@@ -109,7 +109,7 @@ names(issns) <- bib$Key
 issns <- issns[issns != ""]
 ```
 
-In a second step we retrieve the works based on the DOIs fromOpenAlex.
+In a second step we retrieve the works based on the DOIs from OpenAlex.
 
 ```{r}
 #| label: get_works
@@ -159,7 +159,7 @@ One measure of the cleanliness of a Bibliography is assessed by checking the num
 
 To identify a reference, the most widely used identifier is the DOI. The following table shows the number of references with a DOI and the number of unique DOIs.
 
-To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not waranted as e.g. differenc chapters of a book can be separate entries in the library and therefore lead toi duplicates. 
+To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not warranted as e.g. different chapters of a book can be separate entries in the library and therefore lead to duplicates. 
 
 - **DOIs**: `r sum(!is.na(dois))` (`r 100 * sum(!is.na(dois)) / nrow(bib)`%) - `r length(dois) - length(unique((dois)))` duplicates
 - **ISBNs**: `r sum(!is.na(isbns))` (`r 100 * sum(!is.na(isbns)) / nrow(bib)`%) - `r length(isbns) - length(unique((isbns)))` duplicates
@@ -228,7 +228,7 @@ data.frame(
 ```
 
 
-TODO Finally we check, if these dois exist but are not ingested into OpanAlex. This is done using the `doi.org` resolver
+TODO Finally we check, if these dois exist but are not ingested into OpenAlex. This is done using the `doi.org` resolver
 This is disabled at the moment.
 
 ```{r}
