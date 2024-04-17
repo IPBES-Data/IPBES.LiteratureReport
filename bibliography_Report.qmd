@@ -1,5 +1,5 @@
 ---
-title: "Quality report of a bibliography"
+title: "Quality report of the IPBES IAS bibliography"
 format:
     html:
         toc: true
@@ -19,7 +19,7 @@ params:
 
 # Introduction
 
-This report assesses the following in regards to the provided bibliography:
+This report assesses the following in regards to the provided bibliography named ``r basename(params$bibliography)``:
 
 - [ ] "cleanliness" of bibliography, regarding DOIs, 
     - [x] number of DOIs
@@ -473,7 +473,7 @@ bib_works |>
 #| fig-height: 10
 #| fig-width: 10
 
-data <- bib |>
+bib |>
     dplyr::group_by(
         Publication.Title
     ) |>
@@ -483,18 +483,16 @@ data <- bib |>
     dplyr::rename(
         Journal = Publication.Title
     ) |>
-    arrange(
-        desc(count)
-    )
-
-data |>
+    dplyr::filter(
+        Journal != ""
+    ) |>
     dplyr::slice_max(
         count,
         n = 50
     ) |>
     ggplot(
         aes(
-            x = reorder(Journal, -count),
+            x = reorder(Journal, count),
             y = count
         )
     ) +
