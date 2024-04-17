@@ -13,13 +13,25 @@ format:
         #     margin-width: 200px
         #     gutter-width: 1.5rem    
 params:
-    bibliography: "input/IPBES IAS.csv"
+    # input
+    bibliography_zotero: !expr file.path(".", "input", "IPBES IAS.csv")    # csv export of bibliography from Zotero
+    bibliography_name: "IPBES IAS Assessment"
+    bibliography_url: "https://www.zotero.org/groups/2352922/"
+    # data
+    fn_bibliography_metrics: !expr file.path(".", "data", "bibliography_metrics.rds")               # rds file with works from OpenAlex
+    # 
+    ilk_bibliography_zotero: !expr file.path(".", "input", "IPBES ILK.csv")    # csv export of bibliography from Zotero
+    ilk_bibliography_name: "IPBES ILK Bibliography"
+    ilk_bibliography_url: "https://www.zotero.org/groups/xxxxxx/"
+    # data
+    fn_ilk_bibliography_metrics: !expr file.path(".", "data", "ilk_bibliography_metrics.rds")               # rds file with works from OpenAlex
+    #
     mc.cores: 10
 ---
 
 # Introduction
 
-This report assesses the following in regards to the provided bibliography named ``r basename(params$bibliography)``:
+This report assesses the following in regards to the provided bibliography named ``r basename(params$fn_bibliography)``:
 
 - [ ] "cleanliness" of bibliography, regarding DOIs, 
     - [x] number of DOIs
@@ -64,6 +76,7 @@ suppressPackageStartupMessages({
     library(IPBES.R)
 })
 
+## Setup search
 suppressWarnings(
     invisible(
         oa_fetch(
@@ -74,6 +87,8 @@ suppressWarnings(
         )
     )
 )
+
+source(file.path(".", "R", "bibliography_metrics.R"))
 ```
 
 # Bibliography Setup
@@ -81,72 +96,38 @@ The bibliography is loaded and the DOIs, ISBNs and ISSNs are extracted.
 In a second step, the corresponding works are downloaded from [OpenAlex(https://openalex.org)].
 
 ```{r}
+#| label: load_ilk_bibliography
+#|
+
+if (file.exists(params$fn_ilk_bibliography_metrics)) {
+    ilk_bibliography <- readRDS(params$fn_ilk_bibliography_metrics)
+} else {
+    ilk_bibliography <- bibliography_metrics(
+        bibliography_zotero = params$ilk_bibliography_zotero,
+        bibliography_name = params$ilk_bibliography_name,
+        bibliography_url = params$ilk_bibliography_url,
+        mc.cores = params$mc.cores
+    )
+    saveRDS(ilk_bibliography, params$fn_ilk_bibliography_metrics)
+}
+
+```
+
+```{r}
 #| label: load_bibliography
 #|
 
-bib <- read.csv(params$bibliography)
-
-dois <- bib$DOI
-names(dois) <- bib$Key
-dois <- dois[dois != ""]
-
-dois <- dois |>
-    gsub(pattern = "^https://doi.org/", replacement = "") |>
-    gsub(pattern = "^https://dx.doi.org/", replacement = "") |>
-    gsub(pattern = "^https://hdl.handle.net/", replacement = "") |>
-    gsub(pattern = "^http://doi.org/", replacement = "") |>
-    gsub(pattern = "^http://dx.doi.org/", replacement = "") |>
-    gsub(pattern = "^http://hdl.handle.net/", replacement = "") |>
-    gsub(pattern = "^doi:", replacement = "") |>
-    gsub(pattern = "^DOI ", replacement = "")
-
-isbns <- bib$ISBN
-names(isbns) <- bib$Key
-isbns <- isbns[isbns != ""]
-
-issns <- bib$DOI
-names(issns) <- bib$Key
-issns <- issns[issns != ""]
-```
-
-In a second step we retrieve the works based on the DOIs fromOpenAlex.
-
-```{r}
-#| label: get_works
-#|
-
-fn <- file.path(".", "data", "bib_works.rds")
-if (file.exists(fn)) {
-    bib_works <- readRDS(fn)
+if (file.exists(params$fn_bibliography_metrics)) {
+    bibliography <- readRDS(params$fn_bibliography_metrics)
 } else {
-    doi_chunks <- split(unique(dois), ceiling(seq_along(unique(dois)) / 199))
-    #
-    bib_works <- pbmcapply::pbmclapply(
-        seq_along(doi_chunks),
-        function(i) {
-            oa_fetch(
-                entity = "works",
-                doi = doi_chunks[[i]],
-                per_page = 200,
-                verbose = FALSE
-            )
-        },
+    bibliography <- bibliography_metrics(
+        bibliography_zotero = params$bibliography_zotero,
+        bibliography_name = params$bibliography_name,
+        bibliography_url = params$bibliography_url,
         mc.cores = params$mc.cores
-    ) |>
-        do.call(what = rbind)
-
-    saveRDS(bib_works, fn)
+    )
+    saveRDS(bibliography, params$fn_bibliography_metrics)
 }
-
-dois_oa <- bib_works$doi |>
-    gsub(pattern = "^https://doi.org/", replacement = "") |>
-    gsub(pattern = "^https://dx.doi.org/", replacement = "") |>
-    gsub(pattern = "^https://hdl.handle.net/", replacement = "") |>
-    gsub(pattern = "^http://doi.org/", replacement = "") |>
-    gsub(pattern = "^http://dx.doi.org/", replacement = "") |>
-    gsub(pattern = "^http://hdl.handle.net/", replacement = "") |>
-    gsub(pattern = "^doi:", replacement = "") |>
-    gsub(pattern = "^DOI ", replacement = "")
 ```
 
 # Data Quality of the Bibliography
@@ -161,31 +142,27 @@ To identify a reference, the most widely used identifier is the DOI. The followi
 
 To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not waranted as e.g. differenc chapters of a book can be separate entries in the library and therefore lead toi duplicates. 
 
-- **DOIs**: `r sum(!is.na(dois))` (`r 100 * sum(!is.na(dois)) / nrow(bib)`%) - `r length(dois) - length(unique((dois)))` duplicates
-- **ISBNs**: `r sum(!is.na(isbns))` (`r 100 * sum(!is.na(isbns)) / nrow(bib)`%) - `r length(isbns) - length(unique((isbns)))` duplicates
-- **ISSNs**: `r sum(!is.na(issns))` (`r 100 * sum(!is.na(issns)) / nrow(bib)`%) - `r length(issns) - length(unique((issns)))` duplicates
+- **DOIs**: `r sum(!is.na(bibliography$dois_bib))` (`r 100 * sum(!is.na(bibliography$dois_bib)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$dois_bib) - length(unique((bibliography$dois_bib)))` duplicates
+- **ISBNs**: `r sum(!is.na(bibliography$isbns))` (`r 100 * sum(!is.na(bibliography$isbns)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$isbns) - length(unique((bibliography$isbns)))` duplicates
+- **ISSNs**: `r sum(!is.na(bibliography$issns))` (`r 100 * sum(!is.na(bibliography$issns)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$issns) - length(unique((bibliography$issns)))` duplicates
 
 
 The following DOIs are duplicates in the bibliography. This table should be empty.
 ```{r}
 #| label: duplicates
 
-# duplicate_isbns <- paste0("https://isbnsearch.org/search?s=", dois[duplicated(isbns)])
-# duplicate_issns <- paste0("", dois[duplicated(issns)])
+# duplicate_isbns <- paste0("https://isbnsearch.org/search?s=", bibliography$dois_bib[duplicated(bibliography$isbns)])
+# duplicate_issns <- paste0("", bibliography$dois_bib[duplicated(bibliography$issns)])
 
 
 data.frame(
     Type = "doi",
-    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', dois[duplicated(dois)], dois[duplicated(dois)])
+    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', bibliography$dois_bib[duplicated(bibliography$dois_bib)], bibliography$dois_bib[duplicated(bibliography$dois_bib)])
 ) |>
     knitr::kable(
         caption = "Duplicate DOIs in the Bibliography",
         escape = FALSE
     )
-
-
-
-
 ```
 
 
@@ -195,15 +172,14 @@ data.frame(
 To validate the existence and validity of the DOIs, we check if the DOIs are in the OpenAlex database. 
 
 ```{r}
-#| label: dois_in_oa
+#| label: ois_in_oa
 
-
-dois_not_in_oa <- unique(dois)[!(unique(dois) %in% dois_oa)]
+dois_not_in_oa <- unique(bibliography$dois_bib)[!(unique(bibliography$dois_bib) %in% bibliography$dois_works)]
 
 dois_valid <- dois_not_in_oa[IPBES.R::doi_valid(dois_not_in_oa)]
 ```
 
-Of the `r length(unique(dois))` in the library which have a DOI, `r length(dois_not_in_oa)` (`r 100 * length(dois_not_in_oa) / length(unique(dois))`%) are in not in OpenAlex. 
+Of the `r length(unique(bibliography$dois_bib))` in the library which have a DOI, `r length(dois_not_in_oa)` (`r 100 * length(dois_not_in_oa) / length(unique(bibliography$dois_bib))`%) are in not in OpenAlex. 
 
 ```{r}
 #| label: dois_not_in_oa_table
@@ -246,14 +222,14 @@ dois_exist <- IPBES.R::doi_exists(
 #| label: quality
 #| eval: false
 
-to_check <- dois[!(dois %in% dois_oa)]
+to_check <- bibliography$dois_bib[!(bibliography$dois_bib %in% dois_works)]
 
-dois_valid <- IPBES.R::doi_valid(dois)
-dois_openalex <- dois %in% dois_oa
-names(dois_openalex) <- dois
+dois_valid <- IPBES.R::doi_valid(bibliography$dois_bib)
+dois_openalex <- bibliography$dois_bib %in% dois_works
+names(dois_openalex) <- bibliography$dois_bib
 
 dois_exist <- IPBES.R::doi_exists(to_check, cache_file = file.path(".", "cache", "doi_exist.rds"))
-dois_not_retracted <- IPBES.R::doi_not_retracted(dois, cache_file = file.path(".", "cache", "doi_not_retracted.rds"))
+dois_not_retracted <- IPBES.R::doi_not_retracted(bibliography$dois_bib, cache_file = file.path(".", "cache", "doi_not_retracted.rds"))
 
 sprintf(
     fmt = paste(
@@ -266,10 +242,10 @@ sprintf(
         "Percentage of Duplicate DOIs: \t %f",
         sep = "\n"
     ),
-    nrow(bib),
-    sum(!is.na(dois)),
-    length(dois) - length(unique((dois))),
-    sum(dois_openalex), 100 * sum(dois_openalex) / nrow(bib),
+    nrow(bibliography),
+    sum(!is.na(bibliography$dois_bib)),
+    length(bibliography$dois_bib) - length(unique((bibliography$dois_bib))),
+    sum(dois_openalex), 100 * sum(dois_openalex) / nrow(bibliography),
     sum(dois_exist),
     sum(!dois_not_retracted),
     ((dois_valid |> unique() |> length()) / length(dois_valid)) |> round(digits = 3) * 100
@@ -297,19 +273,19 @@ data.frame(
         "# Duplicate ISSNs"
     ),
     Value = c(
-        nrow(bib),
+        nrow(bibliography),
         NA,
-        sum(!is.na(dois)),
-        length(dois) - length(unique((dois))),
+        sum(!is.na(bibliography$dois_bib)),
+        length(bibliography$dois_bib) - length(unique((bibliography$dois_bib))),
         sum(dois_exist),
         sum(!dois_not_retracted),
         ((dois_valid |> unique() |> length()) / length(dois_valid)) |> round(digits = 3) * 100,
         NA,
-        sum(!is.na(isbns)),
-        length(isbns) - length(unique((isbns))),
+        sum(!is.na(bibliography$isbns)),
+        length(bibliography$isbns) - length(unique((bibliography$isbns))),
         NA,
-        sum(!is.na(issns)),
-        length(issns) - length(unique((issns)))
+        sum(!is.na(bibliography$issns)),
+        length(bibliography$issns) - length(unique((bibliography$issns)))
     )
 ) |>
     knitr::kable(
@@ -323,7 +299,7 @@ options(oldopts)
 ## Publication types
 
 ```{r}
-bib |>
+bibliography$bibliography |>
     dplyr::group_by(
         Item.Type
     ) |>
@@ -344,7 +320,7 @@ bib |>
 #| fig-height: 10
 #| fig-width: 10
 
-data_bib <- bib |>
+data_bib <- bibliography$bibliography |>
     dplyr::group_by(
         Publication.Year,
         Item.Type
@@ -375,7 +351,7 @@ data_bib <- bib |>
         )
     )
 
-data_works <- bib_works |>
+data_works <- bibliography$works |>
     dplyr::group_by(
         publication_year,
         type
@@ -437,6 +413,8 @@ data |>
             title = "Legend"
         )
     )
+
+rm(data)
 ```
 
 ## Access Status of References
@@ -448,7 +426,7 @@ This is checked by using the OpenAlex retrieved works. Therefore it is li=mited 
 #| fig-height: 10
 #| fig-width: 10
 
-bib_works |>
+bibliography$works |>
     ggplot(
         aes(
             x = publication_year,
@@ -473,7 +451,7 @@ bib_works |>
 #| fig-height: 10
 #| fig-width: 10
 
-bib |>
+data <- bibliography$bibliography |>
     dplyr::group_by(
         Publication.Title
     ) |>
@@ -489,7 +467,9 @@ bib |>
     dplyr::slice_max(
         count,
         n = 50
-    ) |>
+    )
+
+data |>
     ggplot(
         aes(
             x = reorder(Journal, count),
@@ -516,11 +496,12 @@ bib |>
 This table contains all Journals as specified in the Zotero database. 
 ```{r}
 IPBES.R::table_dt(data, "cited_journals")
+rm(data)
 ```
 
 ## TODO Coutries of Institutes of all authors
 
-sapply(bib_works$author, function(x){x["institution_country_code"]}) |> unlist() |> table() |> sort()
+sapply(bibliography$works$author, function(x){x["institution_country_code"]}) |> unlist() |> table() |> sort()
 ```{r}
 #| label: top_countries
 #| eval: false
@@ -528,13 +509,13 @@ sapply(bib_works$author, function(x){x["institution_country_code"]}) |> unlist()
 #| fig-width: 10
 
 
-bib_works |>
+bibliography$works |>
     dplyr::group_by(
         institution_country_code
     )
 
 
-top_countries <- sapply(bib_works$author, function(x) {
+top_countries <- sapply(bibliography$works$author, function(x) {
     x["institution_country_code"]
 }) |>
     unlist() |>
@@ -574,122 +555,12 @@ data.frame(
 ![[VOSViewer](https://tinyurl.com/292ku9w2)](data/VOSviewer-QR-code.png)
 
 
-# TODO ILK References in Bibliography
+# ILK References in Bibliography
 
-```{r}
-#| label: get_ids
-#| eval: false
-#|
+This comparison is at the moment done using the DOIs in the target  and the ILK bibliography. Entries which have no DOI can not be compared at the mopment. A comparison could be achieved by using text comparison of the title, but this is not implemenmted yet.
 
-ilk_id <- list(
-    doi = ilk$DOI[dois_valid] |>
-        unique(),
-    isbn = ilk$ISBN[ilk$ISBN != ""] |>
-        unique(),
-    issn = ilk$ISSN[ilk$ISSN != ""] |>
-        unique()
-)
+From the **`r length(bibliography$dois_bib)`** references in the target bibliography, **`r sum(bibliography$dois_bib %in% ilk_bibliography$dois_bib)` (`r round(sum(bibliography$dois_bib %in% ilk_bibliography$dois_bib) / length(bibliography$dois_bib), digits = 2)`%) ** are in the ILK bibliography (**`r length(ilk_bibliography$dois_bib)`** references).
 
-# ilk_snowball_id <- list(
-#     doi = ilk_snowball$nodes$doi[ilk_snowball$nodes$doi != ""] |>
-#         unique()
-# )
-
-va <- read.csv(file.path("input", "./Values Assessment.csv"))
-
-va_id <- list(
-    doi = va$DOI[va$DOI != ""] |>
-        unique(),
-    isbn = va$ISBN[va$ISBN != ""] |>
-        unique(),
-    issn = va$ISSN[va$ISSN != ""] |>
-        unique()
-)
-```
-
-In the ILK database, there are `nrow(ilk)` references, while in the Value Assessment bibliography has `nrow(va)` references.
-
-We now determine the overlap of these two by comparing the DOIs.
-```{r}
-#| label: id_overlap
-#| eval: false
-#|
-
-# both_id <- list(
-#     doi = va_id$doi[(va_id$doi %in% ilk_id$doi)],
-#     isbn = va_id$isbn[(va_id$isbn %in% ilk_id$isbn)],
-#     issn = va_id$issn[(va_id$issn %in% ilk_id$issn)] # ,
-#     #     doi_snowball = va_id$doi[(va_id$doi %in% gsub("https://doi.org/", "", ilk_snowball_id$doi))]
-# )
-
-# count <- sapply(both_id, length)
-# va_ref <- sapply(va_id, length)
-# va_ref <- c(va_ref, doi_snowball = va_ref[[1]])
-
-# data.frame(
-#     ref_ILK = length(),
-#     va_ref = va_ref,
-#     p = round(count / va_ref, digits = 3)
-# ) |>
-#     knitr::kable(
-#         caption = "Overlap of the ILK and the Values Assessment Bibliography",
-#         col.names = c("ILK ref in VA", "n VA ref", "p")
-#     )
-
-
-data.frame(
-    No.ILK.Ref = nrow(ilk),
-    No.Valid.DOIs = length(dois_valid),
-    No.VA.Ref = nrow(va),
-    No.DOI.both = sum(dois_valid %in% va$DOI),
-    No.ISBN.both = sum((ilk$ISBN[ilk$ISBN != ""]) %in% va$ISBN),
-    No.ISSN.both = sum((ilk$ISSN[ilk$ISSN != ""]) %in% va$ISBN)
-) |> knitr::kable(
-    caption = "Number of references in ILK Database"
-)
-
-```
-
-
-# TODO TO BE REPLACED WITH TOPICS Assessment of [OpenAlex](https://openalex.org) Concepts
-```{r}
-#| label: openalex_concepts
-#| eval: false
-#|
-
-
-concepts <- do.call(rbind, ilk_works[["concepts"]])
-
-concepts_summary <- concepts |>
-    #     filter(level == 1) |>
-    mutate(score = round(score * 100)) |>
-    group_by(display_name, level) |>
-    summarize(score = mean(score), count = n()) |>
-    arrange(desc(count))
-
-```
-
-```{r}
-#| label: citations_links
-#| eval: false
-#|
-
-ggraph(graph = as_tbl_graph(ilk_snowball), layout = "stress") +
-    geom_edge_link(aes(alpha = after_stat(index)), show.legend = FALSE) +
-    geom_node_point(aes(fill = oa_input, size = cited_by_count), shape = 21, color = "white") +
-    geom_node_label(aes(filter = oa_input, label = id), nudge_y = 0.2, size = 3) +
-    scale_edge_width(range = c(0.1, 1.5), guide = "none") +
-    scale_size(range = c(3, 10), guide = "none") +
-    scale_fill_manual(values = c("#a3ad62", "#d46780"), na.value = "grey", name = "") +
-    theme_graph() +
-    theme(
-        plot.background = element_rect(fill = "transparent", colour = NA),
-        panel.background = element_rect(fill = "transparent", colour = NA),
-        legend.position = "bottom"
-    ) +
-    guides(fill = "none")
-
-```
 
 
 
