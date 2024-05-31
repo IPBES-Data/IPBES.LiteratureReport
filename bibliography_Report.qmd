@@ -26,6 +26,8 @@ params:
     # data
     fn_ilk_bibliography_metrics: !expr file.path(".", "data", "ilk_bibliography_metrics.rds")               # rds file with works from OpenAlex
     #
+    exists_cache: !expr file.path(".", "cache", "doi_exist.rds")
+    #
     mc.cores: 10
 ---
 
@@ -102,12 +104,8 @@ In a second step, the corresponding works are downloaded from [OpenAlex(https://
 if (file.exists(params$fn_ilk_bibliography_metrics)) {
     ilk_bibliography <- readRDS(params$fn_ilk_bibliography_metrics)
 } else {
-    ilk_bibliography <- bibliography_metrics(
-        bibliography_zotero = params$ilk_bibliography_zotero,
-        bibliography_name = params$ilk_bibliography_name,
-        bibliography_url = params$ilk_bibliography_url,
-        mc.cores = params$mc.cores
-    )
+    ilk_bibliography <- get_ilk_bibliography(params)
+
     saveRDS(ilk_bibliography, params$fn_ilk_bibliography_metrics)
 }
 
@@ -120,12 +118,8 @@ if (file.exists(params$fn_ilk_bibliography_metrics)) {
 if (file.exists(params$fn_bibliography_metrics)) {
     bibliography <- readRDS(params$fn_bibliography_metrics)
 } else {
-    bibliography <- bibliography_metrics(
-        bibliography_zotero = params$bibliography_zotero,
-        bibliography_name = params$bibliography_name,
-        bibliography_url = params$bibliography_url,
-        mc.cores = params$mc.cores
-    )
+    bibliography <- get_bibliography(params)
+
     saveRDS(bibliography, params$fn_bibliography_metrics)
 }
 ```
