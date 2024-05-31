@@ -74,7 +74,6 @@ suppressPackageStartupMessages({
     # library(tidygraph)
     # library(tictoc)
     library(pbmcapply)
-    library(pbapply)
     library(IPBES.R)
 })
 

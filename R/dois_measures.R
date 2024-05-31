@@ -1,4 +1,4 @@
-dois_measures <- function(bibliography, params
+dois_measures <- function(bibliography, params = file.path("data", "dois_exist.rds")
 ){
     result <- list()
     

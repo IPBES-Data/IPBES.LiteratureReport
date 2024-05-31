@@ -89,12 +89,14 @@ bibliography_metrics <- function(
 
     doi_chunks <- split(unique(bibliography$dois_bib), ceiling(seq_along(unique(bibliography$dois_bib)) / 199))
     #
-    bibliography$works <- pbmcapply::pbmclapply(
+    bibliography$works <- parallel::mclapply(
         seq_along(doi_chunks),
         function(i) {
+            valid <- IPBES.R::doi_valid(doi_chunks[[i]])
+            dois <- names(valid)[valid]
             oa_fetch(
                 entity = "works",
-                doi = doi_chunks[[i]],
+                doi = dois,
                 per_page = 200,
                 verbose = verbose
             )
