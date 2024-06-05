@@ -1,12 +1,31 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+.Random.seed|object|10fb266ad4cad303|||||||||||||||
 bibliography_metrics|function|1f83c833e7f4a5a0|||||||||||||||
 dois_measures|function|a5d0165abad36460|||||||||||||||
-ias_bibliography|stem|b92e3935a5fa0275|a606a5edc96ca5f1|257af09dcca5b6aa|-209210067||t19874.6281758013s|1bdee17aadc136b8|9871397|rds|local|vector|||59.584||
-ias_bibliography.rds|stem|a670550a68b7b84a|862adc4d78664d34|ffbc78ae57605d96|-1404107945||t19874.6663938151s|ad2bfc70d3794483|9777791|rds|local|vector|||14.918||
-ias_file|stem|886cf103205ee8f3|5a5b31551f637521|2c530c1562a7fbd1|-1425704349|input/IPBES IAS.csv|t19818.2758687387s|504986d36c112217|8207269|file|local|vector|||0||
-ias_metrics.rds|stem|a64b6c8a04f37582|031051ebe3b8d4aa|d222b3851953c562|1384405135||t19874.6663941806s|e0ab5e126382351b|63106|rds|local|vector|||0.003||
-ilk_bibliography|stem|4504d909e0eb8a61|859e29087452f4da|616baf4db8c467f6|2060201333||t19874.6343975559s||7067378|rds|local|vector|||48.244|The following works have truncated lists of authors W2098816950.Query each work separately by its identifier to get full list of authors.For example  lapplycW2098816950, \x oa_fetchidentifier  xDetails at httpsdocs.openalex.orgapientitiesauthorslimitations.|OpenAlex API request failed 403Invalid query parameters error.It looks like youre trying to do an OR query between filters and its not supported. You can do this institutions.country_codefren, but not this institutions.country_codegbhost_venue.issn09571558. Problem value 10.108014649365.2018.152862810.1007s132800130386610.1016j.gfs.2020.10047910.1038s4159801836587710.1007s105840130743210.1016j.ecolmodel.2011.07.00510.108003036758.2019.165219210.3390su1216650510.3390land909033110.5751ES0986523014510.1111cobi.1353210.3390su1215588710.1007s107450180012010.108014486563.2008.972520810.1016j.jrurstud.2019.02.02610.159016760611BN2014010610.1186s1300202000422z10.3390ijerph1721811310.1016j.ecoser.2016.11.02110.1353anq.2014.001310.5751ES0553718031910.1016j.ecoser.2018.03.01710.1007s002670150508y10.1564v28_oct_0210.1007s1257101900930110.1016j.ecoser.2016.11.01710.1016S037811270200559510.1016j.jaridenv.2018.07.00110.1111ddi.1248110.1016j.foodpol.2016.09.01010.1017S003060531200124X10.1186s137170150039810.1007s105300130582010.5250amerindiquar.41.3.020110.1007s132800181058310.3390su1010342010.1007s104570149713610.7882AZ.2006.01610.1016j.geoforum.2012.10.00510.3389fmars.2018.0024710.1111conl.1259310.1016j.jglr.2016.03.00410.1016j.foreco.2016.06.016httpsdoi10.336220417136.2010.01410.108017531055.2016.113866410.1016j.forpol.2017.03.00110.1016j.apgeog.2015.11.01710.3167np.2008.12010510.23073774032
-ilk_bibliography.rds|stem|6ba5592bda3e3262|33fbe3a84b6ef3f7|cb692cc6e16dfd31|-1053066239||t19874.6662078437s|b18d68cce54301b5|8734076|rds|local|vector|||13.061||
-ilk_file|stem|45a1a4587d5a774c|6b3ff8f9d24480e8|2c530c1562a7fbd1|50983903|input/IPBES ILK.csv|t19751.3462054978s|a99533562f443981|10470750|file|local|vector|||1.689||
-ilk_metrics.rds|stem|88c0edbf580f23db|c4634faf3f114d63|681ceb96b7f6585e|-2119782618||t19874.6663940101s|a3b5c587c5f7910f|51214|rds|local|vector|||0.002||
-make_bibliography|function|fb569098a8d0b6c3|||||||||||||||
+ias_bibliography|stem|c4d94f96babb2dd2|56e00305f109a0c5|42ccf03195678ce2|-209210067||t19879.6937754097s|3aed3e7b901130f4|9778112|rds|local|vector|||128.845|The following works have truncated lists of authors W2007847179.Query each work separately by its identifier to get full list of authors.For example  lapplycW2007847179, \x oa_fetchidentifier  xDetails at httpsdocs.openalex.orgapientitiesauthorslimitations.|
+ias_file|stem|886cf103205ee8f3|179b36fd0b5704cf|890b9d51f32ddf3b|-1425704349|./input/IPBES IAS.csv|t19818.2758687387s|504986d36c112217|8207269|file|local|vector|||0||
+ias_metrics|stem|a64b6c8a04f37582|37cb663d89104e0d|1931d91da815ddc8|-1471998985||t19879.6938337468s|e0ab5e126382351b|63106|rds|local|vector|||0.003||
+ias_parameter|stem|988edadd1d424e34|55535f84f2d73289|2c530c1562a7fbd1|-1651006569||t19879.6883274064s|f97768c55a2d1ab0|215|rds|local|vector|||0||
+ilk_bibliography|stem|ee4d8b9552776210|f64f389c0344d242|57658e03feed3d99|2060201333||t19879.7093267304s|f1905714b8769924|8734149|rds|local|vector|||89.195|The following works have truncated lists of authors W2098816950.Query each work separately by its identifier to get full list of authors.For example  lapplycW2098816950, \x oa_fetchidentifier  xDetails at httpsdocs.openalex.orgapientitiesauthorslimitations.. The following works have truncated lists of authors W2594233224.Query each work separately by its identifier to get full list of authors.For example  lapplycW2594233224, \x oa_fetchidentifier  xDetails at httpsdocs.openalex.orgapientitiesauthorslimitations.. The following works have truncated lists of authors W4386100167.Query each work separately by its identifier to get full list of authors.For example  lapplycW4386100167, \x oa_fetchidentifier  xDetails at httpsdocs.openalex.orgapientitiesauthorslimitations.|
+ilk_file|stem|45a1a4587d5a774c|18b4ff16c1e71a47|2c530c1562a7fbd1|50983903|./input/IPBES ILK.csv|t19751.3462054978s|a99533562f443981|10470750|file|local|vector|||1.528||
+ilk_metrics|stem|88c0edbf580f23db|ecffc76a18f9ab3f|f48b6546df23881d|10645416||t19879.7093417621s|a3b5c587c5f7910f|51214|rds|local|vector|||0.001||
+ilk_parameter|stem|39b2c7a55138172a|88a2546cb2cd1df1|2c530c1562a7fbd1|397451262||t19879.688327318s|2d30c6a204266d65|207|rds|local|vector|||1.534||
+plot_oa_status|function|91b058ac4a47f9b7|||||||||||||||
+plot_oa_status_ias|stem|524392d0a25a62e7|38dfca4b8338709f|67a464c4465fd9ad|-1085504521||t19879.6938880097s|4914b9d15603c9bc|38955422|rds|local|vector|||0.005||
+plot_oa_status_ilk|stem|08a2648a8285b749|00563ac0a4833724|2da2a2966473d1e9|-1609500954||t19879.7093840709s|29dd4dca8cec15e4|30700295|rds|local|vector|||0.004||
+plot_pub_year_ias|stem|ab5d8c2d502b49de|8c5f3c68f8aeb4e1|8b28900af4122952|1313710715||t19879.6939033234s|9efc21f45395a122|10002223|rds|local|vector|||0.05||
+plot_pub_year_ilk|stem|dd1f9223e4b5ade1|904ca33e445fe104|a013aa75e423cb5b|1961405158||t19879.709341566s|d70bae354f2ed014|8955186|rds|local|vector|||0.103||
+plot_publication_year|function|54465e21b388784a|||||||||||||||
+plot_top_country|function|16a43d1c9f6b9a40|||||||||||||||
+plot_top_country_data|function|01161669fcc037c9|||||||||||||||
+plot_top_country_data_ias|stem|8ad05168645b9da2|7ea7d813e28a82a0|0d9f48df676812ea|667186007||t19879.6938335936s|1af860d218ddc10e|940|rds|local|vector|||0.045||
+plot_top_country_data_ilk|stem|bd4536c4db0e0337|bec552de8b51dbad|8ab213891a31f48b|-1164774838||t19879.7093845461s|27399a5a4c88625e|978|rds|local|vector|||0.022||
+plot_top_country_ias|stem|8322899ea6a74654|8940638731a23311|4ced6aaa30ed2db5|-1210089236||t19879.6939045705s|7e1d0e9e2c7b902a|90712|rds|local|vector|||0.005||
+plot_top_country_ilk|stem|5910bc3e193e14b2|c201046e761e87e4|daffa707e1fd38be|-744691324||t19879.6939042024s|6d7be674766e9110|90854|rds|local|vector|||0.002||
+plot_top_journals|function|1662292b068d9d87|||||||||||||||
+plot_top_journals_data|function|0212abf81e5c442c|||||||||||||||
+plot_top_journals_data_ias|stem|6e083c9d0301562c|723e66b497a379e2|7b6cbd2cccbd59c8|37159771||t19879.6939035225s|d1299caaee1f7d59|828|rds|local|vector|||0.009||
+plot_top_journals_data_ilk|stem|ce020a145360871a|97d1c593ff0cbc0d|477a36f5fe143b38|-2046175707||t19879.7093418926s|ef57bb77e73b0d6d|788|rds|local|vector|||0.009||
+plot_top_journals_ias|stem|c1c923fd8f837125|f96bf0a2afc0325f|f6c6d9adf3daa2a6|1960973970||t19879.6939049373s|e3d2429185ffe132|90647|rds|local|vector|||0.005||
+plot_top_journals_ilk|stem|6694e85a49f9c09f|f4b3b6b6fb93f988|a1e21405166637fd|2069350489||t19879.6939038575s|e5e31f8094f11a31|90411|rds|local|vector|||0.002||
+report|stem|2e5ee8c6301ac331|ab50b04d68b4b04c|b1157b95bc38705c|787668912|bibliography_report.html*bibliography_report.qmd|t19879.7095459407s|a70592dd555494dd|6224193|file|local|vector|||10.367||

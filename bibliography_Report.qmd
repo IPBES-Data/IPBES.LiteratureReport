@@ -16,6 +16,7 @@ params:
     # input
     bibliography_zotero: !expr file.path(".", "input", "IPBES IAS.csv")    # csv export of bibliography from Zotero
     bibliography_name: "IPBES IAS Assessment"
+    abbr: "ias"
     bibliography_url: "https://www.zotero.org/groups/2352922/"
     # data
     fn_bibliography_metrics: !expr file.path(".", "data", "bibliography_metrics.rds")               # rds file with works from OpenAlex
@@ -65,16 +66,9 @@ if (!(exists("params"))) {
 }
 
 suppressPackageStartupMessages({
-    # library(jsonlite)
     library(openalexR)
-    library(knitr)
-    library(dplyr)
-    library(ggplot2)
-    # library(ggraph)
-    # library(tidygraph)
-    # library(tictoc)
-    library(pbmcapply)
     library(IPBES.R)
+    library(dplyr)
 })
 
 ## Setup search
@@ -89,7 +83,7 @@ suppressWarnings(
     )
 )
 
-source(file.path(".", "R", "bibliography_metrics.R"))
+library(targets)
 ```
 
 # Bibliography Setup
@@ -98,29 +92,14 @@ In a second step, the corresponding works are downloaded from [OpenAlex(https://
 
 ```{r}
 #| label: load_ilk_bibliography
-#|
 
-if (file.exists(params$fn_ilk_bibliography_metrics)) {
-    ilk_bibliography <- readRDS(params$fn_ilk_bibliography_metrics)
-} else {
-    ilk_bibliography <- get_ilk_bibliography(params)
-
-    saveRDS(ilk_bibliography, params$fn_ilk_bibliography_metrics)
-}
-
+ilk_bibliography <- tar_read(ias_bibliography)
 ```
 
 ```{r}
 #| label: load_bibliography
-#|
 
-if (file.exists(params$fn_bibliography_metrics)) {
-    bibliography <- readRDS(params$fn_bibliography_metrics)
-} else {
-    bibliography <- get_bibliography(params)
-
-    saveRDS(bibliography, params$fn_bibliography_metrics)
-}
+bibliography <- tar_read(ias_bibliography)
 ```
 
 # Data Quality of the Bibliography
@@ -165,7 +144,7 @@ data.frame(
 To validate the existence and validity of the DOIs, we check if the DOIs are in the OpenAlex database. 
 
 ```{r}
-#| label: ois_in_oa
+#| label: dois_in_oa
 
 dois_not_in_oa <- unique(bibliography$dois_bib)[!(unique(bibliography$dois_bib) %in% bibliography$dois_works)]
 
@@ -313,101 +292,7 @@ bibliography$bibliography |>
 #| fig-height: 10
 #| fig-width: 10
 
-data_bib <- bibliography$bibliography |>
-    dplyr::group_by(
-        Publication.Year,
-        Item.Type
-    ) |>
-    dplyr::summarize(
-        count = n(),
-        p = count / sum(count),
-    ) |>
-    dplyr::group_by(
-        Item.Type
-    ) |>
-    dplyr::arrange(
-        Publication.Year
-    ) |>
-    mutate(
-        count_cumsum = cumsum(count),
-        p_cumsum = cumsum(p)
-    ) |>
-    dplyr::rename(
-        publication_year = Publication.Year,
-        type = Item.Type
-    ) |>
-    dplyr::mutate(
-        type = dplyr::case_match(
-            type,
-            "journalArticle" ~ "article",
-            .default = type
-        )
-    )
-
-data_works <- bibliography$works |>
-    dplyr::group_by(
-        publication_year,
-        type
-    ) |>
-    dplyr::summarize(
-        count = n(),
-        p = count / sum(count),
-    ) |>
-    dplyr::group_by(
-        type
-    ) |>
-    dplyr::arrange(
-        publication_year
-    ) |>
-    mutate(
-        count_cumsum = cumsum(count),
-        p_cumsum = cumsum(p)
-    ) |>
-    dplyr::rename(
-        publication_year = publication_year,
-        type = type,
-        count_oa = count,
-        p_oa = p,
-        count_oa_cumsum = count_cumsum,
-        p_oa_cumsum = p_cumsum
-    )
-
-data <- dplyr::full_join(
-    x = data_bib,
-    y = data_works,
-    by = c("publication_year", "type")
-)
-
-rm(data_bib, data_works)
-
-data |>
-    dplyr::filter(publication_year >= 1950) |>
-    ggplot() +
-    scale_fill_viridis_d(option = "plasma") +
-    geom_line(aes(x = publication_year, y = count_cumsum / 10, colour = type), linetype = "solid") + # Zotero
-    geom_line(aes(x = publication_year, y = count_oa_cumsum / 10, colour = type), linetype = "dashed") + # OpenAlex
-    scale_x_continuous(
-        breaks = seq(1500, 2020, 10)
-    ) +
-    scale_y_continuous(
-        "Proportion of publications",
-        sec.axis = sec_axis(~ . * 10, name = "Cumulative number of references") # divide by 10 to scale back the secondary axis
-    ) +
-    labs(
-        title = "Publications over time",
-        x = "Year",
-        y = "Number of publications"
-    ) +
-    theme_minimal() +
-    theme(axis.text.y.right = element_text(color = "red")) +
-    theme(legend.position = "bottom") +
-    guides(
-        fill = guide_legend(
-            title = "Legend"
-        )
-    )
-
-rm(data)
+tar_read(plot_pub_year_ias)
 ```
 
 ## Access Status of References
@@ -419,22 +304,7 @@ This is checked by using the OpenAlex retrieved works. Therefore it is li=mited 
 #| fig-height: 10
 #| fig-width: 10
 
-bibliography$works |>
-    ggplot(
-        aes(
-            x = publication_year,
-            fill = oa_status
-        )
-    ) +
-    geom_bar(
-        position = "fill"
-    ) +
-    scale_fill_manual(values = c("#CD7F32", "red", "gold", "green", "pink")) +
-    ggtitle("Publication Year") +
-    theme(
-        plot.title = element_text(size = 15)
-    ) +
-    theme(legend.position = "bottom")
+tar_read(plot_oa_status_ias)
 ```
 
 ## 50 Most often cited Journals
@@ -444,103 +314,39 @@ bibliography$works |>
 #| fig-height: 10
 #| fig-width: 10
 
-data <- bibliography$bibliography |>
-    dplyr::group_by(
-        Publication.Title
-    ) |>
-    dplyr::summarise(
-        count = n()
-    ) |>
-    dplyr::rename(
-        Journal = Publication.Title
-    ) |>
-    dplyr::filter(
-        Journal != ""
-    ) |>
-    dplyr::slice_max(
-        count,
-        n = 50
-    )
-
-data |>
-    ggplot(
-        aes(
-            x = reorder(Journal, count),
-            y = count
-        )
-    ) +
-    geom_bar(
-        stat = "identity",
-        fill = "steelblue"
-    ) +
-    coord_flip() +
-    labs(
-        x = "Journal",
-        y = "Count"
-    ) +
-    ggtitle(
-        "Most often cited Journals"
-    ) +
-    theme(
-        plot.title = element_text(size = 15)
-    )
+tar_read(plot_top_journals_ias)
 ```
 
 This table contains all Journals as specified in the Zotero database. 
 ```{r}
-IPBES.R::table_dt(data, "cited_journals")
-rm(data)
+#| label: top_journals_data
+
+tar_read(plot_top_journals_data_ias) |>
+    IPBES.R::table_dt("cited_journals")
 ```
 
 ## TODO Coutries of Institutes of all authors
 
-sapply(bibliography$works$author, function(x){x["institution_country_code"]}) |> unlist() |> table() |> sort()
+This plot only contains the countries with more than 10 references.
+
 ```{r}
 #| label: top_countries
 #| eval: false
+#| 
 #| fig-height: 10
 #| fig-width: 10
 
+tar_read(plot_top_countries_ias)
 
-bibliography$works |>
-    dplyr::group_by(
-        institution_country_code
-    )
+```
 
+This table contains all countries and the number of authorship.
 
-top_countries <- sapply(bibliography$works$author, function(x) {
-    x["institution_country_code"]
-}) |>
-    unlist() |>
-    table() |>
-    sort(decreasing = TRUE) |>
-    head(50)
+```{r}
+#| label: top_countries_data
 
-data.frame(
-    Country = names(top_countries),
-    Count = as.numeric(top_countries)
-) |>
-    ggplot(
-        aes(
-            x = reorder(Country, -Count),
-            y = Count
-        )
-    ) +
-    geom_bar(
-        stat = "identity",
-        fill = "steelblue"
-    ) +
-    coord_flip() +
-    labs(
-        x = "Country",
-        y = "Count"
-    ) +
-    ggtitle(
-        "Countries of Institutes of all Authors"
-    ) +
-    theme(
-        plot.title = element_text(size = 15)
-    )
+tar_read(plot_top_country_data_ias) |>
+    IPBES.R::table_dt("top_countries")
 ```
 
 # VOSViewer Example
