@@ -48,3 +48,5 @@ rsconnect/
 
 # Folders to include
 !cache/*
+
+# Targets folder

@@ -12,29 +12,31 @@ format:
         #     body-width: 4000px
         #     margin-width: 200px
         #     gutter-width: 1.5rem    
-params:
-    # input
-    bibliography_zotero: !expr file.path(".", "input", "IPBES IAS.csv")    # csv export of bibliography from Zotero
-    bibliography_name: "IPBES IAS Assessment"
-    abbr: "ias"
-    bibliography_url: "https://www.zotero.org/groups/2352922/"
-    # data
-    fn_bibliography_metrics: !expr file.path(".", "data", "bibliography_metrics.rds")               # rds file with works from OpenAlex
-    # 
-    ilk_bibliography_zotero: !expr file.path(".", "input", "IPBES ILK.csv")    # csv export of bibliography from Zotero
-    ilk_bibliography_name: "IPBES ILK Bibliography"
-    ilk_bibliography_url: "https://www.zotero.org/groups/xxxxxx/"
-    # data
-    fn_ilk_bibliography_metrics: !expr file.path(".", "data", "ilk_bibliography_metrics.rds")               # rds file with works from OpenAlex
-    #
-    exists_cache: !expr file.path(".", "cache", "doi_exist.rds")
-    #
-    mc.cores: 10
 ---
+
+# Bibliography Setup
+The bibliography is loaded and the DOIs, ISBNs and ISSNs are extracted.
+
+```{r}
+#| label: setup
+#| include: false
+#|
+if (!(exists("params"))) {
+    params <- rmarkdown::yaml_front_matter("./bibliography_report.qmd")$params
+}
+
+suppressPackageStartupMessages({
+    library(IPBES.R)
+    library(dplyr)
+    library(targets)
+})
+
+bibliography <- targets::tar_read(bibliography)
+```
 
 # Introduction
 
-This report assesses the following in regards to the provided bibliography named ``r basename(params$fn_bibliography)``:
+This report assesses the following in regards to the provided bibliography named ``r bibliography$name``:
 
 - [ ] "cleanliness" of bibliography, regarding DOIs, 
     - [x] number of DOIs
@@ -57,50 +59,8 @@ This report assesses the following in regards to the provided bibliography named
 Remarks: 
 - Group ID is in the json, but not in the csv. The group ID makes it possible to directly jump to the reference in the Zotero Library online.
 
-```{r}
-#| label: setup
-#| include: false
-#|
-if (!(exists("params"))) {
-    params <- rmarkdown::yaml_front_matter("./bibliography_report.qmd")$params
-}
 
-suppressPackageStartupMessages({
-    library(openalexR)
-    library(IPBES.R)
-    library(dplyr)
-})
 
-## Setup search
-suppressWarnings(
-    invisible(
-        oa_fetch(
-            entity = "works",
-            doi = "dummy",
-            per_page = 200,
-            verbose = FALSE
-        )
-    )
-)
-
-library(targets)
-```
-
-# Bibliography Setup
-The bibliography is loaded and the DOIs, ISBNs and ISSNs are extracted.
-In a second step, the corresponding works are downloaded from [OpenAlex(https://openalex.org)].
-
-```{r}
-#| label: load_ilk_bibliography
-
-ilk_bibliography <- tar_read(ias_bibliography)
-```
-
-```{r}
-#| label: load_bibliography
-
-bibliography <- tar_read(ias_bibliography)
-```
 
 # Data Quality of the Bibliography
 
@@ -114,7 +74,7 @@ To identify a reference, the most widely used identifier is the DOI. The followi
 
 To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not waranted as e.g. differenc chapters of a book can be separate entries in the library and therefore lead toi duplicates. 
 
-- **DOIs**: `r sum(!is.na(bibliography$dois_bib))` (`r 100 * sum(!is.na(bibliography$dois_bib)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$dois_bib) - length(unique((bibliography$dois_bib)))` duplicates
+- **DOIs**: `r sum(!is.na(bibliography$dois))` (`r 100 * sum(!is.na(bibliography$dois)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$dois) - length(unique((bibliography$dois)))` duplicates
 - **ISBNs**: `r sum(!is.na(bibliography$isbns))` (`r 100 * sum(!is.na(bibliography$isbns)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$isbns) - length(unique((bibliography$isbns)))` duplicates
 - **ISSNs**: `r sum(!is.na(bibliography$issns))` (`r 100 * sum(!is.na(bibliography$issns)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$issns) - length(unique((bibliography$issns)))` duplicates
 
@@ -123,13 +83,12 @@ The following DOIs are duplicates in the bibliography. This table should be empt
 ```{r}
 #| label: duplicates
 
-# duplicate_isbns <- paste0("https://isbnsearch.org/search?s=", bibliography$dois_bib[duplicated(bibliography$isbns)])
-# duplicate_issns <- paste0("", bibliography$dois_bib[duplicated(bibliography$issns)])
-
+# duplicate_isbns <- paste0("https://isbnsearch.org/search?s=", bibliography$dois[duplicated(bibliography$isbns)])
+# duplicate_issns <- paste0("", bibliography$dois[duplicated(bibliography$issns)])
 
 data.frame(
     Type = "doi",
-    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', bibliography$dois_bib[duplicated(bibliography$dois_bib)], bibliography$dois_bib[duplicated(bibliography$dois_bib)])
+    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', bibliography$dois[duplicated(bibliography$dois)], bibliography$dois[duplicated(bibliography$dois)])
 ) |>
     knitr::kable(
         caption = "Duplicate DOIs in the Bibliography",
@@ -146,12 +105,12 @@ To validate the existence and validity of the DOIs, we check if the DOIs are in 
 ```{r}
 #| label: dois_in_oa
 
-dois_not_in_oa <- unique(bibliography$dois_bib)[!(unique(bibliography$dois_bib) %in% bibliography$dois_works)]
+dois_not_in_oa <- unique(bibliography$dois)[!(unique(bibliography$dois) %in% bibliography$dois_works)]
 
 dois_valid <- dois_not_in_oa[IPBES.R::doi_valid(dois_not_in_oa)]
 ```
 
-Of the `r length(unique(bibliography$dois_bib))` in the library which have a DOI, `r length(dois_not_in_oa)` (`r 100 * length(dois_not_in_oa) / length(unique(bibliography$dois_bib))`%) are in not in OpenAlex. 
+Of the `r length(unique(bibliography$dois))` in the library which have a DOI, `r length(dois_not_in_oa)` (`r 100 * length(dois_not_in_oa) / length(unique(bibliography$dois))`%) are in not in OpenAlex. 
 
 ```{r}
 #| label: dois_not_in_oa_table
@@ -165,6 +124,9 @@ data.frame(
 Of these `r (length(dois_not_in_oa) - length(dois_valid))` are not valid. These are:
 
 ```{r}
+#| label: dois_not_valid
+
+
 data.frame(
     Type = "doi",
     Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', dois_not_in_oa[!(dois_not_in_oa %in% dois_valid)], dois_not_in_oa[!(dois_not_in_oa %in% dois_valid)])
@@ -194,14 +156,14 @@ dois_exist <- IPBES.R::doi_exists(
 #| label: quality
 #| eval: false
 
-to_check <- bibliography$dois_bib[!(bibliography$dois_bib %in% dois_works)]
+to_check <- bibliography$dois[!(bibliography$dois %in% dois_works)]
 
-dois_valid <- IPBES.R::doi_valid(bibliography$dois_bib)
-dois_openalex <- bibliography$dois_bib %in% dois_works
-names(dois_openalex) <- bibliography$dois_bib
+dois_valid <- IPBES.R::doi_valid(bibliography$dois)
+dois_openalex <- bibliography$dois %in% dois_works
+names(dois_openalex) <- bibliography$dois
 
 dois_exist <- IPBES.R::doi_exists(to_check, cache_file = file.path(".", "cache", "doi_exist.rds"))
-dois_not_retracted <- IPBES.R::doi_not_retracted(bibliography$dois_bib, cache_file = file.path(".", "cache", "doi_not_retracted.rds"))
+dois_not_retracted <- IPBES.R::doi_not_retracted(bibliography$dois, cache_file = file.path(".", "cache", "doi_not_retracted.rds"))
 
 sprintf(
     fmt = paste(
@@ -215,8 +177,8 @@ sprintf(
         sep = "\n"
     ),
     nrow(bibliography),
-    sum(!is.na(bibliography$dois_bib)),
-    length(bibliography$dois_bib) - length(unique((bibliography$dois_bib))),
+    sum(!is.na(bibliography$dois)),
+    length(bibliography$dois) - length(unique((bibliography$dois))),
     sum(dois_openalex), 100 * sum(dois_openalex) / nrow(bibliography),
     sum(dois_exist),
     sum(!dois_not_retracted),
@@ -225,6 +187,7 @@ sprintf(
 ```
 
 ```{r}
+#| label: summary_dois
 #| eval: false
 
 oldopts <- options(knitr.kable.NA = "")
@@ -247,8 +210,8 @@ data.frame(
     Value = c(
         nrow(bibliography),
         NA,
-        sum(!is.na(bibliography$dois_bib)),
-        length(bibliography$dois_bib) - length(unique((bibliography$dois_bib))),
+        sum(!is.na(bibliography$dois)),
+        length(bibliography$dois) - length(unique((bibliography$dois))),
         sum(dois_exist),
         sum(!dois_not_retracted),
         ((dois_valid |> unique() |> length()) / length(dois_valid)) |> round(digits = 3) * 100,
@@ -271,6 +234,8 @@ options(oldopts)
 ## Publication types
 
 ```{r}
+#| label: publication_types
+
 bibliography$bibliography |>
     dplyr::group_by(
         Item.Type
@@ -292,7 +257,7 @@ bibliography$bibliography |>
 #| fig-height: 10
 #| fig-width: 10
 
-tar_read(plot_pub_year_ias)
+tar_read(figure_pub_year)
 ```
 
 ## Access Status of References
@@ -304,7 +269,7 @@ This is checked by using the OpenAlex retrieved works. Therefore it is li=mited 
 #| fig-height: 10
 #| fig-width: 10
 
-tar_read(plot_oa_status_ias)
+tar_read(figure_oa_status)
 ```
 
 ## 50 Most often cited Journals
@@ -314,14 +279,14 @@ tar_read(plot_oa_status_ias)
 #| fig-height: 10
 #| fig-width: 10
 
-tar_read(plot_top_journals_ias)
+tar_read(figure_top_journals)
 ```
 
 This table contains all Journals as specified in the Zotero database. 
 ```{r}
 #| label: top_journals_data
 
-tar_read(plot_top_journals_data_ias) |>
+tar_read(figure_top_journals_data) |>
     IPBES.R::table_dt("cited_journals")
 ```
 
@@ -336,7 +301,7 @@ This plot only contains the countries with more than 10 references.
 #| fig-height: 10
 #| fig-width: 10
 
-tar_read(plot_top_countries_ias)
+tar_read(figure_top_countries)
 
 ```
 
@@ -345,21 +310,10 @@ This table contains all countries and the number of authorship.
 ```{r}
 #| label: top_countries_data
 
-tar_read(plot_top_country_data_ias) |>
+tar_read(figure_top_country_data) |>
     IPBES.R::table_dt("top_countries")
 ```
 
 # VOSViewer Example
 
 ![[VOSViewer](https://tinyurl.com/292ku9w2)](data/VOSviewer-QR-code.png)
-
-
-# ILK References in Bibliography
-
-This comparison is at the moment done using the DOIs in the target  and the ILK bibliography. Entries which have no DOI can not be compared at the mopment. A comparison could be achieved by using text comparison of the title, but this is not implemenmted yet.
-
-From the **`r length(bibliography$dois_bib)`** references in the target bibliography, **`r sum(bibliography$dois_bib %in% ilk_bibliography$dois_bib)` (`r round(sum(bibliography$dois_bib %in% ilk_bibliography$dois_bib) / length(bibliography$dois_bib), digits = 2)`%) ** are in the ILK bibliography (**`r length(ilk_bibliography$dois_bib)`** references).
-
-
-
-

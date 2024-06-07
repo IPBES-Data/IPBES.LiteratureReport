@@ -1,16 +1,22 @@
-dois_measures <- function(bibliography, params = file.path("data", "dois_exist.rds")
+dois_measures <- function(
+    bibliography
 ){
     result <- list()
     
     ##
     
-    result$dois_bib_valid <- unique(bibliography$dois_bib)[IPBES.R::doi_valid(unique(bibliography$dois_bib))]
-    result$dois_bib_in_oa <- intersect(
-        bibliography$dois_bib,
+    dois_not_in_oa <- unique(params$bibliography$dois)[!(unique(params$bibliography$dois) %in% params$bibliography$dois_works)]
+
+    dois_valid <- dois_not_in_oa[IPBES.R::doi_valid(dois_not_in_oa)]
+
+    result$dois_valid <- unique(bibliography$dois)[IPBES.R::doi_valid(unique(bibliography$dois))]
+    
+    result$dois_in_oa <- intersect(
+        bibliography$dois,
         bibliography$dois_works
     ) |>
         unique()
-    # result$dois_bib_valid_not_oa_exist <- IPBES.R::doi_exists(
+    # result$dois_valid_not_oa_exist <- IPBES.R::doi_exists(
     #     setdiff(
     #         result$dois_valid,
     #         result$dois_in_oa

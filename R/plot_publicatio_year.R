@@ -7,6 +7,7 @@ plot_publication_year <- function(bibliography) {
         dplyr::summarize(
             count = n(),
             p = count / sum(count),
+            .groups = "drop"
         ) |>
         dplyr::group_by(
             Item.Type
@@ -38,6 +39,7 @@ plot_publication_year <- function(bibliography) {
         dplyr::summarize(
             count = n(),
             p = count / sum(count),
+            .groups = "drop"
         ) |>
         dplyr::group_by(
             type
