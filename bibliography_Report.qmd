@@ -12,7 +12,10 @@ format:
         #     body-width: 4000px
         #     margin-width: 200px
         #     gutter-width: 1.5rem    
+params:
+    bib_name: "IPBES.ILK"
 ---
+# Bibplography `r params$branch`
 
 # Bibliography Setup
 The bibliography is loaded and the DOIs, ISBNs and ISSNs are extracted.
@@ -31,7 +34,16 @@ suppressPackageStartupMessages({
     library(targets)
 })
 
-bibliography <- targets::tar_read(bibliography)
+suppressWarnings({
+    bibliography <- targets::tar_read_raw(paste0("bibliography_", params$bib_name))
+    metrics <- targets::tar_read_raw(paste0("metrics_", params$bib_name))
+    figure_pub_year <- targets::tar_read_raw(paste0("figure_pub_year_", params$bib_name))
+    figure_oa_status <- targets::tar_read_raw(paste0("figure_oa_status_", params$bib_name))
+    figure_top_journ_data <- targets::tar_read_raw(paste0("figure_top_journals_data_", params$bib_name))
+    figure_top_journals <- targets::tar_read_raw(paste0("figure_top_journals_", params$bib_name))
+    figure_top_country_data <- targets::tar_read_raw(paste0("figure_top_country_data_", params$bib_name))
+    figure_top_country <- targets::tar_read_raw(paste0("figure_top_country_", params$bib_name))
+})
 ```
 
 # Introduction
@@ -74,17 +86,14 @@ To identify a reference, the most widely used identifier is the DOI. The followi
 
 To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not waranted as e.g. differenc chapters of a book can be separate entries in the library and therefore lead toi duplicates. 
 
-- **DOIs**: `r sum(!is.na(bibliography$dois))` (`r 100 * sum(!is.na(bibliography$dois)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$dois) - length(unique((bibliography$dois)))` duplicates
-- **ISBNs**: `r sum(!is.na(bibliography$isbns))` (`r 100 * sum(!is.na(bibliography$isbns)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$isbns) - length(unique((bibliography$isbns)))` duplicates
-- **ISSNs**: `r sum(!is.na(bibliography$issns))` (`r 100 * sum(!is.na(bibliography$issns)) / nrow(bibliography$bibliography)`%) - `r length(bibliography$issns) - length(unique((bibliography$issns)))` duplicates
+- **DOIs**: `r metrics$dois_count` (`r metrics$dois_pc`%) - `r metrics$dois_duplicates` duplicates
+- **ISBNss**: `r metrics$isbns_count` (`r metrics$isbns_pc`%) - `r metrics$isbns_duplicates` duplicates
+- **ISBNss**: `r metrics$issns_count` (`r metrics$issns_pc`%) - `r metrics$issns_duplicates` duplicates
 
 
 The following DOIs are duplicates in the bibliography. This table should be empty.
 ```{r}
 #| label: duplicates
-
-# duplicate_isbns <- paste0("https://isbnsearch.org/search?s=", bibliography$dois[duplicated(bibliography$isbns)])
-# duplicate_issns <- paste0("", bibliography$dois[duplicated(bibliography$issns)])
 
 data.frame(
     Type = "doi",
@@ -102,34 +111,25 @@ data.frame(
 
 To validate the existence and validity of the DOIs, we check if the DOIs are in the OpenAlex database. 
 
-```{r}
-#| label: dois_in_oa
-
-dois_not_in_oa <- unique(bibliography$dois)[!(unique(bibliography$dois) %in% bibliography$dois_works)]
-
-dois_valid <- dois_not_in_oa[IPBES.R::doi_valid(dois_not_in_oa)]
-```
-
-Of the `r length(unique(bibliography$dois))` in the library which have a DOI, `r length(dois_not_in_oa)` (`r 100 * length(dois_not_in_oa) / length(unique(bibliography$dois))`%) are in not in OpenAlex. 
+Of the `r metrics$dois_unique` unique DOIs in the library, `r length(metrics$dois_not_in_oa)` (`r 100 * length(metrics$dois_not_in_oa) / length(unique(bibliography$dois))`%) are in not in OpenAlex. 
 
 ```{r}
 #| label: dois_not_in_oa_table
 data.frame(
     Type = "doi",
-    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', dois_not_in_oa, dois_not_in_oa)
+    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', metrics$dois_not_in_oa, metrics$dois_not_in_oa)
 ) |>
-    IPBES.R::table_dt(caption = "The Caption")
+    IPBES.R::table_dt(caption = "dois_not_in_oa")
 ```
 
-Of these `r (length(dois_not_in_oa) - length(dois_valid))` are not valid. These are:
+Of these `r (length(metrics$dois_not_in_oa) - length(metrics$dois_valid))` are not valid. These are:
 
 ```{r}
 #| label: dois_not_valid
 
-
 data.frame(
     Type = "doi",
-    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', dois_not_in_oa[!(dois_not_in_oa %in% dois_valid)], dois_not_in_oa[!(dois_not_in_oa %in% dois_valid)])
+    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', metrics$dois_not_in_oa[!(metrics$dois_not_in_oa %in% metrics$dois_valid)], metrics$dois_not_in_oa[!(metrics$dois_not_in_oa %in% metrics$dois_valid)])
 ) |>
     knitr::kable(
         caption = "Non Valid DOIs in the Bibliography",
@@ -140,16 +140,6 @@ data.frame(
 
 TODO Finally we check, if these dois exist but are not ingested into OpanAlex. This is done using the `doi.org` resolver
 This is disabled at the moment.
-
-```{r}
-#| label: dois_exist
-#| eval: false
-
-dois_exist <- IPBES.R::doi_exists(
-    dois_valid,
-    cache_file = file.path(".", "cache", "doi_exist.rds")
-)
-```
 
 
 ```{r}
@@ -192,7 +182,7 @@ sprintf(
 
 oldopts <- options(knitr.kable.NA = "")
 data.frame(
-    Measure = c(
+    metrics = c(
         "# References",
         "**DOI**",
         "# DOIs",
@@ -257,7 +247,7 @@ bibliography$bibliography |>
 #| fig-height: 10
 #| fig-width: 10
 
-tar_read(figure_pub_year)
+params$figure_pub_year
 ```
 
 ## Access Status of References
@@ -269,7 +259,7 @@ This is checked by using the OpenAlex retrieved works. Therefore it is li=mited 
 #| fig-height: 10
 #| fig-width: 10
 
-tar_read(figure_oa_status)
+params$figure_oa_status
 ```
 
 ## 50 Most often cited Journals
@@ -279,14 +269,14 @@ tar_read(figure_oa_status)
 #| fig-height: 10
 #| fig-width: 10
 
-tar_read(figure_top_journals)
+params$figure_top_journals
 ```
 
 This table contains all Journals as specified in the Zotero database. 
 ```{r}
 #| label: top_journals_data
 
-tar_read(figure_top_journals_data) |>
+params$figure_top_journals_data |>
     IPBES.R::table_dt("cited_journals")
 ```
 
@@ -297,12 +287,11 @@ This plot only contains the countries with more than 10 references.
 ```{r}
 #| label: top_countries
 #| eval: false
-#| 
+#|
 #| fig-height: 10
 #| fig-width: 10
 
-tar_read(figure_top_countries)
-
+params$figure_top_countries
 ```
 
 This table contains all countries and the number of authorship.
@@ -310,7 +299,7 @@ This table contains all countries and the number of authorship.
 ```{r}
 #| label: top_countries_data
 
-tar_read(figure_top_country_data) |>
+params$figure_top_country_data |>
     IPBES.R::table_dt("top_countries")
 ```
 
