@@ -48,3 +48,8 @@ rsconnect/
 
 # Folders to include
 !cache/*
+
+# Targets folder
+.Rproj.user
+
+/.quarto/
