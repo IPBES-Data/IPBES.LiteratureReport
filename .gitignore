@@ -50,3 +50,6 @@ rsconnect/
 !cache/*
 
 # Targets folder
+.Rproj.user
+
+/.quarto/

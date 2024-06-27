@@ -107,3 +107,4 @@ list(
 
 
 # quarto::quarto_render("bibliography_report.qmd", execute_params = list(bibliography = tar_read(ias_bibliography)))
+

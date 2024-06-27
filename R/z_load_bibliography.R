@@ -1,6 +1,6 @@
-#' Calculate Bibliography Metrics
+#' Used in the pipeline - Load and prepare bibliography
 #'
-#' This function calculates various metrics for a given bibliography.
+#' This function loads and prepares the bibliography for rurther analysis.
 #'
 #' @param bibliography_zotero The file path to the bibliography exported from Zotero in CSV format.
 #' @param bibliography_name The name of the bibliography.
@@ -20,7 +20,7 @@
 #'
 #'
 #' @examples
-#' # Load the bibliography from a CSV file
+#' \dontrun{
 #' bibliography <- load_bibliography(
 #'     bibliography_zotero = "path/to/bibliography.csv",
 #'     bibliography_name = "My Bibliography",
@@ -30,12 +30,13 @@
 #'
 #' # Print the calculated metrics
 #' print(bibliography)
+#' }
+#' 
 #' @md
 #'
 #' @importFrom tibble as_tibble
 #' @importFrom utils read.csv
 #'
-#' @export
 load_bibliography <- function(
     bibliography_zotero = NULL,
     bibliography_name = "bibliography",

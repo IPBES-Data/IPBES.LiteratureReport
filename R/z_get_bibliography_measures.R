@@ -1,3 +1,14 @@
+#' Used in the pipeline - Get Bibliography Measures
+#'
+#' This function calculates various measures related to a bibliography dataset.
+#'
+#' @param bibliography A data frame containing the bibliography dataset.
+#'
+#' @return A list containing the calculated measures.
+#'
+#' @importFrom IPBES.R doi_valid
+#'
+#' @md
 get_bibliography_measures <- function(
     bibliography) {
     result <- list()

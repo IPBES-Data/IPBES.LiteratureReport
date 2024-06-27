@@ -1,3 +1,15 @@
+#' Zotero Groups to be Analysed
+#'
+#' This function returns the Zotero groups and their IDs to be used in other functions.
+#'
+#' @md
+#' @examples
+#' \dontrun{
+#' groups()
+#' }
+#' 
+#' @export
+#' 
 groups <- function() {
     c(
         # SPC = ,

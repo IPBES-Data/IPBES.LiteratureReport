@@ -13,8 +13,9 @@ format:
         #     margin-width: 200px
         #     gutter-width: 1.5rem    
 params:
-    bib_name: "IPBES.ILK"
+    bib_name: "IPBES.GA1"
 ---
+
 # Bibplography `r params$branch`
 
 # Bibliography Setup
@@ -33,6 +34,9 @@ suppressPackageStartupMessages({
     library(dplyr)
     library(targets)
 })
+
+cat(file.path(".", "_targets") |>
+    normalizePath())
 
 suppressWarnings({
     bibliography <- targets::tar_read_raw(paste0("bibliography_", params$bib_name))
@@ -94,15 +98,25 @@ To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not
 The following DOIs are duplicates in the bibliography. This table should be empty.
 ```{r}
 #| label: duplicates
+#|
+if (sum(duplicated(bibliography$dois)) > 0) {
+    data <- data.frame(
+        Type = "doi",
+        Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', bibliography$dois[duplicated(bibliography$dois)], bibliography$dois[duplicated(bibliography$dois)])
+    )
+} else {
+    data <- data.frame(
+        Type = "doi",
+        Identifier = NA
+    )
+}
 
-data.frame(
-    Type = "doi",
-    Identifier = sprintf('<a href="https://doi.org/%s" target="_blank">%s</a>', bibliography$dois[duplicated(bibliography$dois)], bibliography$dois[duplicated(bibliography$dois)])
-) |>
+data |>
     knitr::kable(
         caption = "Duplicate DOIs in the Bibliography",
         escape = FALSE
     )
+rm(data)
 ```
 
 
@@ -302,7 +316,3 @@ This table contains all countries and the number of authorship.
 params$figure_top_country_data |>
     IPBES.R::table_dt("top_countries")
 ```
-
-# VOSViewer Example
-
-![[VOSViewer](https://tinyurl.com/292ku9w2)](data/VOSviewer-QR-code.png)
