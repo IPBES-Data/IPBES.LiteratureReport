@@ -1,11 +1,10 @@
-#' Calculate Bibliography Metrics
+#' Used in the pipeline - Load and prepare bibliography
 #'
-#' This function calculates various metrics for a given bibliography.
+#' This function loads and prepares the bibliography for rurther analysis.
 #'
 #' @param bibliography_zotero The file path to the bibliography exported from Zotero in CSV format.
 #' @param bibliography_name The name of the bibliography.
 #' @param bibliography_url The URL of the bibliography.
-#' @param mc.cores The number of CPU cores to use for parallel processing.
 #' @param verbose Whether to display verbose output.
 #'
 #' @return A list containing the calculated metrics for the bibliography:
@@ -21,38 +20,40 @@
 #'
 #'
 #' @examples
-#' # Load the bibliography from a CSV file
-#' bibliography <- bibliography_metrics(
+#' \dontrun{
+#' bibliography <- load_bibliography(
 #'     bibliography_zotero = "path/to/bibliography.csv",
 #'     bibliography_name = "My Bibliography",
 #'     bibliography_url = "https://example.com/bibliography",
-#'     mc.cores = 4,
 #'     verbose = TRUE
 #' )
 #'
 #' # Print the calculated metrics
 #' print(bibliography)
+#' }
+#' 
 #' @md
 #'
 #' @importFrom tibble as_tibble
 #' @importFrom utils read.csv
 #'
-#' @export
-bibliography_metrics <- function(
+load_bibliography <- function(
     bibliography_zotero = NULL,
     bibliography_name = "bibliography",
     bibliography_url = "",
-    mc.cores = getOption("mc.cores", 2L),
-    verbose = FALSE) {
-    #
-    #| label: setup
+    verbose = FALSE
+) {
+    bibliography_zotero <- file.path(".", "input", paste0(bibliography_zotero, ".csv"))
+    
+    ##
+
     bibliography <- list(
         timestamp = Sys.time(),
         name = bibliography_name,
         url = bibliography_url
     )
 
-    class(bibliography) <- c("IPBES.bib_metrics", class(bibliography))
+    class(bibliography) <- c("IPBES.bibliography", class(bibliography))
 
     bibliography$bibliography <- read.csv(
         bibliography_zotero,
@@ -62,11 +63,11 @@ bibliography_metrics <- function(
 
     #| label: load_bibliography
 
-    bibliography$dois_bib <- bibliography$bibliography$DOI
-    names(bibliography$dois_bib) <- bibliography$bibliography$Key
-    bibliography$dois_bib <- bibliography$dois_bib[bibliography$dois_bib != ""]
+    bibliography$dois <- bibliography$bibliography$DOI
+    names(bibliography$dois) <- bibliography$bibliography$Key
+    bibliography$dois <- bibliography$dois[bibliography$dois != ""]
 
-    bibliography$dois_bib <- bibliography$dois_bib |>
+    bibliography$dois <- bibliography$dois |>
         gsub(pattern = "^https://doi.org/", replacement = "") |>
         gsub(pattern = "^https://dx.doi.org/", replacement = "") |>
         gsub(pattern = "^https://hdl.handle.net/", replacement = "") |>
@@ -87,19 +88,20 @@ bibliography_metrics <- function(
 
     #| label: get_works
 
-    doi_chunks <- split(unique(bibliography$dois_bib), ceiling(seq_along(unique(bibliography$dois_bib)) / 199))
+    doi_chunks <- split(unique(bibliography$dois), ceiling(seq_along(unique(bibliography$dois)) / 199))
     #
-    bibliography$works <- pbmcapply::pbmclapply(
+    bibliography$works <- lapply(
         seq_along(doi_chunks),
         function(i) {
+            valid <- IPBES.R::doi_valid(doi_chunks[[i]])
+            dois <- names(valid)[valid]
             oa_fetch(
                 entity = "works",
-                doi = doi_chunks[[i]],
+                doi = dois,
                 per_page = 200,
                 verbose = verbose
             )
-        },
-        mc.cores = mc.cores
+        }
     ) |>
         do.call(what = rbind)
 
