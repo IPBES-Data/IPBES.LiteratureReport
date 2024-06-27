@@ -1,12 +1,49 @@
-make_report <- function(
-    x = groups(),
+#' Generate Reports for Assessments
+#'
+#' This function generates reports for assessments based on the provided bibliography files in the  
+#' folder `input`. The reports are generated using the `bibliography_report.qmd` Quarto document and
+#' will bie located in the `output` folder.
+#'
+#' @param overwrite Logical value indicating whether to overwrite existing reports. Default is \code{FALSE}.
+#' @importFrom quarto quarto_render
+#' @md
+#' @examples
+#' \dontrun{
+#' # Generate reports without overwriting existing reports
+#' make_reports()
+#'
+#' # Generate reports and overwrite existing reports
+#' make_reports(overwrite = TRUE)
+#' }
+#' @export
+#' 
+make_reports <- function(
     overwrite = FALSE) {
     dir.create("output", showWarnings = FALSE)
 
-    for (i in names(x)) {
-        message(">>>>>>>\nGenerating Report for group ", i, " ...")
+    assessments <- list.files(
+        path = "input",
+        pattern = "IPBES.*\\.csv$"
+    ) |>
+        gsub(pattern = "IPBES ", replacement = "") |>
+        gsub(pattern = "\\.csv$", replacement = "")
+    
+    bib_names <- paste0("IPBES.", assessments)
 
-        output <- file.path("output", paste0(x, ".bibliography_report.html"))
+    # tmp <- tempfile()
+    # dir.create(tmp)
+    # on.exit(unlink(tmp))
+
+    # file.copy(
+    #     from = system.file(package = "IPBES.LiteratureReport", "bibliography_report.qmd"),
+    #     to = file.path(tmp, "bibliography_report.qmd"), 
+    #     overwrite = TRUE
+    # )
+
+    for (bib_name in bib_names) {
+        message(">>>>>>>\nGenerating Report for Assessment ", bib_name, " ...")
+
+        output <- file.path("output", paste0(bib_name, ".bibliography_report.html"))
 
         if (file.exists(output) & !overwrite) {
             message("Report already exists! Skipping report generation.\n<<<<<<<\n")
@@ -16,16 +53,15 @@ make_report <- function(
         }
 
         quarto::quarto_render(
-            "bibliography_report.qmd",
+            file.path("bibliography_report.qmd"),
             execute_params = list(bib_name = bib_name)
         )
 
         file.rename(
             from = "bibliography_report.html",
-            to = output,
-            overwrite = TRUE
+            to = output
         )
 
-        message("Generated Report for group ", i, "!\n<<<<<<<\n")
+        message("Generated Report for Assessment ", bib_name, " in ", output, "\n<<<<<<<\n")
     }
 }

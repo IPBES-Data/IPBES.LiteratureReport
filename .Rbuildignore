@@ -1,0 +1,14 @@
+^IPBES\.LiteratureReport\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^README\.Rmd$
+^cran-comments\.md$
+
+^IPBES.LiteratureReport.code-workspace$
+^index.qmd$
+^index.html$
+
+^_targets$
+^cache$
+^input$
+^output$
