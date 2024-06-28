@@ -9,6 +9,8 @@
 #' @importFrom IPBES.R doi_valid
 #'
 #' @md
+#' @export
+
 get_bibliography_measures <- function(
     bibliography) {
     result <- list()

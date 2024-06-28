@@ -1,6 +1,6 @@
 Package: IPBES.LiteratureReport
 Title: Literature Reports for IPBES Zotero Libraries
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person("Rainer", "Krug", , "Rainer@krugs.de", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7490-0066"))

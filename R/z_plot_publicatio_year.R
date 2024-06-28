@@ -36,6 +36,7 @@
 #' # Plot the publication year
 #' plot_publication_year(bibliography)
 #' }
+#' @export
 plot_publication_year <- function(bibliography) {
     data_bib <- bibliography$bibliography |>
         dplyr::group_by(

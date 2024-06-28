@@ -29,6 +29,9 @@ if (!(exists("params"))) {
     params <- rmarkdown::yaml_front_matter("./bibliography_report.qmd")$params
 }
 
+# Make sure that one sees the progress messages when rendering this document
+knitr::opts_chunk$set(message = NA)
+
 suppressPackageStartupMessages({
     library(IPBES.R)
     library(dplyr)
