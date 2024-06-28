@@ -19,6 +19,7 @@
 #' 
 make_reports <- function(
     overwrite = FALSE) {
+    ##
     dir.create("output", showWarnings = FALSE)
 
     assessments <- list.files(
@@ -30,15 +31,12 @@ make_reports <- function(
     
     bib_names <- paste0("IPBES.", assessments)
 
-    # tmp <- tempfile()
-    # dir.create(tmp)
-    # on.exit(unlink(tmp))
-
-    # file.copy(
-    #     from = system.file(package = "IPBES.LiteratureReport", "bibliography_report.qmd"),
-    #     to = file.path(tmp, "bibliography_report.qmd"), 
-    #     overwrite = TRUE
-    # )
+    file.copy(
+        from = system.file(package = "IPBES.LiteratureReport", "bibliography_report.qmd"),
+        to = "bibliography_report.qmd", 
+        overwrite = TRUE
+    )
+    on.exit(unlink("bibliography_report.qmd"))
 
     for (bib_name in bib_names) {
         message(">>>>>>>\nGenerating Report for Assessment ", bib_name, " ...")

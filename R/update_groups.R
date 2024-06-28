@@ -41,7 +41,7 @@ update_groups <- function(
     x = groups(),
     overwrite = FALSE) {
     ##
-    dir.create("output", showWarnings = FALSE)
+    dir.create("input", showWarnings = FALSE)
     ##
     for (i in names(x)) {
         message(">>>>>>>\nDownloading group ", i, " ...")

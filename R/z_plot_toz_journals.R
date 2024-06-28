@@ -25,6 +25,7 @@
 #' }
 #'
 #' @md
+#' @export
 #' 
 
 plot_top_journals <- function(data) {

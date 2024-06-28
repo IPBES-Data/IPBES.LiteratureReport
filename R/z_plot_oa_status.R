@@ -12,6 +12,7 @@
 #' plot_oa_status(bibliography)
 #' }
 #' 
+#' @export
 plot_oa_status <- function(bibliography) {
     figure <- bibliography$works |>
         ggplot(
