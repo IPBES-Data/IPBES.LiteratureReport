@@ -39,6 +39,7 @@
 #' plot_top_country(data)
 #' }
 #'
+#' @export
 plot_top_country <- function(data) {
     figure <- data |>
         dplyr::filter(

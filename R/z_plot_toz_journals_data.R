@@ -16,6 +16,7 @@
 #' plot_top_journals_data(bibliography)
 #' }
 #' 
+#' @export
 plot_top_journals_data <- function(bibliography) {
     data <- bibliography$bibliography |>
         dplyr::group_by(
