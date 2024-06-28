@@ -13,6 +13,7 @@
 #' plot_top_country_data(bibliography)
 #' }
 #' 
+#' @export
 plot_top_country_data <- function(bibliography) {
     data <- sapply(
         bibliography$works$author,

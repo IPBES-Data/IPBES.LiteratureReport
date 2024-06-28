@@ -37,6 +37,8 @@
 #' @importFrom tibble as_tibble
 #' @importFrom utils read.csv
 #'
+#' @export
+
 load_bibliography <- function(
     bibliography_zotero = NULL,
     bibliography_name = "bibliography",
