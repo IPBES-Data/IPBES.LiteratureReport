@@ -78,14 +78,14 @@ names <- data.frame(
 list(
     tar_map(
         values = values,
-        tar_target(bibliography, load_bibliography(files)),
-        tar_target(metrics, get_bibliography_measures(bibliography)),
-        tar_target(figure_pub_year, plot_publication_year(bibliography)),
-        tar_target(figure_oa_status, plot_oa_status(bibliography)),
-        tar_target(figure_top_journals_data, plot_top_journals_data(bibliography)),
-        tar_target(figure_top_journals, plot_top_journals(figure_top_journals_data)),
-        tar_target(figure_top_country_data, plot_top_country_data(bibliography)),
-        tar_target(figure_top_country, plot_top_country(figure_top_country_data))
+        tar_target(bibliography, IPBES.LiteratureReport::load_bibliography(files)),
+        tar_target(metrics, IPBES.LiteratureReport::get_bibliography_measures(bibliography)),
+        tar_target(figure_pub_year, IPBES.LiteratureReport::plot_publication_year(bibliography)),
+        tar_target(figure_oa_status, IPBES.LiteratureReport::plot_oa_status(bibliography)),
+        tar_target(figure_top_journals_data, IPBES.LiteratureReport::plot_top_journals_data(bibliography)),
+        tar_target(figure_top_journals, IPBES.LiteratureReport::plot_top_journals(figure_top_journals_data)),
+        tar_target(figure_top_country_data, IPBES.LiteratureReport::plot_top_country_data(bibliography)),
+        tar_target(figure_top_country, IPBES.LiteratureReport::plot_top_country(figure_top_country_data))
     )
 )
 
