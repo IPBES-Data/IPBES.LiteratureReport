@@ -76,7 +76,7 @@ c(
 #| label: calculate_metrics_targets
 
 targets::tar_make(
-    script = system.file(package = "IPBES.LiteratureReport", "_targets.R")
+    // script = system.file(package = "IPBES.LiteratureReport", "_targets.R")
 )
 ```
 
