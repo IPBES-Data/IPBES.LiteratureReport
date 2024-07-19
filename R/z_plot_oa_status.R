@@ -36,8 +36,7 @@ plot_oa_status <- function(data) {
       plot.title = element_text(size = 15)
     ) +
     theme(legend.position = "bottom") +
-    labs(fill = "Open Access Status") +
-    coord_flip()
+    labs(fill = "Open Access Status")
 
   return(figure)
 }

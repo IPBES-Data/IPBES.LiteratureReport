@@ -39,9 +39,9 @@ combined_data_255c0b7528cee6a2|branch|d44c3c4f2445a8f4|c7069786c801c23d|73a11b17
 combined_data_603be4a1f398bc0c|branch|93b8549e15316faf|c7069786c801c23d|9fc3947991e3c645|-1561222391||t19923.3162831419s|a82086b177844f00|18641339|rds|local|vector|combined_data||0.001||
 combined_data_c907b252bad7bb08|branch||80992180021163f0|2bc4b0566238a501|518358667||t19922.5843818863s||0|rds|local|vector|combined_data||0.004||could not load dependencies of target combined_data_c907b252bad7bb08. figure_oa_status_7ad47022a82cd411 must be a vector, not a ggggplot object.
 combined_data_d02f8ae0826ea6d3|branch|8bddb6b645720771|c7069786c801c23d|27ea3d3ee22ca696|780349628||t19923.316325706s|9187c36ce5a3e5ea|17377028|rds|local|vector|combined_data||0||
-combined_data_IPBES_GA1_2333077|stem|984aa48fb4daf124|9b596663ae0a354a|2439d49bf672a4ff|1603246631||t19923.5910521172s|5ab43db05e527f38|14790335|rds|local|vector|||0||
-combined_data_IPBES_IAS_2352922|stem|1529ffbe41c6a930|91798d903f86f85e|1d30904eca431909|-1148174406||t19923.5910788934s|b919d2700cd38dc2|10103073|rds|local|vector|||0||
-combined_data_IPBES_ILK_2344322|stem|8ba135f9a512ad58|067ac0d7fec86e1d|bf02d683bb7218f5|-1028408045||t19923.5910178369s|bc9248d8d5122b70|9400691|rds|local|vector|||0||
+combined_data_IPBES_GA1_2333077|stem|db0f5d3354a9c38c|ead9bb39553d8b43|93a0a0b14080654e|1603246631||t19923.6381143398s|88f121952e2a0b2d|18543757|rds|local|vector|||0||
+combined_data_IPBES_IAS_2352922|stem|4dc47c9850e59cbf|fb6ce55811943327|f1c980afcddbb75c|-1148174406||t19923.6380270172s|4ce4b0d0cf53eca3|13855165|rds|local|vector|||0||
+combined_data_IPBES_ILK_2344322|stem|a7b44f5f94efb513|d855ea62cca180ee|fc071f9b6562dead|-1028408045||t19923.638064007s|907ac18249f58984|13152928|rds|local|vector|||0||
 dois_measures|function|9da20cdb7ce823d3|||||||||||||||
 figure_oa_status|pattern|a16604d70abd9b1b|45b87c8e3c746d50||155662958||||31056484|rds|local|vector||figure_oa_status_7ad47022a82cd411*figure_oa_status_c3f9518587d2889f*figure_oa_status_de9f69b1276a7d38|0.022||
 figure_oa_status_182ac67cb1e7aad3|branch|728be2f29534a6a1|7e86673996197f0f|1f38fbb9003cedaf|-1204624700||t19909.6155720424s|2a10feb12a31825a|34530847|rds|local|vector|figure_oa_status||0.003||
@@ -60,11 +60,11 @@ figure_oa_status_data_IPBES_IAS_2352922|stem|bf22ddb2f5fd33a0|f0fd22c2a3cb7134|2
 figure_oa_status_data_IPBES_ILK_2344322|stem|7f24d1b59082a4ec|5a10843b8718d2b0|253ce35f5e695db8|1197675152||t19923.3302802429s|ae518d45202f64d7|4829|rds|local|vector|||0.001||
 figure_oa_status_de9f69b1276a7d38|branch|48e02a213bba6eb8|45b87c8e3c746d50|b113908024abbdc2|1990569461||t19923.3010162827s|844eb05ac612f6e8|8453311|rds|local|vector|figure_oa_status||0.003||
 figure_oa_status_fdf37829d38153ed|branch|cef3abbe6fba9295|7e86673996197f0f|07f42ae0ef3e9e28|452379105||t19909.6159618673s|76e0412020c44564|61554508|rds|local|vector|figure_oa_status||0.002||
-figure_oa_status_IPBES_GA1_2333077|stem|f36c030cf67f7362|eda76c73c9905365|38a71b72fe854f57|142012455||t19923.5909947431s|a9fd83c8010823c4|165875|rds|local|vector|||0.003||
+figure_oa_status_IPBES_GA1_2333077|stem|b8749290a186146f|eda76c73c9905365|1b325e50c590ab5e|142012455||t19923.6291209059s|cd18b9bde203e36b|163337|rds|local|vector|||0.011||
 figure_oa_status_IPBES_GA1_2333077.csv|stem|cfe8c7015f3897ec|3e0ba0c2637552a1|577d8d747abb294d|-1623367954||t19922.3903502839s|766b5e843bce5173|57593754|rds|local|vector|||0.003||
-figure_oa_status_IPBES_IAS_2352922|stem|08171ccd6162f57c|5876c35543498ac8|80f4b46213e17ca7|2135363590||t19923.5909953917s|d665153f934d7af8|151498|rds|local|vector|||0.003||
+figure_oa_status_IPBES_IAS_2352922|stem|2d9dd9c0b429a3d8|5876c35543498ac8|73100ebf91fe84e3|2135363590||t19923.6291215205s|9c0a80aad164207b|148985|rds|local|vector|||0.003||
 figure_oa_status_IPBES_IAS_2352922.csv|stem|8d35fed018c77f13|eb479b4eb727ca92|adad184711b50321|1908589427||t19922.3901902742s|3c0bc16ef9b436a7|38041562|rds|local|vector|||0.003||
-figure_oa_status_IPBES_ILK_2344322|stem|6857f391ade9148c|72a8a13103ee1756|693e08a4b0aa3764|1379661989||t19923.5909940767s|12692e4180de1211|145027|rds|local|vector|||0.022||
+figure_oa_status_IPBES_ILK_2344322|stem|6a7839907cd8b54a|72a8a13103ee1756|c7bdd2ca5bcc169c|1379661989||t19923.6291196732s|0f9471b49859e4d6|142323|rds|local|vector|||0.013||
 figure_oa_status_IPBES_ILK_2344322.csv|stem|0faf9bcf12a7d18f|abb593630aa0981c|35f0b02cbf5ebdb2|-1751639612||t19922.3902343361s|fb23787b06c175d9|30512390|rds|local|vector|||0.002||
 figure_oa_status_IPBES.AFA|stem|ec738f3a377fa967|f3ad728379dccebd|1775b51b6cf93c6b|-1117706082||t19900.7137122722s|f917c711669a0037|5556912|rds|local|vector|||0.003||
 figure_oa_status_IPBES.AMA|stem|f2a6679c5ebe2fd4|34b274653e3c371c|65ced5528ce9bfad|240977826||t19900.7138397144s|ff6cba6e12bad2fb|34632549|rds|local|vector|||0.002||
@@ -89,16 +89,16 @@ figure_pub_year_b2b05b1a912a80df|branch|ae2713b3ec78de3d|b83e1644d1c4d3df|c4b6bc
 figure_pub_year_bd5b8d980ce26a48|branch|d59f875e663c2d75|b83e1644d1c4d3df|31519e815740376c|1983902489||t19909.6153756228s|c20d579df25d6233|1778191|rds|local|vector|figure_pub_year||0.14||
 figure_pub_year_c3f9518587d2889f|branch|9831d2c37cd9181b|d05c47b62036c768|b871c903a1b6d62f|233065481||t19923.3010507625s|6d1d12a97c66b7dc|9136610|rds|local|vector|figure_pub_year||0.022||
 figure_pub_year_ce8fa67c53f0c6db|branch|7a185869606346c0|b83e1644d1c4d3df|524c9791f50755f6|-1584551798||t19909.6155147557s|8b8642f996cf8e56|2296994|rds|local|vector|figure_pub_year||0.024||
-figure_pub_year_data_IPBES_GA1_2333077|stem|d74162c2d3d4496e|79c3829b7a3ea061|9f4ad81af5975b46|397498707||t19923.3302932453s|f03bb485bd82bc9e|3968|rds|local|vector|||0.018||
-figure_pub_year_data_IPBES_IAS_2352922|stem|969ce3369c61c455|512636246b3ca738|aa5a0ec9faa09a7a|654991152||t19923.3302732289s|310e49681d995377|3745|rds|local|vector|||0.186||
-figure_pub_year_data_IPBES_ILK_2344322|stem|7d67a00a21e5ccfc|67b041a6999351bb|15f8c65c89c27997|1931403498||t19923.3302805756s|72b68942dc5fa86b|3809|rds|local|vector|||0.015||
+figure_pub_year_data_IPBES_GA1_2333077|stem|fc78e1b1dd02d7d6|79c3829b7a3ea061|7701708288cf1d62|397498707||t19923.6200807253s|53bcdc1ed746862e|1027|rds|local|vector|||0.008||
+figure_pub_year_data_IPBES_IAS_2352922|stem|308a2a97c058f049|512636246b3ca738|b70bb54c6fc1a40d|654991152||t19923.6200884892s|61c90b62c4e83c3c|958|rds|local|vector|||0.008||
+figure_pub_year_data_IPBES_ILK_2344322|stem|614a953ecc102d14|67b041a6999351bb|5919427640731a7d|1931403498||t19923.620068536s|659229575a55c101|829|rds|local|vector|||0.05||
 figure_pub_year_de9f69b1276a7d38|branch|17eeb6bc83cc9710|d05c47b62036c768|c490cc2c5832079a|740105959||t19923.3010636921s|6f845ab4152e7ca4|8533671|rds|local|vector|figure_pub_year||0.022||
 figure_pub_year_fdf37829d38153ed|branch|407535afbd4eae92|b83e1644d1c4d3df|07f42ae0ef3e9e28|783573523||t19909.6155064836s|fc66aeebf9f523aa|17410519|rds|local|vector|figure_pub_year||0.024||
-figure_pub_year_IPBES_GA1_2333077|stem|fd19ee773f6f7282|adef71944df57b12|f37ebab4595667f8|176159578||t19923.3303032838s|29d6c75314b75d42|217489|rds|local|vector|||0.009||
+figure_pub_year_IPBES_GA1_2333077|stem|6b9b47959ae9c111|adef71944df57b12|505f520e160c8524|176159578||t19923.6283790497s|86d7a2642ec5b280|90828|rds|local|vector|||0.004||
 figure_pub_year_IPBES_GA1_2333077.csv|stem|96a64b8467b83a13|4c57e886a0cfcf83|577d8d747abb294d|-1322785586||t19922.3902692954s|2fd364ef684d2a53|13812667|rds|local|vector|||0.024||
-figure_pub_year_IPBES_IAS_2352922|stem|e8fe980ad34911fd|ceb5424d5c79501d|c9ee3b241d5007c5|-1388736010||t19923.3302956094s|bba84a8cca343da8|216725|rds|local|vector|||0.058||
+figure_pub_year_IPBES_IAS_2352922|stem|d38d74fcf77c403a|ceb5424d5c79501d|141e45e7a8e4a80e|-1388736010||t19923.6283794198s|10d468dbc5863055|90569|rds|local|vector|||0.002||
 figure_pub_year_IPBES_IAS_2352922.csv|stem|2690e6caa7cb74f4|3447e5a944ecb9c2|adad184711b50321|1771312265||t19922.3901363209s|f2a761c7a909d460|9608804|rds|local|vector|||0.052||
-figure_pub_year_IPBES_ILK_2344322|stem|3d6d90670126e65d|f87e0878675a37ee|a1a134dca82416ac|-479948320||t19923.3302993201s|f1a096956f18b1ea|216580|rds|local|vector|||0.009||
+figure_pub_year_IPBES_ILK_2344322|stem|43ce2a980a584310|f87e0878675a37ee|8bbc7044f2c715d2|-479948320||t19923.6283786272s|971da4446cda5550|90080|rds|local|vector|||0.007||
 figure_pub_year_IPBES_ILK_2344322.csv|stem|163761a2403980f8|03480725356aa57d|35f0b02cbf5ebdb2|-521004916||t19922.3902481715s|fea279181fb68979|8707456|rds|local|vector|||0.023||
 figure_pub_year_IPBES.AFA|stem|fd14a82a2dc42c04|d9ef8c162f83d66e|a682114c78333fdb|-1875708043||t19900.7137039797s|d1be23b023fee4e8|1781062|rds|local|vector|||0.022||
 figure_pub_year_IPBES.AMA|stem|6ce093fb40f1849d|1157e277ff0ef58b|66f19b006d53b01a|611644563||t19900.713854952s|d293328898ed53ee|9866261|rds|local|vector|||0.026||
@@ -170,6 +170,9 @@ figure_top_country_IPBES.ILK|stem|3ec58a0a2091fb31|967ca06f374d269d|4e3afd7933e4
 figure_top_country_IPBES.LDR|stem|49abbdb5ac0376ca|d6f7bfe2f1cd69aa|dbe69f49aea9779e|-706627064||t19900.7139802111s|1a3385be509685f8|90871|rds|local|vector|||0.002||
 figure_top_country_IPBES.PPA|stem|9b20555b8344bc4f|6bcc2ce1c4665733|0cd7a3be3a764d3c|163308467||t19900.7139748791s|07b83582b14232e2|89441|rds|local|vector|||0.004||
 figure_top_country_IPBES.SCM|stem|6db6e9569f88c0c0|fd4ca5ee151f4166|27975f756001dad3|1965430751||t19900.7139791555s|bad87c014e343f3e|89512|rds|local|vector|||0.003||
+figure_top_country_map_IPBES_GA1_2333077|stem|4e1fa614a029a3f8|8bdee5c9414fe563|94fbddace3e2011a|-461038911||t19923.6379890854s|9330e4d9a7f82c20|3900183|rds|local|vector|||2.63|The following countries are not in the world dataset BMU, MCOand will therefore not be plotted|
+figure_top_country_map_IPBES_IAS_2352922|stem|82e33b3f269f1456|a678598af90bd638|f3c23d824fb59101|72771143||t19923.6379021975s|cbabe97ed6f85cdd|3900073|rds|local|vector|||2.642|The following countries are not in the world dataset BMU, MDV, MCO, GIBand will therefore not be plotted|
+figure_top_country_map_IPBES_ILK_2344322|stem|ebeb831be1e490c8|f36107a10c949dc2|a0a44ef1c1a39f1d|1296768417||t19923.6379449555s|c8d2e173ed05b7cd|3900121|rds|local|vector|||2.519|Some values were not matched unambiguously XK. The following countries are not in the world dataset MCO, NAand will therefore not be plotted|
 figure_top_journ_data|pattern|5f940f7b38edf129|4e3bd1a4cc9a6eb4||376586982||||2460|rds|local|vector||figure_top_journ_data_7ad47022a82cd411*figure_top_journ_data_c3f9518587d2889f*figure_top_journ_data_de9f69b1276a7d38|0.037||
 figure_top_journ_data_182ac67cb1e7aad3|branch|5932e861eaf4666e|a7d4f3bec110cf5d|1f38fbb9003cedaf|35000957||t19909.6145942972s|d1299caaee1f7d59|828|rds|local|vector|figure_top_journ_data||0.008||
 figure_top_journ_data_3bf82b8344c09cb1|branch||4e3bd1a4cc9a6eb4|fdcde604ffdc0cdd|647352533||t19881.4502277864s||0|rds|local|vector|figure_top_journ_data||0.004||no applicable method for group_by applied to an object of class NULL
@@ -312,13 +315,14 @@ metrics_IPBES.LDR|stem|59e185710fd65ebb|49e02d7f63e4f053|b3332fa5fd62a3ea|834321
 metrics_IPBES.PPA|stem|18ac3979ead1582e|b4798a1bf5a8c0d1|01fb3c32bfe6f81f|249779769||t19900.7134154398s|cd5c142d8586127d|9896|rds|local|vector|||0.001||
 metrics_IPBES.SCM|stem|e7c41cf5a463b374|b4973a43f3e4ac4e|1e1e7392121e9928|1654120480||t19900.713776183s|05271d63350746f7|8510|rds|local|vector|||0.001||
 names|object|df4aeb85ad8f08d6|||||||||||||||
-plot_oa_status|function|710945b52253a476|||||||||||||||
+plot_oa_status|function|730bef808d78437e|||||||||||||||
 plot_oa_status_data|function|c4b5754767ac0cf2|||||||||||||||
 plot_pub_year_3bf82b8344c09cb1|branch||d05c47b62036c768|5b692b94b4fd3050|1514572073||t19880.6209859843s||0|rds|local|vector|plot_pub_year||0.016||no applicable method for group_by applied to an object of class NULL
-plot_publication_year|function|2edfdcb1ae4d7031|||||||||||||||
-plot_publication_year_data|function|ca986fdd2ef7c9a8|||||||||||||||
+plot_publication_year|function|fb299f413150ae7d|||||||||||||||
+plot_publication_year_data|function|f9cc9437156a5834|||||||||||||||
 plot_top_country|function|16a43d1c9f6b9a40|||||||||||||||
 plot_top_country_data|function|01161669fcc037c9|||||||||||||||
+plot_top_country_map|function|9d06a9fb56e129e4|||||||||||||||
 plot_top_journals|function|1662292b068d9d87|||||||||||||||
 plot_top_journals_data|function|0212abf81e5c442c|||||||||||||||
 plot_types|function|d37e7669d685dba6|||||||||||||||

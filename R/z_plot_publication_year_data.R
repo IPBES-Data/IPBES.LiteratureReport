@@ -41,69 +41,54 @@ plot_publication_year_data <- function(bibliography) {
   data_bib <- bibliography$bibliography |>
     dplyr::group_by(
       Publication.Year,
-      Item.Type
     ) |>
     dplyr::summarize(
       count = n(),
       p = count / sum(count),
       .groups = "drop"
-    ) |>
-    dplyr::group_by(
-      Item.Type
     ) |>
     dplyr::arrange(
       Publication.Year
     ) |>
     mutate(
       count_cumsum = cumsum(count),
-      p_cumsum = cumsum(p)
+      p_cumsum = cumsum(p),
+      from = "Zenodo"
     ) |>
     dplyr::rename(
       publication_year = Publication.Year,
-      type = Item.Type
-    ) |>
-    dplyr::mutate(
-      type = dplyr::case_match(
-        type,
-        "journalArticle" ~ "article",
-        .default = type
-      )
     )
 
   data_works <- bibliography$works |>
     dplyr::group_by(
       publication_year,
-      type
     ) |>
     dplyr::summarize(
       count = n(),
       p = count / sum(count),
       .groups = "drop"
     ) |>
-    dplyr::group_by(
-      type
-    ) |>
     dplyr::arrange(
       publication_year
     ) |>
     mutate(
       count_cumsum = cumsum(count),
-      p_cumsum = cumsum(p)
+      p_cumsum = cumsum(p),
+      from = "OpenAlex"
     ) |>
     dplyr::rename(
       publication_year = publication_year,
-      type = type,
-      count_oa = count,
-      p_oa = p,
-      count_oa_cumsum = count_cumsum,
-      p_oa_cumsum = p_cumsum
+      count = count,
+      p = p,
+      count_cumsum = count_cumsum,
+      p_cumsum = p_cumsum
     )
 
-  data <- dplyr::full_join(
-    x = data_bib,
-    y = data_works,
-    by = c("publication_year", "type")
-  )
+  data <- dplyr::bind_rows(
+    data_bib,
+    data_works
+  ) |>
+    dplyr::ungroup()
 
   return(data)
 }
