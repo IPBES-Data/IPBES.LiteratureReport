@@ -11,25 +11,33 @@
 #' bibliography <- read_bibliography("path/to/bibliography.csv")
 #' plot_oa_status(bibliography)
 #' }
-#' 
+#'
 #' @export
-plot_oa_status <- function(bibliography) {
-    figure <- bibliography$works |>
-        ggplot(
-            aes(
-                x = publication_year,
-                fill = oa_status
-            )
-        ) +
-        geom_bar(
-            position = "fill"
-        ) +
-        scale_fill_manual(values = c("#CD7F32", "red", "gold", "green", "pink")) +
-        ggtitle("Publication Year") +
-        theme(
-            plot.title = element_text(size = 15)
-        ) +
-        theme(legend.position = "bottom")
-    
-    return(figure)
+plot_oa_status <- function(data) {
+  figure <- data |>
+    ggplot(
+      aes(
+        x = publication_year,
+        fill = factor(
+          oa_status,
+          levels = c("closed", "hybrid", "bronze", "green", "gold", "diamond")
+        )
+      )
+    ) +
+    geom_bar(
+      # position = "fill"
+    ) +
+    scale_fill_manual(
+      breaks = c("diamond", "gold", "green", "bronze", "hybrid", "closed"),
+      values = c("white", "gold", "green", "#CD7F32", "cyan", "red")
+    ) +
+    ggtitle("Publication Year") +
+    theme(
+      plot.title = element_text(size = 15)
+    ) +
+    theme(legend.position = "bottom") +
+    labs(fill = "Open Access Status") +
+    coord_flip()
+
+  return(figure)
 }
