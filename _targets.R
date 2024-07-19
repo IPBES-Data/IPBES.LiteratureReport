@@ -104,6 +104,7 @@ list(
     #
     tar_target(figure_top_country_data, plot_top_country_data(bibliography)),
     tar_target(figure_top_country, plot_top_country(figure_top_country_data)),
+    tar_target(figure_top_country_map, plot_top_country_map(figure_top_country_data)),
     #
     tar_target(figure_types_data, plot_types_data(bibliography)),
     tar_target(figure_types, plot_types(figure_types_data)),
@@ -126,6 +127,7 @@ list(
         #
         figure_top_country_data = figure_top_country_data,
         figure_top_country = figure_top_country,
+        figure_top_country_map = figure_top_country_map,
         #
         figure_types_data = figure_types_data,
         figure_types = figure_types

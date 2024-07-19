@@ -48,7 +48,7 @@ bib_data <- targets::tar_read_raw(
 
 
 - [`r bib_data$bibliography$name` Bibliography](`r bib_data$bibliography$url`){target="_blank"}
-- [This Report](`r paste0("https://ipbes-data.github.io/IPBES.LiteratureReport/output/IPBES.", bib_data$bibliography$name, ".bibliography_report.html")`)
+- [This Report](`r paste0("https://ipbes-data.github.io/IPBES.LiteratureReport/output/IPBES.", bib_data$bibliography$name, ".bibliography_report.html")`){target="_blank"}
 - [Github repository](https://github.com/IPBES-Data/IPBES.LiteratureReport/tree/main)
 
 # Introduction
@@ -146,11 +146,11 @@ data.frame(
 ```
 
 
-### Not in [OpenAlex](https://OpenAlex.org)
+### Not in [OpenAlex](https://OpenAlex.org){target="_blank"}
 
-To validate the existence and validity of the DOIs, we check if the DOIs are in the [OpenAlex](https://OpenAlex.org) database. 
+To validate the existence and validity of the DOIs, we check if the DOIs are in the [OpenAlex](https://OpenAlex.org){target="_blank"} database. 
 
-Of the `r length(bib_data$metrics$zotero_dois$unique)` unique DOIs in the library, `r length(bib_data$metrics$zotero_dois$not_in_oa)` (`r round(100 * length(bib_data$metrics$zotero_dois$not_in_oa) / bib_data$metrics$zotero_dois$count, digits = 2)`%) are in not in [OpenAlex](https://OpenAlex.org). This includes the non-valid DOIS, whci are filtered out in the table below.
+Of the `r length(bib_data$metrics$zotero_dois$unique)` unique DOIs in the library, `r length(bib_data$metrics$zotero_dois$not_in_oa)` (`r round(100 * length(bib_data$metrics$zotero_dois$not_in_oa) / bib_data$metrics$zotero_dois$count, digits = 2)`%) are in not in [OpenAlex](https://OpenAlex.org){target="_blank"}. This includes the non-valid DOIS, whci are filtered out in the table below.
 
 
 ```{r}
@@ -165,7 +165,7 @@ data.frame(
     link = NULL
   ) |>
   knitr::kable(
-    caption = "DOIs in Zenodo which ar not in [OpenAlex](https://OpenAlex.org)",
+    caption = "DOIs in Zenodo which ar not in [OpenAlex](https://OpenAlex.org){target='_blank'}",
     escape = FALSE
   )
 ```
@@ -184,11 +184,11 @@ This is disabled at the moment and still needs o=to be implemented.
 
 # Bibliographic analysis
 
-In the bibliographic analysis, we can only analyse the references in [OpenAlex](https://OpenAlex.org) as the bibliographic metadata alanised is not in the Zotero liubrary but retrieved from [OpenAlex](https://OpenAlex.org).
+In the bibliographic analysis, we can only analyse the references in [OpenAlex](https://OpenAlex.org){target="_blank"} as the bibliographic metadata alanised is not in the Zotero liubrary but retrieved from [OpenAlex](https://OpenAlex.org){target="_blank"}.
 
 ## Publication types
 
-Works on Zenodo as well as on [OpenAlex](https://OpenAlex.org) are of different types. Here we show these separate.
+Works on Zenodo as well as on [OpenAlex](https://OpenAlex.org){target="_blank"} are of different types. Here we show these separate.
 
 ```{r}
 #| label: publication_types_data
@@ -208,19 +208,19 @@ bib_data$figure_types_data |>
 bib_data$figure_types
 ```
 
-### Zenodo versus [OpenAlex](https://OpenAlex.org) Types
+### Zenodo versus [OpenAlex](https://OpenAlex.org){target="_blank"} Types
 
-The types entered in the Zenodo library and the types as retrieved from [OpenAlex](https://OpenAlex.org) are not linked, therefore they can differ, This can indicate problems but not necessarily has to. These cases need to be carefully evaluated and here only a starting point is given. 
+The types entered in the Zenodo library and the types as retrieved from [OpenAlex](https://OpenAlex.org){target="_blank"} are not linked, therefore they can differ, This can indicate problems but not necessarily has to. These cases need to be carefully evaluated and here only a starting point is given. 
 
-`NA` in [OpenAlex](https://OpenAlex.org) is likely caused by the doi not found in [OpenAlex](https://OpenAlex.org) (not in there, not valid, non-standard DOI in Zenodo). `NA` in Zotero is linked to non-standard DOI entries (i.e. with `http`) whcih can therefore not be linked to [OpenAlex](https://OpenAlex.org) data. If all DOIs are in standard format, there should be no NAs in this Table in the column Ferom Zenodo.
+`NA` in [OpenAlex](https://OpenAlex.org){target="_blank"} is likely caused by the doi not found in [OpenAlex](https://OpenAlex.org){target="_blank"} (not in there, not valid, non-standard DOI in Zenodo). `NA` in Zotero is linked to non-standard DOI entries (i.e. with `http`) whcih can therefore not be linked to [OpenAlex](https://OpenAlex.org){target="_blank"} data. If all DOIs are in standard format, there should be no NAs in this Table in the column Ferom Zenodo.
 
 Improvements should be done after feedback.
 
 ```{r}
 bib_data$metrics$types$comparison |>
   knitr::kable(
-    col.names = c("Type from Zenodo", "Type from [OpenAlex](https://OpenAlex.org)", "count"),
-    caption = "Table giving the combination of types from Zenodo as well as [OpenAlex](https://OpenAlex.org) and their frequency"
+    col.names = c("Type from Zenodo", "Type from [OpenAlex](https://OpenAlex.org){target='_blank'}", "count"),
+    caption = "Table giving the combination of types from Zenodo as well as [OpenAlex](https://OpenAlex.org){target='_blank'} and their frequency"
   )
 ```
 
@@ -237,7 +237,7 @@ bib_data$figure_pub_year
 
 ## Access Status of References
 
-This is checked by using the [OpenAlex](https://OpenAlex.org) retrieved works. Therefore it is li=mited to the works that are on [OpenAlex](https://OpenAlex.org). At the moment, only references with a DOI were retrieved from [OpenAlex](https://OpenAlex.org).
+This is checked by using the [OpenAlex](https://OpenAlex.org){target="_blank"} retrieved works. Therefore it is li=mited to the works that are on [OpenAlex](https://OpenAlex.org){target="_blank"}. At the moment, only references with a DOI were retrieved from [OpenAlex](https://OpenAlex.org){target="_blank"}.
 
 ```{r}
 #| label: oa_status_figure
@@ -249,6 +249,9 @@ bib_data$figure_oa_status
 
 ## 50 Most often cited Journals
     
+Based on the data entered in the [bibliography on Zenodo](`r bib_data$bibliography$url`){target="_blank"}
+
+
 ```{r}
 #| label: top_journals_figure
 #| fig-height: 10
@@ -265,18 +268,29 @@ bib_data$figure_top_journals_data |>
   IPBES.R::table_dt("cited_journals")
 ```
 
-## TODO Coutries of Institutes of all authors
+## Coutries of Institutes of all authors
+
+In this section we will take a closer look at the countries from which ih the authors ot the publication come. THe data comes from [OpenAlex](https://OpenAlex.org){target="_blank"} and includes all authoirs without weighting.
+
+
+```{r}
+#| label: top_countries_map
+#|
+#| fig-height: 10
+#| fig-width: 10
+
+bib_data$figure_top_country_map
+```
 
 This plot only contains the countries with more than 10 references.
 
 ```{r}
 #| label: top_countries
-#| eval: false
 #|
 #| fig-height: 10
 #| fig-width: 10
 
-bib_data$figure_top_countries
+bib_data$figure_top_country
 ```
 
 This table contains all countries and the number of authorship.
