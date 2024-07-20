@@ -43,7 +43,7 @@ make_reports <- function(
     }
 
     quarto::quarto_render(
-      file.path("inst/bibliography_report.qmd"),
+      file.path("bibliography_report.qmd"),
       execute_params = list(
         bib_name = bib_name,
         targets_store = targets::tar_config_get("store")
