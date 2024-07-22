@@ -13,7 +13,7 @@ format:
         #     margin-width: 200px
         #     gutter-width: 1.5rem    
 params:
-    bib_name: "IPBES_IAS_2352922"
+    bib_name: "IPBES_GA1_2333077"
     targets_store: "/Users/rainerkrug/Documents_Local/git/IPBES_data_tsu/Packages/IPBES.LiteratureReport/_targets"
 ---
 
@@ -82,20 +82,21 @@ The following DOIs are duplicates in the bibliography. This table should be empt
 
 ```{r}
 #| label: duplicates
-#|
-data.frame(
-  doi = bib_data$metrics$zotero_dois$duplicate,
-  link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$duplicate))
-) |>
-  dplyr::mutate(
-    doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
-    link = NULL
-  ) |>
-  knitr::kable(
-    caption = "DOIs in Zenodo which are duplicated",
-    escape = FALSE
-  )
 
+if (length(bib_data$metrics$zotero_dois$duplicate) > 0) {
+  data.frame(
+    doi = bib_data$metrics$zotero_dois$duplicate,
+    link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$duplicate))
+  ) |>
+    dplyr::mutate(
+      doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
+      link = NULL
+    ) |>
+    knitr::kable(
+      caption = "DOIs in Zenodo which are duplicated",
+      escape = FALSE
+    )
+}
 ```
 
 ### Non Standard
