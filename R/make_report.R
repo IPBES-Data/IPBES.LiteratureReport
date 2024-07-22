@@ -1,6 +1,6 @@
 #' Generate Reports for Assessments
 #'
-#' This function generates reports for assessments based on the provided bibliography files in the  
+#' This function generates reports for assessments based on the provided bibliography files in the
 #' folder `input`. The reports are generated using the `bibliography_report.qmd` Quarto document and
 #' will bie located in the `output` folder.
 #'
@@ -16,50 +16,45 @@
 #' make_reports(overwrite = TRUE)
 #' }
 #' @export
-#' 
+#'
 make_reports <- function(
     overwrite = FALSE) {
-    ##
-    dir.create("output", showWarnings = FALSE)
+  ##
+  dir.create("output", showWarnings = FALSE)
 
-    assessments <- list.files(
-        path = "input",
-        pattern = "IPBES.*\\.csv$"
-    ) |>
-        gsub(pattern = "IPBES ", replacement = "") |>
-        gsub(pattern = "\\.csv$", replacement = "")
-    
-    bib_names <- paste0("IPBES.", assessments)
+  bib_names <- list.files(
+    path = "input",
+    pattern = "IPBES.*\\.csv$"
+  ) |>
+    gsub(pattern = "\\.csv$", replacement = "")
 
-    file.copy(
-        from = system.file(package = "IPBES.LiteratureReport", "bibliography_report.qmd"),
-        to = "bibliography_report.qmd", 
-        overwrite = TRUE
-    )
-    on.exit(unlink("bibliography_report.qmd"))
+  # bib_names <- paste0("IPBES.", assessments)
 
-    for (bib_name in bib_names) {
-        message(">>>>>>>\nGenerating Report for Assessment ", bib_name, " ...")
+  for (bib_name in bib_names) {
+    message(">>>>>>>\nGenerating Report for Assessment ", bib_name, " ...")
 
-        output <- file.path("output", paste0(bib_name, ".bibliography_report.html"))
+    output <- file.path("output", paste0(bib_name, ".bibliography_report.html"))
 
-        if (file.exists(output) & !overwrite) {
-            message("Report already exists! Skipping report generation.\n<<<<<<<\n")
-            next
-        } else {
-            unlink(output, force = TRUE)
-        }
-
-        quarto::quarto_render(
-            file.path("bibliography_report.qmd"),
-            execute_params = list(bib_name = bib_name)
-        )
-
-        file.rename(
-            from = "bibliography_report.html",
-            to = output
-        )
-
-        message("Generated Report for Assessment ", bib_name, " in ", output, "\n<<<<<<<\n")
+    if (file.exists(output) & !overwrite) {
+      message("Report already exists! Skipping report generation.\n<<<<<<<\n")
+      next
+    } else {
+      unlink(output, force = TRUE)
     }
+
+    quarto::quarto_render(
+      file.path("bibliography_report.qmd"),
+      execute_params = list(
+        bib_name = bib_name,
+        targets_store = targets::tar_config_get("store")
+      )
+    )
+
+    file.rename(
+      from = "bibliography_report.html",
+      to = output
+    )
+
+    message("Generated Report for Assessment ", bib_name, " in ", output, "\n<<<<<<<\n")
+  }
 }

@@ -20,7 +20,7 @@
 #' directory.
 #' @param x A named character vector specifying the group names and their
 #' corresponding group IDs.
-#' @param overwrite Logical value indicating whether to overwrite existing files. 
+#' @param overwrite Logical value indicating whether to overwrite existing files.
 #' Default is \code{FALSE}.
 #'
 #' @importFrom IPBES.R zotero_get_group
@@ -29,37 +29,40 @@
 #' # Update groups using default settings
 #' \dontrun{
 #' update_groups()
-#' 
+#'
 #' # Update groups and overwrite existing files
 #' update_groups(overwrite = TRUE)
 #' }
-#' 
+#'
 #' @md
-#' 
+#'
 #' @export
 update_groups <- function(
     x = groups(),
     overwrite = FALSE) {
-    ##
-    dir.create("input", showWarnings = FALSE)
-    ##
-    for (i in names(x)) {
-        message(">>>>>>>\nDownloading group ", i, " ...")
+  ##
+  dir.create("input", showWarnings = FALSE)
+  ##
+  for (i in names(x)) {
+    message(">>>>>>>\nDownloading group ", i, " ...")
 
-        file <- file.path("input", paste0("IPBES ", i, ".csv"))
+    file <- file.path(
+      "input",
+      paste0("IPBES_", i, "_", x[i], ".csv")
+    )
 
-        if (file.exists(file) & !overwrite) {
-            message("File already exists! Skipping download.\n<<<<<<<\n")
-            next
-        } else {
-            unlink(file, force = TRUE)
-        }
-
-        IPBES.R::zotero_get_group(
-            group_id = x[i],
-            file = file
-        )
-
-        message("Downloaded group ", i, "!\n<<<<<<<\n")
+    if (file.exists(file) & !overwrite) {
+      message("File already exists! Skipping download.\n<<<<<<<\n")
+      next
+    } else {
+      unlink(file, force = TRUE)
     }
+
+    IPBES.R::zotero_get_group(
+      group_id = x[i],
+      file = file
+    )
+
+    message("Downloaded group ", i, "!\n<<<<<<<\n")
+  }
 }
