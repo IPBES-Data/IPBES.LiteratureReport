@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.49">
+<meta name="generator" content="quarto-1.5.54">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -3121,19 +3121,21 @@ vertical-align: -.125em;
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># library(IPBES.LiteratureReport)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;devtools&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Make sure that one sees the progress messages when rendering this document</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span>opts_chunk<span class="sc">$</span><span class="fu">set</span>(<span class="at">message =</span> <span class="cn">NA</span>)</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_deps</span>(<span class="at">dependencies =</span> <span class="cn">TRUE</span>, <span class="at">upgrade =</span> <span class="st">&quot;never&quot;</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">load_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">list.files</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">path =</span> <span class="st">&quot;R&quot;</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">pattern =</span> <span class="st">&quot;^[^z].*&quot;</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">full.names =</span> <span class="cn">TRUE</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    source</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">invisible</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>ℹ Loading IPBES.LiteratureReport
-Loading required package: targets</code></pre>
-</div>
 </div>
 <p>This document is the starting page to the IPBES Bibliography Reports. Thes reports give information about the bibliographies from IPBES on Zotero.</p>
 <section id="methods" class="level2">
@@ -3145,108 +3147,28 @@ Loading required package: targets</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># SPC = ,</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># GA2 = ,</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># MTA = ,</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># BBA = ,</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># NXS = ,</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># TCA = ,</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ILK =</span> <span class="dv">2344322</span>,</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">IAS =</span> <span class="dv">2352922</span>,</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># SUA = 2344805,</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># VA = 2345372,</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">GA1 =</span> <span class="dv">2333077</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">LDR =</span> <span class="dv">2333076</span>,</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">AFA =</span> <span class="dv">2333070</span>,</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">AMA =</span> <span class="dv">2333011</span>,</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">APA =</span> <span class="dv">2333075</span>,</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">ECA =</span> <span class="dv">2345951</span>,</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">PPA =</span> <span class="dv">2333088</span>,</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">SCM =</span> <span class="dv">2333079</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">update_groups</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># SPC = ,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># GA2 = ,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># MTA = ,</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># BBA = ,</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># NXS = ,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># TCA = ,</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ILK =</span> <span class="dv">2344322</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">IAS =</span> <span class="dv">2352922</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># SUA = 2344805,</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># VA = 2345372,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">GA1 =</span> <span class="dv">2333077</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">LDR =</span> <span class="dv">2333076</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">AFA =</span> <span class="dv">2333070</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">AMA =</span> <span class="dv">2333011</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">APA =</span> <span class="dv">2333075</span>,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">ECA =</span> <span class="dv">2345951</span>,</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">PPA =</span> <span class="dv">2333088</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">SCM =</span> <span class="dv">2333079</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">update_groups</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group ILK ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group IAS ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group GA1 ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group LDR ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group AFA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group AMA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group APA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group ECA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group PPA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Downloading group SCM ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>File already exists! Skipping download.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
 </div>
 </section>
 <section id="calculate-the-bibliometric-measures-and-the-graphs-for-each-report" class="level2">
@@ -3254,93 +3176,12 @@ Downloading group SCM ...</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_make</span>(</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">script =</span> <span class="fu">system.file</span>(<span class="at">package =</span> <span class="st">&quot;IPBES.LiteratureReport&quot;</span>, <span class="st">&quot;_targets.R&quot;</span>)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>targets<span class="sc">::</span><span class="fu">tar_make</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">#  script = system.file(package = &quot;IPBES.LiteratureReport&quot;, &quot;_targets.R&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">reporter =</span> <span class="st">&quot;silent&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stdout">
-<pre><code>✔ skipped target bibliography_IPBES.IAS
-✔ skipped target bibliography_IPBES.PPA
-✔ skipped target bibliography_IPBES.GA1
-✔ skipped target bibliography_IPBES.ECA
-✔ skipped target bibliography_IPBES.APA
-✔ skipped target bibliography_IPBES.AFA
-✔ skipped target bibliography_IPBES.ILK
-✔ skipped target bibliography_IPBES.SCM
-✔ skipped target bibliography_IPBES.AMA
-✔ skipped target bibliography_IPBES.LDR
-✔ skipped target figure_top_journals_data_IPBES.IAS
-✔ skipped target figure_pub_year_IPBES.IAS
-✔ skipped target metrics_IPBES.IAS
-✔ skipped target figure_oa_status_IPBES.IAS
-✔ skipped target figure_top_country_data_IPBES.IAS
-✔ skipped target figure_top_country_data_IPBES.PPA
-✔ skipped target figure_pub_year_IPBES.PPA
-✔ skipped target figure_top_journals_data_IPBES.PPA
-✔ skipped target metrics_IPBES.PPA
-✔ skipped target figure_oa_status_IPBES.PPA
-✔ skipped target figure_top_journals_data_IPBES.GA1
-✔ skipped target figure_top_country_data_IPBES.GA1
-✔ skipped target figure_pub_year_IPBES.GA1
-✔ skipped target figure_oa_status_IPBES.GA1
-✔ skipped target metrics_IPBES.GA1
-✔ skipped target metrics_IPBES.ECA
-✔ skipped target figure_top_country_data_IPBES.ECA
-✔ skipped target figure_oa_status_IPBES.ECA
-✔ skipped target figure_top_journals_data_IPBES.ECA
-✔ skipped target figure_pub_year_IPBES.ECA
-✔ skipped target figure_top_country_data_IPBES.APA
-✔ skipped target figure_pub_year_IPBES.APA
-✔ skipped target figure_top_journals_data_IPBES.APA
-✔ skipped target metrics_IPBES.APA
-✔ skipped target figure_oa_status_IPBES.APA
-✔ skipped target figure_pub_year_IPBES.AFA
-✔ skipped target figure_top_journals_data_IPBES.AFA
-✔ skipped target figure_top_country_data_IPBES.AFA
-✔ skipped target metrics_IPBES.AFA
-✔ skipped target figure_oa_status_IPBES.AFA
-✔ skipped target figure_top_journals_data_IPBES.ILK
-✔ skipped target figure_oa_status_IPBES.ILK
-✔ skipped target metrics_IPBES.ILK
-✔ skipped target figure_top_country_data_IPBES.ILK
-✔ skipped target figure_pub_year_IPBES.ILK
-✔ skipped target figure_top_journals_data_IPBES.SCM
-✔ skipped target figure_top_country_data_IPBES.SCM
-✔ skipped target figure_pub_year_IPBES.SCM
-✔ skipped target metrics_IPBES.SCM
-✔ skipped target figure_oa_status_IPBES.SCM
-✔ skipped target figure_top_country_data_IPBES.AMA
-✔ skipped target figure_top_journals_data_IPBES.AMA
-✔ skipped target metrics_IPBES.AMA
-✔ skipped target figure_oa_status_IPBES.AMA
-✔ skipped target figure_pub_year_IPBES.AMA
-✔ skipped target figure_top_country_data_IPBES.LDR
-✔ skipped target figure_oa_status_IPBES.LDR
-✔ skipped target figure_pub_year_IPBES.LDR
-✔ skipped target figure_top_journals_data_IPBES.LDR
-✔ skipped target metrics_IPBES.LDR
-✔ skipped target figure_top_journals_IPBES.IAS
-✔ skipped target figure_top_country_IPBES.IAS
-✔ skipped target figure_top_country_IPBES.PPA
-✔ skipped target figure_top_journals_IPBES.PPA
-✔ skipped target figure_top_journals_IPBES.GA1
-✔ skipped target figure_top_country_IPBES.GA1
-✔ skipped target figure_top_country_IPBES.ECA
-✔ skipped target figure_top_journals_IPBES.ECA
-✔ skipped target figure_top_country_IPBES.APA
-✔ skipped target figure_top_journals_IPBES.APA
-✔ skipped target figure_top_journals_IPBES.AFA
-✔ skipped target figure_top_country_IPBES.AFA
-✔ skipped target figure_top_journals_IPBES.ILK
-✔ skipped target figure_top_country_IPBES.ILK
-✔ skipped target figure_top_journals_IPBES.SCM
-✔ skipped target figure_top_country_IPBES.SCM
-✔ skipped target figure_top_country_IPBES.AMA
-✔ skipped target figure_top_journals_IPBES.AMA
-✔ skipped target figure_top_country_IPBES.LDR
-✔ skipped target figure_top_journals_IPBES.LDR
-✔ skipped pipeline [0.125 seconds]</code></pre>
-</div>
 </div>
 </section>
 <section id="compile-the-reports" class="level2">
@@ -3348,96 +3189,10 @@ Downloading group SCM ...</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">file.copy</span>(</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">from =</span> <span class="fu">system.file</span>(<span class="at">package =</span> <span class="st">&quot;IPBES.LiteratureReport&quot;</span>, <span class="st">&quot;bibliography_Report.qmd&quot;</span>),</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">to =</span> <span class="fu">file.path</span>(<span class="st">&quot;.&quot;</span>, <span class="st">&quot;bibliography_Report.qmd&quot;</span>)</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">invisible</span>()</span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="fu">on.exit</span>(<span class="fu">unlink</span>(<span class="fu">file.path</span>(<span class="st">&quot;.&quot;</span>, <span class="st">&quot;bibliography_Report.qmd&quot;</span>)))</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="fu">make_reports</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">#|</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make_reports</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.AFA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.AMA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.APA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.ECA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.GA1 ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.IAS ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.ILK ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.LDR ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.PPA ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;
-Generating Report for Assessment IPBES.SCM ...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Report already exists! Skipping report generation.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code></pre>
-</div>
 </div>
 </section>
 <section id="reports" class="level2">
@@ -3445,22 +3200,22 @@ Generating Report for Assessment IPBES.SCM ...</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>reports <span class="ot">&lt;-</span> <span class="fu">list.files</span>(</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">path =</span> <span class="st">&quot;output&quot;</span>,</span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">pattern =</span> <span class="st">&quot;^IPBES</span><span class="sc">\\</span><span class="st">..*</span><span class="sc">\\</span><span class="st">.bibliography_report</span><span class="sc">\\</span><span class="st">.html$&quot;</span>,</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">full.names =</span> <span class="cn">TRUE</span></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
-<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">Report =</span> <span class="fu">paste0</span>(</span>
-<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">&#39;&lt;a href=&quot;&#39;</span>, reports, <span class="st">&#39;&quot;&gt;&#39;</span>, <span class="fu">basename</span>(reports), <span class="st">&#39;&lt;/a&gt;&#39;</span></span>
-<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>    knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">format =</span> <span class="st">&quot;html&quot;</span>,</span>
-<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">escape =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">caption =</span> <span class="st">&quot;List of the reports&quot;</span></span>
-<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>reports <span class="ot">&lt;-</span> <span class="fu">list.files</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">path =</span> <span class="st">&quot;output&quot;</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">pattern =</span> <span class="st">&quot;.bibliography_report</span><span class="sc">\\</span><span class="st">.html$&quot;</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">full.names =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Report =</span> <span class="fu">paste0</span>(</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;&lt;a href=&quot;&#39;</span>, reports, <span class="st">&#39;&quot; target=&quot;_blank&quot;&gt;&#39;</span>, <span class="fu">basename</span>(reports), <span class="st">&quot;&lt;/a&gt;&quot;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">format =</span> <span class="st">&quot;html&quot;</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">escape =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;List of the reports&quot;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small" data-quarto-postprocess="true">
@@ -3472,34 +3227,34 @@ Generating Report for Assessment IPBES.SCM ...</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;"><a href="output/IPBES.AFA.bibliography_report.html">IPBES.AFA.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_AFA_2333070.bibliography_report.html" target="_blank">IPBES_AFA_2333070.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><a href="output/IPBES.AMA.bibliography_report.html">IPBES.AMA.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_AMA_2333011.bibliography_report.html" target="_blank">IPBES_AMA_2333011.bibliography_report.html</a></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><a href="output/IPBES.APA.bibliography_report.html">IPBES.APA.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_APA_2333075.bibliography_report.html" target="_blank">IPBES_APA_2333075.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><a href="output/IPBES.ECA.bibliography_report.html">IPBES.ECA.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_ECA_2345951.bibliography_report.html" target="_blank">IPBES_ECA_2345951.bibliography_report.html</a></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><a href="output/IPBES.GA1.bibliography_report.html">IPBES.GA1.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_GA1_2333077.bibliography_report.html" target="_blank">IPBES_GA1_2333077.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><a href="output/IPBES.IAS.bibliography_report.html">IPBES.IAS.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_IAS_2352922.bibliography_report.html" target="_blank">IPBES_IAS_2352922.bibliography_report.html</a></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><a href="output/IPBES.ILK.bibliography_report.html">IPBES.ILK.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_ILK_2344322.bibliography_report.html" target="_blank">IPBES_ILK_2344322.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><a href="output/IPBES.LDR.bibliography_report.html">IPBES.LDR.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_LDR_2333076.bibliography_report.html" target="_blank">IPBES_LDR_2333076.bibliography_report.html</a></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><a href="output/IPBES.PPA.bibliography_report.html">IPBES.PPA.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_PPA_2333088.bibliography_report.html" target="_blank">IPBES_PPA_2333088.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><a href="output/IPBES.SCM.bibliography_report.html">IPBES.SCM.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="output/IPBES_SCM_2333079.bibliography_report.html" target="_blank">IPBES_SCM_2333079.bibliography_report.html</a></td>
 </tr>
 </tbody>
 </table>
