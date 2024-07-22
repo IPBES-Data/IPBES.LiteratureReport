@@ -17,25 +17,18 @@
 #' }
 make_all <- function(
     overwrite = TRUE) {
-    output <- "index.html"
+  output <- "index.html"
 
-    if (file.exists(output)) {
-        if (overwrite) {
-            unlink(output, force = TRUE)
-        } else {
-            message("Report already exists! Skipping report generation.\n<<<<<<<\n")
-            return()
-        }
+  if (file.exists(output)) {
+    if (overwrite) {
+      unlink(output, force = TRUE)
+    } else {
+      message("Report already exists! Skipping report generation.\n<<<<<<<\n")
+      return()
     }
+  }
 
-    file.copy(
-        from = system.file(package = "IPBES.LiteratureReport", "index.qmd"),
-        to = "index.qmd",
-        overwrite = TRUE
-    )
-    on.exit(unlink("index.qmd"))
-
-    quarto::quarto_render(
-        file.path("index.qmd")
-    )
+  quarto::quarto_render(
+    file.path("index.qmd")
+  )
 }
