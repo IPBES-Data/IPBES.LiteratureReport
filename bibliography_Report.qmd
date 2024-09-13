@@ -13,8 +13,8 @@ format:
         #     margin-width: 200px
         #     gutter-width: 1.5rem    
 params:
-    bib_name: "IPBES_GA1_2333077"
-    targets_store: "/Users/rainerkrug/Documents_Local/git/IPBES_data_tsu/Packages/IPBES.LiteratureReport/_targets"
+    bib_name: "IPBES_NFF_4937409"
+    targets_store: "/Users/rainerkrug/Documents_Local/git/IPBES_data_tsu/Diverse/IPBES.LiteratureReport/_targets"
 ---
 
 ```{r}
@@ -59,7 +59,7 @@ This report assesses the [`r bib_data$bibliography$name` Bibliography](`r bib_da
 
 Cleanliness of a bibliography is defined here as the quality of the bibliografic data in the bibliography. It does not concern any topical measures, only measures related to the bibliografic data in the bibliography.
 
-The analysis is at the moment only done for DOIs as corresponding measures are not available at the moment for ISBNs and ISSNs and duplicate ISBNs and ISSNs can be rcorrect as div=fferent chapters of a book might be in the bibliography.
+The analysis is at the moment only done for DOIs as corresponding measures are not available at the moment for ISBNs and ISSNs and duplicate ISBNs and ISSNs can be rcorrect as different chapters of a book might be in the bibliography.
 
 ## Entries with DOIs, ISBNs or ISSNs in Zotero
 
@@ -69,12 +69,12 @@ To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not
 
 
 - **DOIs**: `r bib_data$metrics$zotero_dois$count` (`r round(bib_data$metrics$zotero_dois$pc, digits = 2)`%) - `r length(bib_data$metrics$zotero_dois$duplicate)` duplicates
-- **ISBNss**: `r bib_data$metrics$zotero_isbns$count` (`r round(bib_data$metrics$zotero_isbns$pc, digits = 2)`%) - `r length(bib_data$metrics$zotero_isbns$duplicate)` duplicates
-- **ISBNss**: `r bib_data$metrics$zotero_issn$count` (`r round(bib_data$metrics$zotero_issns$pc, digits = 2)`%) - `r length(bib_data$metrics$zotero_issns$duplicate)` duplicates
+- **ISBNss**: `r bib_data$metrics$zotero_isbns$count` (`r round(bib_data$metrics$zotero_isbns$pc, digits = 2)`%)
+- **ISBNss**: `r bib_data$metrics$zotero_issn$count` (`r round(bib_data$metrics$zotero_issns$pc, digits = 2)`%)
 
 ## DOIs in Zotero
 
-The foilowing sections provide some more detailed analysis of the bibliography in Zenodo. The tables all contain clickable links which, shwen clicked, show the respective article in the Zotero bibliograpohy.
+The following sections provide some more detailed analysis of the bibliography in Zenodo. The tables all contain clickable links which, shwen clicked, show the respective article in the Zotero bibliograpohy.
 
 ### Duplicates
 
@@ -89,8 +89,14 @@ if (length(bib_data$metrics$zotero_dois$duplicate) > 0) {
     link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$duplicate))
   ) |>
     dplyr::mutate(
+      sort = doi,
       doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
-      link = NULL
+    ) |>
+    dplyr::arrange(
+      sort
+    ) |>
+    dplyr::mutate(
+      sort = NULL
     ) |>
     knitr::kable(
       caption = "DOIs in Zenodo which are duplicated",
@@ -101,7 +107,7 @@ if (length(bib_data$metrics$zotero_dois$duplicate) > 0) {
 
 ### Non Standard
 
-All DOIs should be given as only the DOI without the resolver, i.e. `not starting with `http`. The following table shows all entries which do have a non-copnform DOI: 
+All DOIs should be given as only the DOI without the resolver, i.e. not starting with `http`. The following table shows all entries which do have a non-conform DOI: 
 
 ```{r}
 #| label: dois_non_standard
@@ -132,18 +138,22 @@ Of these `r (length(bib_data$metrics$zotero_dois$not_in_oa) - length(bib_data$me
 #| label: dois_not_valid
 #|
 
-data.frame(
-  doi = bib_data$metrics$zotero_dois$not_valid,
-  link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$not_valid))
-) |>
-  dplyr::mutate(
-    doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
-    link = NULL
+if (length(bib_data$metrics$zotero_dois$not_valid) > 0) {
+  data.frame(
+    doi = bib_data$metrics$zotero_dois$not_valid,
+    link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$not_valid))
   ) |>
-  knitr::kable(
-    caption = "DOIs in Zenodo which ar not valid",
-    escape = FALSE
-  )
+    dplyr::mutate(
+      doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
+      link = NULL
+    ) |>
+    knitr::kable(
+      caption = "DOIs in Zenodo which ar not valid",
+      escape = FALSE
+    )
+} else {
+  print("All DOIs in Zenodo are valid.")
+}
 ```
 
 
@@ -151,7 +161,7 @@ data.frame(
 
 To validate the existence and validity of the DOIs, we check if the DOIs are in the [OpenAlex](https://OpenAlex.org){target="_blank"} database. 
 
-Of the `r length(bib_data$metrics$zotero_dois$unique)` unique DOIs in the library, `r length(bib_data$metrics$zotero_dois$not_in_oa)` (`r round(100 * length(bib_data$metrics$zotero_dois$not_in_oa) / bib_data$metrics$zotero_dois$count, digits = 2)`%) are in not in [OpenAlex](https://OpenAlex.org){target="_blank"}. This includes the non-valid DOIS, whci are filtered out in the table below.
+Of the `r length(bib_data$metrics$zotero_dois$unique)` unique DOIs in the library, `r length(bib_data$metrics$zotero_dois$not_in_oa)` (`r round(100 * length(bib_data$metrics$zotero_dois$not_in_oa) / bib_data$metrics$zotero_dois$count, digits = 2)`%) are in not in [OpenAlex](https://OpenAlex.org){target="_blank"}. This includes the non-valid DOIS, which are filtered out in the table below.
 
 
 ```{r}
@@ -173,8 +183,8 @@ data.frame(
 
 ### TODO Do Exist
 
-TODO Finally we check, if these dois exist but are not ingested into OpanAlex. This is done using the `doi.org` resolver
-This is disabled at the moment and still needs o=to be implemented.
+TODO Finally we check, if these dois exist but are not ingested into OpenAlex. This is done using the `doi.org` resolver
+This is disabled at the moment and still needs to be implemented.
 
 ```{r}
 #| label: dois_exist
@@ -185,11 +195,13 @@ This is disabled at the moment and still needs o=to be implemented.
 
 # Bibliographic analysis
 
-In the bibliographic analysis, we can only analyse the references in [OpenAlex](https://OpenAlex.org){target="_blank"} as the bibliographic metadata alanised is not in the Zotero liubrary but retrieved from [OpenAlex](https://OpenAlex.org){target="_blank"}.
+In most cases, the bibliographic analysis is done on the [OpenAlex](https://OpenAlex.org){target="_blank"} library. In some cases, we can also do it using the Zenodo data. This is mentioned in the beginning of each subsection
 
 ## Publication types
 
-Works on Zenodo as well as on [OpenAlex](https://OpenAlex.org){target="_blank"} are of different types. Here we show these separate.
+**Analysis: Zenodo and OpenAlex**
+
+OpenAlex and Zotero use different tyoes. These are not directly compable, which is whu=y both are shown.
 
 ```{r}
 #| label: publication_types_data
@@ -211,11 +223,13 @@ bib_data$figure_types
 
 ### Zenodo versus [OpenAlex](https://OpenAlex.org){target="_blank"} Types
 
-The types entered in the Zenodo library and the types as retrieved from [OpenAlex](https://OpenAlex.org){target="_blank"} are not linked, therefore they can differ, This can indicate problems but not necessarily has to. These cases need to be carefully evaluated and here only a starting point is given. 
+**Analysis: Zenodo and OpenAlex**
 
-`NA` in [OpenAlex](https://OpenAlex.org){target="_blank"} is likely caused by the doi not found in [OpenAlex](https://OpenAlex.org){target="_blank"} (not in there, not valid, non-standard DOI in Zenodo). `NA` in Zotero is linked to non-standard DOI entries (i.e. with `http`) whcih can therefore not be linked to [OpenAlex](https://OpenAlex.org){target="_blank"} data. If all DOIs are in standard format, there should be no NAs in this Table in the column Ferom Zenodo.
+The types entered in the Zenodo library and the types as retrieved from [OpenAlex](https://OpenAlex.org){target="_blank"} are not linked, therefore they can differ. This can indicate faulty data entering in Zenodo but not necessarily has to. These cases need to be carefully evaluated and here only given as a starting point.
 
-Improvements should be done after feedback.
+`NA` in [OpenAlex](https://OpenAlex.org){target="_blank"} is likely caused by the doi not found in [OpenAlex](https://OpenAlex.org){target="_blank"} (not in there, not valid, non-standard DOI in Zenodo). `NA` in Zotero is linked to non-standard DOI entries (i.e. with `http`) which can therefore not be linked to [OpenAlex](https://OpenAlex.org){target="_blank"} data. If all DOIs are in standard format, there should be no NAs in this Table in the column Ferom Zenodo.
+
+**TODO: Improvements should be done after feedback.**
 
 ```{r}
 bib_data$metrics$types$comparison |>
@@ -228,6 +242,20 @@ bib_data$metrics$types$comparison |>
 
 ## Year of Publication
 
+**Analysis: Zenodo and OpenAlex**
+
+The following ranges of publication years can be found in the data.
+
+```{r}
+bib_data$figure_pub_year_data |>
+  dplyr::summarize(
+    min = min(publication_year, na.rm = TRUE),
+    max = max(publication_year, na.rm = TRUE),
+    .by = c(from)
+  ) |>
+  knitr::kable()
+```
+
 ```{r}
 #| label: publication_years_figure
 #| fig-height: 10
@@ -238,7 +266,7 @@ bib_data$figure_pub_year
 
 ## Access Status of References
 
-This is checked by using the [OpenAlex](https://OpenAlex.org){target="_blank"} retrieved works. Therefore it is li=mited to the works that are on [OpenAlex](https://OpenAlex.org){target="_blank"}. At the moment, only references with a DOI were retrieved from [OpenAlex](https://OpenAlex.org){target="_blank"}.
+**Analysis: OpenAlex**
 
 ```{r}
 #| label: oa_status_figure
@@ -249,9 +277,10 @@ bib_data$figure_oa_status
 ```
 
 ## 50 Most often cited Journals
-    
-Based on the data entered in the [bibliography on Zenodo](`r bib_data$bibliography$url`){target="_blank"}
 
+**Analysis: Zenodo**
+
+**TODO: OpenAlex should be added**
 
 ```{r}
 #| label: top_journals_figure
@@ -271,7 +300,9 @@ bib_data$figure_top_journals_data |>
 
 ## Coutries of Institutes of all authors
 
-In this section we will take a closer look at the countries from which ih the authors ot the publication come. THe data comes from [OpenAlex](https://OpenAlex.org){target="_blank"} and includes all authoirs without weighting.
+**Analysis: OpenAlex**
+
+In this section we will take a closer look at the countries from which ih the authors ot the publication come. THe data includes all authoirs without weighting.
 
 
 ```{r}

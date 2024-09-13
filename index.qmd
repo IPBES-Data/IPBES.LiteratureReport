@@ -45,24 +45,30 @@ To compile the assessments, the following steps need to be done:
 #| label: download_groups
 
 c(
-  # SPC = ,
-  # GA2 = ,
-  # MTA = ,
-  # BBA = ,
-  # NXS = ,
-  # TCA = ,
-  ILK = 2344322,
-  IAS = 2352922,
-  # SUA = 2344805,
-  # VA = 2345372,
-  GA1 = 2333077,
-  LDR = 2333076,
+  # Assessments
   AFA = 2333070,
   AMA = 2333011,
   APA = 2333075,
+  # BBA = ,
   ECA = 2345951,
+  GA1 = 2333077,
+  # GA2 = ,
+  IAS = 2352922,
+  LDR = 2333076,
+  # MTA = ,
+  # NXS = ,
   PPA = 2333088,
-  SCM = 2333079
+  SCM = 2333079,
+  # SPC = ,
+  # SUA = 2344805,
+  # TCA = ,
+  # VA = 2345372, # Still private
+
+  # Others
+  ILK = 2344322, # Indigenous and Local Kowlege
+  IPCC = 2603670, # IPCC-IPBES
+  # NFF = 4937409, # Nature Futures Framework NOT WORKING
+  PAND = 2499181 # Pandemics
 ) |>
   update_groups()
 ```
@@ -98,10 +104,18 @@ reports <- list.files(
   full.names = TRUE
 )
 
+name <- reports |>
+  sub(pattern = "^[^_]*_([^_]*)_.*", replacement = "\\1")
+
+
+id <- reports |>
+  sub(pattern = ".*_(\\d*)\\..*", replacement = "\\1")
+id <- paste0("https://zotero.org/groups/", id)
+
 data.frame(
-  Report = paste0(
-    '<a href="', reports, '" target="_blank">', basename(reports), "</a>"
-  )
+  "Zotero Library" = paste0('<a href="', id, '" target="_blank">', name, "</a>"),
+  Report = paste0('<a href="', reports, '" target="_blank">', basename(reports), "</a>"),
+  check.names = FALSE
 ) |>
   knitr::kable(
     format = "html",
