@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.54">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -3148,26 +3148,32 @@ vertical-align: -.125em;
 <details class="code-fold">
 <summary>Show the code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># SPC = ,</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># GA2 = ,</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># MTA = ,</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># BBA = ,</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># NXS = ,</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># TCA = ,</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">ILK =</span> <span class="dv">2344322</span>,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">IAS =</span> <span class="dv">2352922</span>,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># SUA = 2344805,</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># VA = 2345372,</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">GA1 =</span> <span class="dv">2333077</span>,</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">LDR =</span> <span class="dv">2333076</span>,</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">AFA =</span> <span class="dv">2333070</span>,</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">AMA =</span> <span class="dv">2333011</span>,</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">APA =</span> <span class="dv">2333075</span>,</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">ECA =</span> <span class="dv">2345951</span>,</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">PPA =</span> <span class="dv">2333088</span>,</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">SCM =</span> <span class="dv">2333079</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">update_groups</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Assessments</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">AFA =</span> <span class="dv">2333070</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">AMA =</span> <span class="dv">2333011</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">APA =</span> <span class="dv">2333075</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># BBA = ,</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">ECA =</span> <span class="dv">2345951</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">GA1 =</span> <span class="dv">2333077</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># GA2 = ,</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">IAS =</span> <span class="dv">2352922</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">LDR =</span> <span class="dv">2333076</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># MTA = ,</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># NXS = ,</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">PPA =</span> <span class="dv">2333088</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">SCM =</span> <span class="dv">2333079</span>,</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># SPC = ,</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># SUA = 2344805,</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="co"># TCA = ,</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># VA = 2345372, # Still private</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Others</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">ILK =</span> <span class="dv">2344322</span>, <span class="co"># Indigenous and Local Kowlege</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">IPCC =</span> <span class="dv">2603670</span>, <span class="co"># IPCC-IPBES</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># NFF = 4937409, # Nature Futures Framework NOT WORKING</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">PAND =</span> <span class="dv">2499181</span> <span class="co"># Pandemics</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">update_groups</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -3206,54 +3212,85 @@ vertical-align: -.125em;
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">full.names =</span> <span class="cn">TRUE</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">Report =</span> <span class="fu">paste0</span>(</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;&lt;a href=&quot;&#39;</span>, reports, <span class="st">&#39;&quot; target=&quot;_blank&quot;&gt;&#39;</span>, <span class="fu">basename</span>(reports), <span class="st">&quot;&lt;/a&gt;&quot;</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">format =</span> <span class="st">&quot;html&quot;</span>,</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">escape =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;List of the reports&quot;</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>name <span class="ot">&lt;-</span> reports <span class="sc">|&gt;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sub</span>(<span class="at">pattern =</span> <span class="st">&quot;^[^_]*_([^_]*)_.*&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">1&quot;</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> reports <span class="sc">|&gt;</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sub</span>(<span class="at">pattern =</span> <span class="st">&quot;.*_(</span><span class="sc">\\</span><span class="st">d*)</span><span class="sc">\\</span><span class="st">..*&quot;</span>, <span class="at">replacement =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">1&quot;</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;https://zotero.org/groups/&quot;</span>, id)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">&quot;Zotero Library&quot;</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">&#39;&lt;a href=&quot;&#39;</span>, id, <span class="st">&#39;&quot; target=&quot;_blank&quot;&gt;&#39;</span>, name, <span class="st">&quot;&lt;/a&gt;&quot;</span>),</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">Report =</span> <span class="fu">paste0</span>(<span class="st">&#39;&lt;a href=&quot;&#39;</span>, reports, <span class="st">&#39;&quot; target=&quot;_blank&quot;&gt;&#39;</span>, <span class="fu">basename</span>(reports), <span class="st">&quot;&lt;/a&gt;&quot;</span>),</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">format =</span> <span class="st">&quot;html&quot;</span>,</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">escape =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="st">&quot;List of the reports&quot;</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small" data-quarto-postprocess="true">
 <caption>List of the reports</caption>
 <thead>
 <tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Zotero Library</th>
 <th style="text-align: left;" data-quarto-table-cell-role="th">Report</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2333070" target="_blank">AFA</a></td>
 <td style="text-align: left;"><a href="output/IPBES_AFA_2333070.bibliography_report.html" target="_blank">IPBES_AFA_2333070.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2333011" target="_blank">AMA</a></td>
 <td style="text-align: left;"><a href="output/IPBES_AMA_2333011.bibliography_report.html" target="_blank">IPBES_AMA_2333011.bibliography_report.html</a></td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2333075" target="_blank">APA</a></td>
 <td style="text-align: left;"><a href="output/IPBES_APA_2333075.bibliography_report.html" target="_blank">IPBES_APA_2333075.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2345951" target="_blank">ECA</a></td>
 <td style="text-align: left;"><a href="output/IPBES_ECA_2345951.bibliography_report.html" target="_blank">IPBES_ECA_2345951.bibliography_report.html</a></td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2333077" target="_blank">GA1</a></td>
 <td style="text-align: left;"><a href="output/IPBES_GA1_2333077.bibliography_report.html" target="_blank">IPBES_GA1_2333077.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2352922" target="_blank">IAS</a></td>
 <td style="text-align: left;"><a href="output/IPBES_IAS_2352922.bibliography_report.html" target="_blank">IPBES_IAS_2352922.bibliography_report.html</a></td>
 </tr>
 <tr class="odd">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2344322" target="_blank">ILK</a></td>
 <td style="text-align: left;"><a href="output/IPBES_ILK_2344322.bibliography_report.html" target="_blank">IPBES_ILK_2344322.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;"><a href="output/IPBES_LDR_2333076.bibliography_report.html" target="_blank">IPBES_LDR_2333076.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="https://zotero.org/groups/2603670" target="_blank">IPCC</a></td>
+<td style="text-align: left;"><a href="output/IPBES_IPCC_2603670.bibliography_report.html" target="_blank">IPBES_IPCC_2603670.bibliography_report.html</a></td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><a href="output/IPBES_PPA_2333088.bibliography_report.html" target="_blank">IPBES_PPA_2333088.bibliography_report.html</a></td>
+<td style="text-align: left;"><a href="https://zotero.org/groups/2333076" target="_blank">LDR</a></td>
+<td style="text-align: left;"><a href="output/IPBES_LDR_2333076.bibliography_report.html" target="_blank">IPBES_LDR_2333076.bibliography_report.html</a></td>
 </tr>
 <tr class="even">
+<td style="text-align: left;"><a href="https://zotero.org/groups/4937409" target="_blank">NFF</a></td>
+<td style="text-align: left;"><a href="output/IPBES_NFF_4937409.bibliography_report.html" target="_blank">IPBES_NFF_4937409.bibliography_report.html</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2499181" target="_blank">PAND</a></td>
+<td style="text-align: left;"><a href="output/IPBES_PAND_2499181.bibliography_report.html" target="_blank">IPBES_PAND_2499181.bibliography_report.html</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2333088" target="_blank">PPA</a></td>
+<td style="text-align: left;"><a href="output/IPBES_PPA_2333088.bibliography_report.html" target="_blank">IPBES_PPA_2333088.bibliography_report.html</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><a href="https://zotero.org/groups/2333079" target="_blank">SCM</a></td>
 <td style="text-align: left;"><a href="output/IPBES_SCM_2333079.bibliography_report.html" target="_blank">IPBES_SCM_2333079.bibliography_report.html</a></td>
 </tr>
 </tbody>
