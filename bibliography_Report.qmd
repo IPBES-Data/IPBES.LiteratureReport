@@ -1,5 +1,30 @@
 ---
 title: "Bibliography Report"
+
+author:
+  - name: 
+      given: Rainer M.
+      family: Krug
+    id: rmk
+    orcid: 0000-0002-7490-0066
+    email: Rainer@krugs.de
+    affiliation: 
+      - name: University of Zürich
+        city: Zürich
+        url: www.uzh.ch
+    roles: [author, editor]
+abstract: > 
+  Reports analysing the IPBES Libraries on Zotero.
+license: "CC BY"
+copyright: 
+  holder: No idea
+  year: 2024
+citation: 
+  type: report
+  # doi: 10.5281/zenodo.XXXXXXXX
+# doi: 10.5281/zenodo.XXXXXXXX
+version: 0.5.0
+
 format:
     html:
         toc: true
