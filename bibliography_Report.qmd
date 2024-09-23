@@ -55,143 +55,6 @@ bib_data <- targets::tar_read_raw(
 
 This report assesses the [`r bib_data$bibliography$name` Bibliography](`r bib_data$bibliography$url`){target="_blank"} in regards to different measures and shows some information of the content. It does **not** assess the content of the sources but rather the bibliometric data.
 
-# Cleanliness of the Bibliography
-
-Cleanliness of a bibliography is defined here as the quality of the bibliografic data in the bibliography. It does not concern any topical measures, only measures related to the bibliografic data in the bibliography.
-
-The analysis is at the moment only done for DOIs as corresponding measures are not available at the moment for ISBNs and ISSNs and duplicate ISBNs and ISSNs can be rcorrect as different chapters of a book might be in the bibliography.
-
-## Entries with DOIs, ISBNs or ISSNs in Zotero
-
-To identify a reference, the most widely used identifier is the DOI. The following table shows the number of references with a DOI and the number of unique DOIs.
-
-To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not waranted as e.g. differenc chapters of a book can be separate entries in the library and therefore lead to duplicates. 
-
-
-- **DOIs**: `r bib_data$metrics$zotero_dois$count` (`r round(bib_data$metrics$zotero_dois$pc, digits = 2)`%) - `r length(bib_data$metrics$zotero_dois$duplicate)` duplicates
-- **ISBNss**: `r bib_data$metrics$zotero_isbns$count` (`r round(bib_data$metrics$zotero_isbns$pc, digits = 2)`%)
-- **ISBNss**: `r bib_data$metrics$zotero_issn$count` (`r round(bib_data$metrics$zotero_issns$pc, digits = 2)`%)
-
-## DOIs in Zotero
-
-The following sections provide some more detailed analysis of the bibliography in Zenodo. The tables all contain clickable links which, shwen clicked, show the respective article in the Zotero bibliograpohy.
-
-### Duplicates
-
-The following DOIs are duplicates in the bibliography. This table should be empty.
-
-```{r}
-#| label: duplicates
-
-if (length(bib_data$metrics$zotero_dois$duplicate) > 0) {
-  data.frame(
-    doi = bib_data$metrics$zotero_dois$duplicate,
-    link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$duplicate))
-  ) |>
-    dplyr::mutate(
-      sort = doi,
-      doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
-    ) |>
-    dplyr::arrange(
-      sort
-    ) |>
-    dplyr::mutate(
-      sort = NULL
-    ) |>
-    knitr::kable(
-      caption = "DOIs in Zenodo which are duplicated",
-      escape = FALSE
-    )
-}
-```
-
-### Non Standard
-
-All DOIs should be given as only the DOI without the resolver, i.e. not starting with `http`. The following table shows all entries which do have a non-conform DOI: 
-
-```{r}
-#| label: dois_non_standard
-#|
-
-http <- grep("http", bib_data$metrics$zotero_dois$id_raw)
-data.frame(
-  doi = bib_data$metrics$zotero_dois$id_raw[http],
-  link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$id_raw)[http])
-) |>
-  dplyr::mutate(
-    doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
-    link = NULL
-  ) |>
-  knitr::kable(
-    caption = "DOIs in Zenodo which include a `http`",
-    escape = FALSE
-  )
-```
-
-### Not Valid
-
-Here we do acheck for the structural validity of the dois. This check needs to be improved.
-Of these `r (length(bib_data$metrics$zotero_dois$not_in_oa) - length(bib_data$metrics$zotero_dois$dois_valid))` are not valid. These are:
-
-
-```{r}
-#| label: dois_not_valid
-#|
-
-if (length(bib_data$metrics$zotero_dois$not_valid) > 0) {
-  data.frame(
-    doi = bib_data$metrics$zotero_dois$not_valid,
-    link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$not_valid))
-  ) |>
-    dplyr::mutate(
-      doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
-      link = NULL
-    ) |>
-    knitr::kable(
-      caption = "DOIs in Zenodo which ar not valid",
-      escape = FALSE
-    )
-} else {
-  print("All DOIs in Zenodo are valid.")
-}
-```
-
-
-### Not in [OpenAlex](https://OpenAlex.org){target="_blank"}
-
-To validate the existence and validity of the DOIs, we check if the DOIs are in the [OpenAlex](https://OpenAlex.org){target="_blank"} database. 
-
-Of the `r length(bib_data$metrics$zotero_dois$unique)` unique DOIs in the library, `r length(bib_data$metrics$zotero_dois$not_in_oa)` (`r round(100 * length(bib_data$metrics$zotero_dois$not_in_oa) / bib_data$metrics$zotero_dois$count, digits = 2)`%) are in not in [OpenAlex](https://OpenAlex.org){target="_blank"}. This includes the non-valid DOIS, which are filtered out in the table below.
-
-
-```{r}
-#| label: dois_not_in_openalex
-
-data.frame(
-  doi = bib_data$metrics$zotero_dois$not_in_oa,
-  link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$not_in_oa))
-) |>
-  dplyr::mutate(
-    doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
-    link = NULL
-  ) |>
-  knitr::kable(
-    caption = "DOIs in Zenodo which ar not in [OpenAlex](https://OpenAlex.org){target='_blank'}",
-    escape = FALSE
-  )
-```
-
-### TODO Do Exist
-
-TODO Finally we check, if these dois exist but are not ingested into OpenAlex. This is done using the `doi.org` resolver
-This is disabled at the moment and still needs to be implemented.
-
-```{r}
-#| label: dois_exist
-#| eval: false
-
-
-```
 
 # Bibliographic analysis
 
@@ -332,4 +195,143 @@ This table contains all countries and the number of authorship.
 
 bib_data$figure_top_country_data |>
   IPBES.R::table_dt("top_countries")
+```
+
+
+# Cleanliness of the Bibliography
+
+Cleanliness of a bibliography is defined here as the quality of the bibliografic data in the bibliography. It does not concern any topical measures, only measures related to the bibliografic data in the bibliography.
+
+The analysis is at the moment only done for DOIs as corresponding measures are not available at the moment for ISBNs and ISSNs and duplicate ISBNs and ISSNs can be rcorrect as different chapters of a book might be in the bibliography.
+
+## Entries with DOIs, ISBNs or ISSNs in Zotero
+
+To identify a reference, the most widely used identifier is the DOI. The following table shows the number of references with a DOI and the number of unique DOIs.
+
+To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not waranted as e.g. differenc chapters of a book can be separate entries in the library and therefore lead to duplicates. 
+
+
+- **DOIs**: `r bib_data$metrics$zotero_dois$count` (`r round(bib_data$metrics$zotero_dois$pc, digits = 2)`%) - `r length(bib_data$metrics$zotero_dois$duplicate)` duplicates
+- **ISBNss**: `r bib_data$metrics$zotero_isbns$count` (`r round(bib_data$metrics$zotero_isbns$pc, digits = 2)`%)
+- **ISBNss**: `r bib_data$metrics$zotero_issn$count` (`r round(bib_data$metrics$zotero_issns$pc, digits = 2)`%)
+
+## DOIs in Zotero
+
+The following sections provide some more detailed analysis of the bibliography in Zenodo. The tables all contain clickable links which, shwen clicked, show the respective article in the Zotero bibliograpohy.
+
+### Duplicates
+
+The following DOIs are duplicates in the bibliography. This table should be empty.
+
+```{r}
+#| label: duplicates
+
+if (length(bib_data$metrics$zotero_dois$duplicate) > 0) {
+  data.frame(
+    doi = bib_data$metrics$zotero_dois$duplicate,
+    link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$duplicate))
+  ) |>
+    dplyr::mutate(
+      sort = doi,
+      doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
+    ) |>
+    dplyr::arrange(
+      sort
+    ) |>
+    dplyr::mutate(
+      sort = NULL
+    ) |>
+    knitr::kable(
+      caption = "DOIs in Zenodo which are duplicated",
+      escape = FALSE
+    )
+}
+```
+
+### Non Standard
+
+All DOIs should be given as only the DOI without the resolver, i.e. not starting with `http`. The following table shows all entries which do have a non-conform DOI: 
+
+```{r}
+#| label: dois_non_standard
+#|
+
+http <- grep("http", bib_data$metrics$zotero_dois$id_raw)
+data.frame(
+  doi = bib_data$metrics$zotero_dois$id_raw[http],
+  link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$id_raw)[http])
+) |>
+  dplyr::mutate(
+    doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
+    link = NULL
+  ) |>
+  knitr::kable(
+    caption = "DOIs in Zenodo which include a `http`",
+    escape = FALSE
+  )
+```
+
+### Not Valid
+
+Here we do acheck for the structural validity of the dois. This check needs to be improved.
+Of these `r (length(bib_data$metrics$zotero_dois$not_in_oa) - length(bib_data$metrics$zotero_dois$dois_valid))` are not valid. These are:
+
+
+```{r}
+#| label: dois_not_valid
+#|
+
+if (length(bib_data$metrics$zotero_dois$not_valid) > 0) {
+  data.frame(
+    doi = bib_data$metrics$zotero_dois$not_valid,
+    link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$not_valid))
+  ) |>
+    dplyr::mutate(
+      doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
+      link = NULL
+    ) |>
+    knitr::kable(
+      caption = "DOIs in Zenodo which ar not valid",
+      escape = FALSE
+    )
+} else {
+  print("All DOIs in Zenodo are valid.")
+}
+```
+
+
+### Not in [OpenAlex](https://OpenAlex.org){target="_blank"}
+
+To validate the existence and validity of the DOIs, we check if the DOIs are in the [OpenAlex](https://OpenAlex.org){target="_blank"} database. 
+
+Of the `r length(bib_data$metrics$zotero_dois$unique)` unique DOIs in the library, `r length(bib_data$metrics$zotero_dois$not_in_oa)` (`r round(100 * length(bib_data$metrics$zotero_dois$not_in_oa) / bib_data$metrics$zotero_dois$count, digits = 2)`%) are in not in [OpenAlex](https://OpenAlex.org){target="_blank"}. This includes the non-valid DOIS, which are filtered out in the table below.
+
+
+```{r}
+#| label: dois_not_in_openalex
+
+data.frame(
+  doi = bib_data$metrics$zotero_dois$not_in_oa,
+  link = paste0(bib_data$bibliography$url, "/items/", names(bib_data$metrics$zotero_dois$not_in_oa))
+) |>
+  dplyr::mutate(
+    doi = paste0('<a href="', link, '" target="_blank">', doi, "</a>"),
+    link = NULL
+  ) |>
+  knitr::kable(
+    caption = "DOIs in Zenodo which ar not in [OpenAlex](https://OpenAlex.org){target='_blank'}",
+    escape = FALSE
+  )
+```
+
+### TODO Do Exist
+
+TODO Finally we check, if these dois exist but are not ingested into OpenAlex. This is done using the `doi.org` resolver
+This is disabled at the moment and still needs to be implemented.
+
+```{r}
+#| label: dois_exist
+#| eval: false
+
+
 ```
