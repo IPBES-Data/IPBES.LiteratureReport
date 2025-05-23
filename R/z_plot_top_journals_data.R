@@ -1,6 +1,6 @@
 #' Used in the pipeline - Plot Top Journals Data
 #'
-#' This function takes a bibliography object and returns a data frame with the 
+#' This function takes a bibliography object and returns a data frame with the
 #' top 50 journals based on the number of publications.
 #'
 #' @param bibliography A bibliography object.
@@ -15,9 +15,10 @@
 #' bibliography <- read_bibliography("path/to/bibliography.csv")
 #' plot_top_journals_data(bibliography)
 #' }
-#' 
+#'
 #' @export
-plot_top_journals_data <- function(bibliography) {
+plot_top_journals_data <- function(bibliography_fn) {
+    bibliography <- readRDS(bibliography_fn)
     data <- bibliography$bibliography |>
         dplyr::group_by(
             Publication.Title
@@ -35,6 +36,16 @@ plot_top_journals_data <- function(bibliography) {
             count,
             n = 50
         )
-    
-    return(data)
+
+    dir <- normalizePath(
+        file.path("output", "plot_top_journals"),
+        mustWork = FALSE
+    )
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+    file <- file.path(dir, basename(bibliography_fn))
+
+    saveRDS(data, file = file)
+
+    return(file)
 }

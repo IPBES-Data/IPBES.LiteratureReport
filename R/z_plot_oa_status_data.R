@@ -13,12 +13,25 @@
 #' }
 #'
 #' @export
-plot_oa_status_data <- function(bibliography) {
+plot_oa_status_data <- function(
+  bibliography_fn
+) {
+  bibliography <- readRDS(bibliography_fn)
   data <- bibliography$works |>
     dplyr::select(
       publication_year,
       oa_status
     )
 
-  return(data)
+  dir <- normalizePath(
+    file.path("output", "plot_oa_status"),
+    mustWork = FALSE
+  )
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  file <- file.path(dir, basename(bibliography_fn))
+
+  saveRDS(data, file = file)
+
+  return(file)
 }
