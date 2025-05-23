@@ -13,9 +13,10 @@
 #' }
 #'
 #' @export
-plot_oa_status <- function(data) {
+plot_oa_status <- function(data_fn) {
+  data <- readRDS(data_fn)
   figure <- data |>
-    ggplot(
+    ggplot2::ggplot(
       aes(
         x = publication_year,
         fill = factor(
@@ -24,19 +25,33 @@ plot_oa_status <- function(data) {
         )
       )
     ) +
-    geom_bar(
+    ggplot2::geom_bar(
       # position = "fill"
     ) +
-    scale_fill_manual(
+    ggplot2::scale_fill_manual(
       breaks = c("diamond", "gold", "green", "bronze", "hybrid", "closed"),
       values = c("white", "gold", "green", "#CD7F32", "cyan", "red")
     ) +
-    ggtitle("Publication Year") +
-    theme(
+    ggplot2::ggtitle("Publication Year") +
+    ggplot2::theme(
       plot.title = element_text(size = 15)
     ) +
-    theme(legend.position = "bottom") +
-    labs(fill = "Open Access Status")
+    ggplot2::theme(legend.position = "bottom") +
+    ggplot2::labs(fill = "Open Access Status")
 
-  return(figure)
+  dir <- normalizePath(
+    file.path("output", "plot_oa_status"),
+    mustWork = FALSE
+  )
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  file <- file.path(dir, basename(data_fn)) |>
+    gsub(
+      pattern = "\\.rds$",
+      replacement = "_ggplot.rds"
+    )
+
+  saveRDS(figure, file = file)
+
+  return(file)
 }

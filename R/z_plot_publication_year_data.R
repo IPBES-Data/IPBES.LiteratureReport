@@ -10,7 +10,7 @@
 #' The plot also includes a legend for the item types.
 #' @param bibliography A bibliography object containing publication information.
 #'
-#' @importFrom dplyr group_by summarize arrange mutate rename case_match full_join filter
+#' @importFrom dplyr group_by summarize arrange mutate rename case_match full_join filter n join_by
 #' @importFrom ggplot2 ggplot geom_line scale_fill_viridis_d scale_x_continuous scale_y_continuous labs theme_minimal theme guides element_text guide_legend sec_axis
 #'
 #' @md
@@ -37,7 +37,11 @@
 #' plot_publication_year_data(bibliography)
 #' }
 #' @export
-plot_publication_year_data <- function(bibliography) {
+plot_publication_year_data <- function(
+  bibliography_fn
+) {
+  bibliography <- readRDS(bibliography_fn)
+
   data_bib <- bibliography$bibliography |>
     dplyr::group_by(
       Publication.Year,
@@ -50,7 +54,7 @@ plot_publication_year_data <- function(bibliography) {
     dplyr::arrange(
       Publication.Year
     ) |>
-    mutate(
+    dplyr::mutate(
       count_cumsum = cumsum(count),
       p_cumsum = cumsum(p),
       from = "Zenodo"
@@ -71,7 +75,7 @@ plot_publication_year_data <- function(bibliography) {
     dplyr::arrange(
       publication_year
     ) |>
-    mutate(
+    dplyr::mutate(
       count_cumsum = cumsum(count),
       p_cumsum = cumsum(p),
       from = "OpenAlex"
@@ -90,5 +94,15 @@ plot_publication_year_data <- function(bibliography) {
   ) |>
     dplyr::ungroup()
 
-  return(data)
+  dir <- normalizePath(
+    file.path("output", "plot_publication_year"),
+    mustWork = FALSE
+  )
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  file <- file.path(dir, basename(bibliography_fn))
+
+  saveRDS(data, file = file)
+
+  return(file)
 }

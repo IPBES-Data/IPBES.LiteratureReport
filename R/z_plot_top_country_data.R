@@ -12,11 +12,12 @@
 #' bibliography <- read_bibliography("path/to/bibliography.csv")
 #' plot_top_country_data(bibliography)
 #' }
-#' 
+#'
 #' @export
-plot_top_country_data <- function(bibliography) {
+plot_top_country_data <- function(bibliography_fn) {
+    bibliography <- readRDS(bibliography_fn)
     data <- sapply(
-        bibliography$works$author,
+        bibliography$works$authorships,
         function(x) {
             x["institution_country_code"]
         }
@@ -30,7 +31,17 @@ plot_top_country_data <- function(bibliography) {
                 "Country",
                 "Count"
             )
-        )           
-    
-    return(data)
+        )
+
+    dir <- normalizePath(
+        file.path("output", "plot_top_countries"),
+        mustWork = FALSE
+    )
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+    file <- file.path(dir, basename(bibliography_fn))
+
+    saveRDS(data, file = file)
+
+    return(file)
 }

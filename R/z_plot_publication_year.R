@@ -11,7 +11,7 @@
 #' @param bibliography A bibliography object containing publication information.
 #'
 #' @importFrom dplyr group_by summarize arrange mutate rename case_match full_join filter
-#' @importFrom ggplot2 ggplot geom_line scale_fill_viridis_d scale_x_continuous scale_y_continuous labs theme_minimal theme guides element_text guide_legend sec_axis
+#' @importFrom ggplot2 ggplot geom_line scale_fill_viridis_d scale_x_continuous scale_y_continuous labs theme_minimal theme guides element_text guide_legend sec_axis ggsave
 #'
 #' @md
 #'
@@ -37,18 +37,34 @@
 #' plot_publication_year(bibliography)
 #' }
 #' @export
-plot_publication_year <- function(data) {
+plot_publication_year <- function(data_fn) {
+  data <- readRDS(data_fn)
+
   figure <- data |>
-    ggplot(
+    ggplot2::ggplot(
       aes(
         x = publication_year,
         y = count,
         fill = from
       )
     ) +
-    geom_col(position = "dodge") +
-    ggtitle("Publication Year") +
-    theme(legend.position = "bottom")
+    ggplot2::geom_col(position = "dodge") +
+    ggplot2::ggtitle("Publication Year") +
+    ggplot2::theme(legend.position = "bottom")
 
-  return(figure)
+  dir <- normalizePath(
+    file.path("output", "plot_publication_year"),
+    mustWork = FALSE
+  )
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  file <- file.path(dir, basename(data_fn)) |>
+    gsub(
+      pattern = "\\.rds$",
+      replacement = "_ggplot.rds"
+    )
+
+  saveRDS(figure, file = file)
+
+  return(file)
 }

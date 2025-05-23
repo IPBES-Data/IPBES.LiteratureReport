@@ -2,10 +2,10 @@
 #'
 #' This function takes a data frame as input and plots a bar chart of the top cited journals.
 #'
-#' The `plot_top_journals` function takes a data frame as input and creates a bar chart using the `ggplot2` package. 
-#' The x-axis represents the journal names, ordered by their citation count, and the y-axis represents the count of 
+#' The `plot_top_journals` function takes a data frame as input and creates a bar chart using the `ggplot2` package.
+#' The x-axis represents the journal names, ordered by their citation count, and the y-axis represents the count of
 #' citations. The function returns a `ggplot` object representing the bar chart.
-#' 
+#'
 #' @param data A data frame containing the journal names and their corresponding citation counts.
 #'
 #' @importFrom ggplot2 ggplot aes geom_bar coord_flip labs ggtitle theme element_text
@@ -26,9 +26,10 @@
 #'
 #' @md
 #' @export
-#' 
+#'
 
-plot_top_journals <- function(data) {
+plot_top_journals <- function(data_fn) {
+    data <- readRDS(data_fn)
     figure <- data |>
         ggplot(
             aes(
@@ -51,6 +52,19 @@ plot_top_journals <- function(data) {
         theme(
             plot.title = element_text(size = 15)
         )
-    
-    return(figure)
+    dir <- normalizePath(
+        file.path("output", "plot_top_journals"),
+        mustWork = FALSE
+    )
+    dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+    file <- file.path(dir, basename(data_fn)) |>
+        gsub(
+            pattern = "\\.rds$",
+            replacement = "_ggplot.rds"
+        )
+
+    saveRDS(figure, file = file)
+
+    return(file)
 }

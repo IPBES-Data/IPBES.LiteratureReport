@@ -53,3 +53,10 @@ rsconnect/
 .Rproj.user
 
 /.quarto/
+
+
+sanbox/*
+
+*.code-workspace
+IPBES.LiteratureReport.code-workspace
+website/*

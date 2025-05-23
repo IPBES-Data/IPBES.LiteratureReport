@@ -1,0 +1,70 @@
+---
+title: "Bibliography Reports"
+format:
+    html:
+        toc: true
+        toc-depth: 2
+        embed-resources: true
+        code-fold: true
+        code-summary: "Show the code"
+params:
+    report_files: !expr targets::tar_read(group_reports)
+---
+
+# Introduction
+
+```{r}
+#| label: setup
+
+library(knitr)
+
+if (!(exists("params"))) {
+  params <- rmarkdown::yaml_front_matter("./bibliography_report.qmd")$params
+}
+# Make sure that one sees the progress messages when rendering this document
+knitr::opts_chunk$set(message = NA)
+
+```
+
+This document is the starting page to the IPBES Bibliography Reports. Thes reports give information about the bibliographies from IPBES on Zotero.
+
+## Methods
+
+To compile the assessments, the following steps need to be done:
+
+TO ADD!!!
+
+## Reports
+
+```{r}
+#| label: reports_listing
+
+data.frame(
+  Name = params$report_files$full_name,
+  " " = paste0(
+    '<a href="https://www.zotero.org/groups/',
+    params$report_files$id,
+    '" target="_blank">',
+    'Zotero Library',
+    "</a>"
+  ),
+  " " = paste0(
+    '<a href="',
+    gsub(
+      file.path("output", "report", ""),
+      "",
+      params$report_files$file
+    ),
+    '" target="_blank">',
+    'Bibliography Report',
+    "</a>"
+  ),
+  check.names = FALSE
+) |>
+  knitr::kable(
+    format = "html",
+    escape = FALSE,
+    caption = "List of the reports"
+  )
+
+```

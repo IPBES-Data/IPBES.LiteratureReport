@@ -37,8 +37,9 @@
 #' @export
 
 load_bibliography <- function(
-    bibliography_zotero_file = NULL,
-    verbose = FALSE) {
+  bibliography_zotero_file = NULL,
+  verbose = FALSE
+) {
   ##
 
   bibliography_name <- bibliography_zotero_file |>
@@ -59,7 +60,10 @@ load_bibliography <- function(
     strsplit(
       split = "_"
     )
-  bibliography_url <- paste0("https://www.zotero.org/groups/", bibliography_url[[1]][[3]])
+  bibliography_url <- paste0(
+    "https://www.zotero.org/groups/",
+    bibliography_url[[1]][[3]]
+  )
 
   bibliography <- list(
     timestamp = Sys.time(),
@@ -68,7 +72,6 @@ load_bibliography <- function(
   )
 
   class(bibliography) <- c("IPBES.bibliography", class(bibliography))
-
 
   if (!grepl("\\.csv", bibliography_zotero_file)) {
     bibliography_zotero_file <- paste0(bibliography_zotero_file, ".csv")
@@ -106,13 +109,26 @@ load_bibliography <- function(
   bibliography$works <-
     openalexR::oa_fetch(
       entity = "works",
-      doi = names(IPBES.R::doi_valid(bibliography$bibliography$DOI))[IPBES.R::doi_valid(bibliography$bibliography$DOI)],
+      doi = names(IPBES.R::doi_valid(
+        bibliography$bibliography$DOI
+      ))[IPBES.R::doi_valid(bibliography$bibliography$DOI)],
       verbose = verbose
     )
 
   #| label: get_standardise_dois_works
 
-
   ###
-  return(bibliography)
+
+  dir <- normalizePath(file.path("output", "bibliographies"), mustWork = FALSE)
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  file <- file.path(dir, basename(bibliography_zotero_file)) |>
+    gsub(
+      pattern = "\\.csv$",
+      replacement = ".rds"
+    )
+
+  saveRDS(bibliography, file = file)
+
+  return(file)
 }

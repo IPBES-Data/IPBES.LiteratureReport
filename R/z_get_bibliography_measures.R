@@ -12,14 +12,16 @@
 #' @export
 
 get_bibliography_measures <- function(
-    bibliography) {
+  bibliography_fn
+) {
+  bibliography <- readRDS(bibliography_fn)
+
   ################################
   result <- list(
     timestamp = bibliography$timestamp,
     name = bibliography$name,
     url = bibliography$url
   )
-
 
   ### DOIs OpenAlex
 
@@ -42,7 +44,9 @@ get_bibliography_measures <- function(
     unique()
 
   result$oa_dois$count <- sum(!is.na(result$oa_dois$id))
-  result$oa_dois$pc <- 100 * result$oa_dois$count / nrow(bibliography$bibliography)
+  result$oa_dois$pc <- 100 *
+    result$oa_dois$count /
+    nrow(bibliography$bibliography)
 
   result$oa_dois$duplicate <- result$oa_dois$id[duplicated(result$oa_dois$id)]
   result$oa_dois$unique <- unique(result$oa_dois$id)
@@ -67,18 +71,32 @@ get_bibliography_measures <- function(
     gsub(pattern = "^doi:", replacement = "") |>
     gsub(pattern = "^DOI ", replacement = "")
 
-
   result$zotero_dois$count <- sum(!is.na(result$zotero_dois$id))
-  result$zotero_dois$pc <- 100 * result$zotero_dois$count / nrow(bibliography$bibliography)
+  result$zotero_dois$pc <- 100 *
+    result$zotero_dois$count /
+    nrow(bibliography$bibliography)
 
-  result$zotero_dois$duplicate <- result$zotero_dois$id[result$zotero_dois$id %in% result$zotero_dois$id[duplicated(result$zotero_dois$id)]]
-  result$zotero_dois$unique <- result$zotero_dois$id[result$zotero_dois$id %in% unique(result$zotero_dois$id)]
+  result$zotero_dois$duplicate <- result$zotero_dois$id[
+    result$zotero_dois$id %in%
+      result$zotero_dois$id[duplicated(result$zotero_dois$id)]
+  ]
+  result$zotero_dois$unique <- result$zotero_dois$id[
+    result$zotero_dois$id %in% unique(result$zotero_dois$id)
+  ]
 
-  result$zotero_dois$valid <- result$zotero_dois$unique[IPBES.R::doi_valid(result$zotero_dois$unique)]
-  result$zotero_dois$not_valid <- result$zotero_dois$unique[!IPBES.R::doi_valid(result$zotero_dois$unique)]
+  result$zotero_dois$valid <- result$zotero_dois$unique[IPBES.R::doi_valid(
+    result$zotero_dois$unique
+  )]
+  result$zotero_dois$not_valid <- result$zotero_dois$unique[
+    !IPBES.R::doi_valid(result$zotero_dois$unique)
+  ]
 
-  result$zotero_dois$in_oa <- result$zotero_dois$id[(result$zotero_dois$unique %in% result$oa_dois$id)]
-  result$zotero_dois$not_in_oa <- result$zotero_dois$id[!(result$zotero_dois$unique %in% result$oa_dois$id)]
+  result$zotero_dois$in_oa <- result$zotero_dois$id[
+    (result$zotero_dois$unique %in% result$oa_dois$id)
+  ]
+  result$zotero_dois$not_in_oa <- result$zotero_dois$id[
+    !(result$zotero_dois$unique %in% result$oa_dois$id)
+  ]
 
   ### ISBNs Zotero
 
@@ -87,13 +105,22 @@ get_bibliography_measures <- function(
   )
   names(result$zotero_isbns$id) <- bibliography$bibliography$Key
   result$zotero_isbns$id <- result$zotero_isbns$id[result$zotero_isbns$id != ""]
-  result$zotero_isbns$id <- result$zotero_isbns$id[!is.na(result$zotero_isbns$id)]
+  result$zotero_isbns$id <- result$zotero_isbns$id[
+    !is.na(result$zotero_isbns$id)
+  ]
 
   result$zotero_isbns$count <- sum(!is.na(result$zotero_isbns$id))
-  result$zotero_isbns$pc <- 100 * result$zotero_isbns$count / nrow(bibliography$bibliography)
+  result$zotero_isbns$pc <- 100 *
+    result$zotero_isbns$count /
+    nrow(bibliography$bibliography)
 
-  result$zotero_isbns$duplicate <- result$zotero_isbns$id[result$zotero_isbns$id %in% result$zotero_isbns$id[duplicated(result$zotero_isbns$id)]]
-  result$zotero_isbns$unique <- result$zotero_isbns$id[result$zotero_isbns$id %in% unique(result$zotero_isbns$id)]
+  result$zotero_isbns$duplicate <- result$zotero_isbns$id[
+    result$zotero_isbns$id %in%
+      result$zotero_isbns$id[duplicated(result$zotero_isbns$id)]
+  ]
+  result$zotero_isbns$unique <- result$zotero_isbns$id[
+    result$zotero_isbns$id %in% unique(result$zotero_isbns$id)
+  ]
 
   ### ISSNs Zotero
 
@@ -102,13 +129,22 @@ get_bibliography_measures <- function(
   )
   names(result$zotero_issns$id) <- bibliography$bibliography$Key
   result$zotero_issns$id <- result$zotero_issns$id[result$zotero_issns$id != ""]
-  result$zotero_issns$id <- result$zotero_issns$id[!is.na(result$zotero_issns$id)]
+  result$zotero_issns$id <- result$zotero_issns$id[
+    !is.na(result$zotero_issns$id)
+  ]
 
   result$zotero_issns$count <- sum(!is.na(result$zotero_issns$id))
-  result$zotero_issns$pc <- 100 * result$zotero_issns$count / nrow(bibliography$bibliography)
+  result$zotero_issns$pc <- 100 *
+    result$zotero_issns$count /
+    nrow(bibliography$bibliography)
 
-  result$zotero_issns$duplicate <- result$zotero_issns$id[result$zotero_issns$id %in% result$zotero_issns$id[duplicated(result$zotero_issns$id)]]
-  result$zotero_issns$unique <- result$zotero_issns$id[result$zotero_issns$id %in% unique(result$zotero_issns$id)]
+  result$zotero_issns$duplicate <- result$zotero_issns$id[
+    result$zotero_issns$id %in%
+      result$zotero_issns$id[duplicated(result$zotero_issns$id)]
+  ]
+  result$zotero_issns$unique <- result$zotero_issns$id[
+    result$zotero_issns$id %in% unique(result$zotero_issns$id)
+  ]
 
   ### Types
 
@@ -127,14 +163,15 @@ get_bibliography_measures <- function(
         dplyr::mutate(
           doi = gsub(pattern = "https://doi.org/", replacement = "", doi)
         ),
-      relationship = "many-to-many"
+      relationship = "many-to-many",
+      by = join_by(doi)
     )
 
   result$types$comparison <- result$types$types |>
     dplyr::mutate(
       doi = NULL
     ) |>
-    summarise(
+    dplyr::summarise(
       count = n(),
       .by = c(type_zenodo, type_openalex)
     ) |>
@@ -142,5 +179,15 @@ get_bibliography_measures <- function(
       desc(count)
     )
 
-  return(result)
+  dir <- normalizePath(
+    file.path("output", "metrics"),
+    mustWork = FALSE
+  )
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  file <- file.path(dir, basename(bibliography_fn))
+
+  saveRDS(result, file = file)
+
+  return(file)
 }
