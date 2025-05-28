@@ -4,7 +4,7 @@
 \name{LitReport-package}
 \alias{LitReport}
 \alias{LitReport-package}
-\title{LitReport: What the Package Does (one line, title case)}
+\title{LitReport: Creation of literature reports as well as website and publishing it}
 \description{
 More about what it does (one paragraph).
 }

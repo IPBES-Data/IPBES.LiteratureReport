@@ -1,5 +1,5 @@
 Package: LitReport
-Title: What the Package Does (one line, title case)
+Title: Creation of literature reports as well as website and publishing it
 Version: 0.1.0
 Authors@R: 
     person(given = "First",
