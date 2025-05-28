@@ -35,6 +35,18 @@ list(
 
   # Define reports ---------------------------------------------------------
 
+  tar_target(
+    group_report_qmd,
+    file.path("input", "bibliography_Report.qmd"),
+    format = "file"
+  ),
+
+  tar_target(
+    index_qmd,
+    file.path("input", "index.qmd"),
+    format = "file"
+  ),
+
   # Read full table as data.frame ------------------------------------------
 
   tar_target(
@@ -203,10 +215,17 @@ list(
       out_dir <- file.path("output", "report", "bibliography")
       out_file <- paste0(group_output$name, ".html")
 
+      file.copy(
+        group_report_qmd,
+        "."
+      )
       quarto::quarto_render(
-        input = "bibliography_Report.qmd",
+        input = basename(group_report_qmd),
         execute_params = list(output_files = group_output),
         output_file = out_file
+      )
+      unlink(
+        basename(group_report_qmd)
       )
 
       dir.create(
@@ -249,10 +268,17 @@ list(
       out_dir <- file.path("output", "report")
       out_file <- "index.html"
 
+      file.copy(
+        index_qmd,
+        "."
+      )
       quarto::quarto_render(
-        input = "index.qmd",
+        input = basename(index_qmd),
         execute_params = list(report_files = group_reports),
         output_file = out_file
+      )
+      unlink(
+        basename(index_qmd)
       )
 
       dir.create(

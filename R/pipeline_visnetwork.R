@@ -10,7 +10,10 @@
 #'
 #' @return A `visNetwork` object (plotted interactively).
 #' @export
-pipeline_visnetwork <- function(dir = ".", ...) {
+pipeline_visnetwork <- function(
+  dir = ".",
+  ...
+) {
   if (!file.exists(file.path(dir, "_targets.R"))) {
     stop("No _targets.R file found in directory: ", dir, call. = FALSE)
   }

@@ -38,7 +38,7 @@ format:
         #     margin-width: 200px
         #     gutter-width: 1.5rem    
 params:
-    output_files: !expr targets::tar_read(branch_output_ea56dfce6c554fdb)  
+    output_files: NULL # !expr targets::tar_read(branch_output_ea56dfce6c554fdb)  
 ---
 
 ```{r}

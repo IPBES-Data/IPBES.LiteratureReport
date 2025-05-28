@@ -15,6 +15,10 @@ pipeline_make <- function(
   dir = ".",
   ...
 ) {
+  if (!file.exists(file.path(dir, "_targets.R"))) {
+    stop("No _targets.R file found in directory: ", dir, call. = FALSE)
+  }
+
   # run the pipeline inside the target directory
   withr::with_dir(dir, {
     targets::tar_make(...)

@@ -4,12 +4,12 @@
 \alias{pipeline_prepare}
 \title{Prepare folder to run targets pipeline from the package}
 \usage{
-pipeline_prepare(output_dir = ".", template_dir = NULL, overwrite = TRUE)
+pipeline_prepare(dir = ".", template_dir = NULL, overwrite = TRUE)
 }
 \arguments{
-\item{overwrite}{Logical. Overwrite an existing _targets.R in \code{dir}? Default is FALSE.}
-
 \item{dir}{Path to the directory where the pipeline should run. Default is the current directory.}
+
+\item{overwrite}{Logical. Overwrite an existing _targets.R in \code{dir}? Default is FALSE.}
 
 \item{script}{Optional path to a custom _targets.R file. If NULL, uses the package default.}
 
