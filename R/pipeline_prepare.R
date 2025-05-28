@@ -11,17 +11,17 @@
 #'
 #' @export
 pipeline_prepare <- function(
-  output_dir = ".",
+  dir = ".",
   template_dir = NULL,
   overwrite = TRUE
 ) {
-  if (dir.exists(output_dir)) {
+  if (dir.exists(dir)) {
     stop(
-      "`output_dir` already exists!\n",
+      "`dir` already exists!\n",
       "  Use `overwrite = TRUE` to overwrite with new template files for the targets pipeline.\n"
     )
   } else {
-    dir.create(output_dir)
+    dir.create(dir)
   }
 
   if (is.null(template_dir)) {
@@ -40,7 +40,7 @@ pipeline_prepare <- function(
     function(x) {
       file.copy(
         from = file.path(template_dir, x),
-        to = output_dir,
+        to = dir,
         recursive = TRUE,
         overwrite = overwrite
       )

@@ -33,6 +33,8 @@ list(
     format = "file"
   ),
 
+  # Define reports ---------------------------------------------------------
+
   # Read full table as data.frame ------------------------------------------
 
   tar_target(
@@ -208,7 +210,7 @@ list(
       )
 
       dir.create(
-        dirname(out_dir),
+        out_dir,
         recursive = TRUE,
         showWarnings = FALSE
       )
@@ -254,7 +256,7 @@ list(
       )
 
       dir.create(
-        dirname(out_dir),
+        out_dir,
         recursive = TRUE,
         showWarnings = FALSE
       )

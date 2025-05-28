@@ -5,7 +5,6 @@
 #' @param bibliography_fn A bibliography object containing publication information.
 #'
 #' @importFrom dplyr bind_rows group_by summarize arrange mutate select
-#' @importFrom utils readRDS
 #'
 #' @md
 #'
