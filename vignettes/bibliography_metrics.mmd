@@ -1,0 +1,57 @@
+%% Mermaid class diagram for the bibliography_metrics object structure
+classDiagram
+    class bibliography_metrics {
+        +timestamp POSIXct
+        +name character
+        +url character
+        +oa_dois oa_dois_summary
+        +zotero_dois zotero_dois_summary
+        +dois_comp doi_comparison
+        +zotero_isbn identifier_summary
+        +zotero_issn identifier_summary
+        +types type_summary
+    }
+
+    class oa_dois_summary {
+        +id character[]
+        +count integer
+        +pc numeric
+        +duplicate character[]
+        +unique character[]
+    }
+
+    class zotero_dois_summary {
+        +id character[]
+        +id_raw character[]
+        +count integer
+        +pc numeric
+        +duplicate character[]
+        +unique character[]
+        +valid character[]
+        +not_valid character[]
+    }
+
+    class doi_comparison {
+        +zotero_in_oa character[]
+        +zotero_not_in_oa character[]
+    }
+
+    class identifier_summary {
+        +id character[]
+        +count integer
+        +pc numeric
+        +duplicate character[]
+        +unique character[]
+    }
+
+    class type_summary {
+        +types tibble (columns: doi, type_zenodo, type_openalex)
+        +comparison tibble (columns: type_zenodo, type_openalex, count)
+    }
+
+    bibliography_metrics --> oa_dois_summary : oa_dois
+    bibliography_metrics --> zotero_dois_summary : zotero_dois
+    bibliography_metrics --> doi_comparison : dois_comp
+    bibliography_metrics --> identifier_summary : zotero_isbn
+    bibliography_metrics --> identifier_summary : zotero_issn
+    bibliography_metrics --> type_summary : types

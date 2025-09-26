@@ -52,10 +52,7 @@ plot_publication_year <- function(data_fn) {
     ggplot2::ggtitle("Publication Year") +
     ggplot2::theme(legend.position = "bottom")
 
-  dir <- normalizePath(
-    file.path("output", "plot_publication_year"),
-    mustWork = FALSE
-  )
+  dir <- file.path("output", "plot_publication_year")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
   file <- file.path(dir, basename(data_fn)) |>

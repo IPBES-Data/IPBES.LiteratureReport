@@ -51,10 +51,7 @@ plot_top_country_map <- function(data_fn) {
       value = "count"
     )
 
-  dir <- normalizePath(
-    file.path("output", "plot_top_countries"),
-    mustWork = FALSE
-  )
+  dir <- file.path("output", "plot_top_countries")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
   file <- file.path(dir, basename(data_fn)) |>

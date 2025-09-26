@@ -45,10 +45,7 @@ plot_types_data <- function(bibliography_fn) {
       )
   )
 
-  dir <- normalizePath(
-    file.path("output", "plot_types"),
-    mustWork = FALSE
-  )
+  dir <- file.path("output", "plot_types")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
   file <- file.path(dir, basename(bibliography_fn))

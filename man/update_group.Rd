@@ -33,6 +33,8 @@ The function uses the \code{zotero_get_group} function from the \code{IPBES.R}
 package to download the group data. It iterates over each group in the \code{group}
 vector, downloads the group data, and saves it as a CSV file in the "input"
 directory.
+The api key for zotero to access private groups can be specified in the environmental
+variable \code{ZOTERO_API_KEY}.
 }
 \examples{
 # Update group using default settings

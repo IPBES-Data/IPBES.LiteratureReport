@@ -1,5 +1,6 @@
 ---
 title: "Bibliography Reports"
+date: today
 format:
     html:
         toc: true
@@ -15,8 +16,10 @@ params:
 
 ```{r}
 #| label: setup
+#| echo: false
 
 library(knitr)
+library(LitReport)
 
 if (!(exists("params"))) {
   params <- rmarkdown::yaml_front_matter("./bibliography_report.qmd")$params
@@ -27,12 +30,6 @@ knitr::opts_chunk$set(message = NA)
 ```
 
 This document is the starting page to the IPBES Bibliography Reports. Thes reports give information about the bibliographies from IPBES on Zotero.
-
-## Methods
-
-To compile the assessments, the following steps need to be done:
-
-TO ADD!!!
 
 ## Reports
 
@@ -66,5 +63,12 @@ data.frame(
     escape = FALSE,
     caption = "List of the reports"
   )
+```
 
+## The pipeline used
+
+```{r}
+#| echo: false
+
+targets::tar_glimpse()
 ```

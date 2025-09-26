@@ -39,10 +39,7 @@ plot_oa_status <- function(data_fn) {
     ggplot2::theme(legend.position = "bottom") +
     ggplot2::labs(fill = "Open Access Status")
 
-  dir <- normalizePath(
-    file.path("output", "plot_oa_status"),
-    mustWork = FALSE
-  )
+  dir <- file.path("output", "plot_oa_status")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
   file <- file.path(dir, basename(data_fn)) |>

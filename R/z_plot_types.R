@@ -49,10 +49,7 @@ plot_types <- function(data_fn) {
       dplyr::vars(from) # Add this line to create facets by the 'from' variable
     )
 
-  dir <- normalizePath(
-    file.path("output", "plot_types"),
-    mustWork = FALSE
-  )
+  dir <- file.path("output", "plot_types")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
   file <- file.path(dir, basename(data_fn)) |>

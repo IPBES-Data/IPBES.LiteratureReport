@@ -6,7 +6,7 @@ To generate the reports, do the following:
 
 1. Start R
 2. Open the document `index.qmd`
-3. Adjust the gropups defined in `download_groups` if necessary
+3. Adjust the groups defined in `download_groups` if necessary
 4. Render `index.qmd` - that should it be.
 
 This is all you should have to know.
