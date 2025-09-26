@@ -65,10 +65,7 @@ plot_top_country <- function(data) {
             plot.title = element_text(size = 15)
         )
 
-    dir <- normalizePath(
-        file.path("output", "plot_top_countries"),
-        mustWork = FALSE
-    )
+    dir <- file.path("output", "plot_top_countries")
     dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
     file <- file.path(dir, basename(data_fn)) |>

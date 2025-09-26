@@ -63,7 +63,7 @@ load_bibliography <- function(
     )
   bibliography_url <- paste0(
     "https://www.zotero.org/groups/",
-    bibliography_url[[1]][[3]]
+    bibliography_url[[1]][[4]]
   )
 
   bibliography <- list(
@@ -119,7 +119,7 @@ load_bibliography <- function(
 
   ###
 
-  dir <- normalizePath(file.path("output", "bibliographies"), mustWork = FALSE)
+  dir <- file.path("output", "bibliographies")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
   file <- file.path(dir, basename(bibliography_zotero_file)) |>

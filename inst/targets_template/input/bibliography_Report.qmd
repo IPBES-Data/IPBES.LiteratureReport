@@ -228,24 +228,24 @@ readRDS(params$output_files$top_country_data) |>
 
 # Cleanliness of the Bibliography
 
-Cleanliness of a bibliography is defined here as the quality of the bibliografic data in the bibliography. It does not concern any topical measures, only measures related to the bibliografic data in the bibliography.
+Cleanliness of a bibliography is defined here as the quality of the bibliographic data in the bibliography. It does not concern any topical measures, only measures related to the bibliographic data in the bibliography.
 
-The analysis is at the moment only done for DOIs as corresponding measures are not available at the moment for ISBNs and ISSNs and duplicate ISBNs and ISSNs can be rcorrect as different chapters of a book might be in the bibliography.
+The analysis is at the moment only done for DOIs as corresponding measures are not available at the moment for ISBNs and ISSNs and duplicate ISBNs and ISSNs can be correct as different chapters of a book might be in the bibliography.
 
 ## Entries with DOIs, ISBNs or ISSNs in Zotero
 
 To identify a reference, the most widely used identifier is the DOI. The following table shows the number of references with a DOI and the number of unique DOIs.
 
-To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not waranted as e.g. differenc chapters of a book can be separate entries in the library and therefore lead to duplicates. 
+To consider duplicate ISBNs or ISSNs as duplicates entries in the library is not warranted as e.g. different chapters of a book can be separate entries in the library and therefore lead to duplicates. 
 
 
-- **DOIs**: `r metrics$zotero_dois$count` (`r round(metrics$zotero_dois$pc, digits = 2)`%) - `r length(metrics$zotero_dois$duplicate)` duplicates
-- **ISBNss**: `r metrics$zotero_isbns$count` (`r round(metrics$zotero_isbns$pc, digits = 2)`%)
-- **ISBNss**: `r metrics$zotero_issn$count` (`r round(metrics$zotero_issns$pc, digits = 2)`%)
+- **DOIs**: `r metrics$zotero_doi$count` (`r round(metrics$zotero_doi$pc, digits = 2)`%) - `r length(metrics$zotero_doi$duplicate)` duplicates
+- **ISBNss**: `r metrics$zotero_isbn$count` (`r round(metrics$zotero_isbn$pc, digits = 2)`%)
+- **ISBNss**: `r metrics$zotero_issn$count` (`r round(metrics$zotero_issn$pc, digits = 2)`%)
 
 ## DOIs in Zotero
 
-The following sections provide some more detailed analysis of the bibliography in Zenodo. The tables all contain clickable links which, shwen clicked, show the respective article in the Zotero bibliograpohy.
+The following sections provide some more detailed analysis of the bibliography in Zenodo. The tables all contain clickable links which, when clicked, show the respective article in the Zotero bibliography.
 
 ### Duplicates
 
@@ -254,13 +254,13 @@ The following DOIs are duplicates in the bibliography. This table should be empt
 ```{r}
 #| label: duplicates
 
-if (length(metrics$zotero_dois$duplicate) > 0) {
+if (length(metrics$zotero_doi$duplicate) > 0) {
   data.frame(
-    doi = metrics$zotero_dois$duplicate,
+    doi = metrics$zotero_doi$duplicate,
     link = paste0(
       bibliography$url,
       "/items/",
-      names(metrics$zotero_dois$duplicate)
+      names(metrics$zotero_doi$duplicate)
     )
   ) |>
     dplyr::mutate(
@@ -288,13 +288,13 @@ All DOIs should be given as only the DOI without the resolver, i.e. not starting
 #| label: dois_non_standard
 #|
 
-http <- grep("http", metrics$zotero_dois$id_raw)
+http <- grep("http", metrics$zotero_doi$id_raw)
 data.frame(
-  doi = metrics$zotero_dois$id_raw[http],
+  doi = metrics$zotero_doi$id_raw[http],
   link = paste0(
     bibliography$url,
     "/items/",
-    names(metrics$zotero_dois$id_raw)[http]
+    names(metrics$zotero_doi$id_raw)[http]
   )
 ) |>
   dplyr::mutate(
@@ -310,20 +310,20 @@ data.frame(
 ### Not Valid
 
 Here we do acheck for the structural validity of the dois. This check needs to be improved.
-Of these `r (length(metrics$zotero_dois$not_in_oa) - length(metrics$zotero_dois$dois_valid))` are not valid. These are:
+Of these `r (length(metrics$dois_comp$zotero_not_in_oa) - length(metrics$zotero_doi$dois_valid))` are not valid. These are:
 
 
 ```{r}
 #| label: dois_not_valid
 #|
 
-if (length(metrics$zotero_dois$not_valid) > 0) {
+if (length(metrics$zotero_doi$not_valid) > 0) {
   data.frame(
-    doi = metrics$zotero_dois$not_valid,
+    doi = metrics$zotero_doi$not_valid,
     link = paste0(
       bibliography$url,
       "/items/",
-      names(metrics$zotero_dois$not_valid)
+      names(metrics$zotero_doi$not_valid)
     )
   ) |>
     dplyr::mutate(
@@ -344,18 +344,18 @@ if (length(metrics$zotero_dois$not_valid) > 0) {
 
 To validate the existence and validity of the DOIs, we check if the DOIs are in the [OpenAlex](https://OpenAlex.org){target="_blank"} database. 
 
-Of the `r length(metrics$zotero_dois$unique)` unique DOIs in the library, `r length(metrics$zotero_dois$not_in_oa)` (`r round(100 * length(metrics$zotero_dois$not_in_oa) / metrics$zotero_dois$count, digits = 2)`%) are in not in [OpenAlex](https://OpenAlex.org){target="_blank"}. This includes the non-valid DOIS, which are filtered out in the table below.
+Of the `r length(metrics$zotero_doi$unique)` unique DOIs in the library, `r length(metrics$dois_comp$zotero_not_in_oa)` (`r round(100 * length(metrics$dois_comp$zotero_not_in_oa) / metrics$zotero_doi$count, digits = 2)`%) are in not in [OpenAlex](https://OpenAlex.org){target="_blank"}. This includes the non-valid DOIS, which are filtered out in the table below.
 
 
 ```{r}
 #| label: dois_not_in_openalex
 
 data.frame(
-  doi = metrics$zotero_dois$not_in_oa,
+  doi = metrics$dois_comp$zotero_not_in_oa,
   link = paste0(
     bibliography$url,
     "/items/",
-    names(metrics$zotero_dois$not_in_oa)
+    names(metrics$dois_comp$zotero_not_in_oa)
   )
 ) |>
   dplyr::mutate(

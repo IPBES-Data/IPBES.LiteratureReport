@@ -18,6 +18,8 @@
 #' package to download the group data. It iterates over each group in the \code{group}
 #' vector, downloads the group data, and saves it as a CSV file in the "input"
 #' directory.
+#' The api key for zotero to access private groups can be specified in the environmental
+#' variable `ZOTERO_API_KEY`.
 #' @param group A named character vector specifying the group names and their
 #' corresponding group IDs.
 #' @param overwrite Logical value indicating whether to overwrite existing files.
@@ -41,7 +43,8 @@ update_group <- function(
   group
 ) {
   ##
-  dir <- normalizePath(file.path("output", "zotero_groups"), mustWork = FALSE)
+  dir <- file.path("output", "zotero_groups")
+
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
   ##
 
@@ -51,10 +54,17 @@ update_group <- function(
     paste0("IPBES_", group$name, "_", group$id)
   )
 
+  api_key <- NULL
+  try(
+    api_key <- keyring::key_get("API_zotero"),
+    silent = TRUE
+  )
+
   zotero_get_group(
     group_id = group$id,
     file = file,
-    output_format = "csv"
+    output_format = "csv",
+    api_key = api_key
   )
 
   message("Downloaded group ", group$name, "!\n<<<<<<<\n")

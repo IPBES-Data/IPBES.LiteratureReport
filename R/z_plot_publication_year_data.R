@@ -94,10 +94,7 @@ plot_publication_year_data <- function(
   ) |>
     dplyr::ungroup()
 
-  dir <- normalizePath(
-    file.path("output", "plot_publication_year"),
-    mustWork = FALSE
-  )
+  dir <- file.path("output", "plot_publication_year")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
   file <- file.path(dir, basename(bibliography_fn))

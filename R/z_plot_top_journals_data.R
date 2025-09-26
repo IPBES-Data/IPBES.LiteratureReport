@@ -37,10 +37,7 @@ plot_top_journals_data <- function(bibliography_fn) {
             n = 50
         )
 
-    dir <- normalizePath(
-        file.path("output", "plot_top_journals"),
-        mustWork = FALSE
-    )
+    dir <- file.path("output", "plot_top_journals")
     dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
     file <- file.path(dir, basename(bibliography_fn))

@@ -23,10 +23,7 @@ plot_oa_status_data <- function(
       oa_status
     )
 
-  dir <- normalizePath(
-    file.path("output", "plot_oa_status"),
-    mustWork = FALSE
-  )
+  dir <- file.path("output", "plot_oa_status")
   dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
   file <- file.path(dir, basename(bibliography_fn))

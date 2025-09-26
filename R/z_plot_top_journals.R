@@ -52,10 +52,7 @@ plot_top_journals <- function(data_fn) {
         theme(
             plot.title = element_text(size = 15)
         )
-    dir <- normalizePath(
-        file.path("output", "plot_top_journals"),
-        mustWork = FALSE
-    )
+    dir <- file.path("output", "plot_top_journals")
     dir.create(dir, recursive = TRUE, showWarnings = FALSE)
 
     file <- file.path(dir, basename(data_fn)) |>
