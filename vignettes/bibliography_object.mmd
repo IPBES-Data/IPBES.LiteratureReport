@@ -1,0 +1,36 @@
+%% Mermaid class diagram for the IPBES.bibliography object structure
+classDiagram
+    class IPBES_bibliography {
+        +timestamp POSIXct
+        +name character
+        +url character
+        +bibliography zotero_table
+        +works openalex_table
+    }
+
+    class zotero_table {
+        +Key character
+        +Title character
+        +Publication.Title character
+        +Publication.Year integer
+        +Item.Type character
+        +DOI character
+        +doi_short character
+        +ISBN character
+        +ISSN character
+        +in_oa logical
+        +... other Zotero fields
+    }
+
+    class openalex_table {
+        +id character
+        +doi character
+        +type character
+        +publication_year integer
+        +oa_status character
+        +authorships list
+        +... other OpenAlex fields
+    }
+
+    IPBES_bibliography --> zotero_table : bibliography
+    IPBES_bibliography --> openalex_table : works

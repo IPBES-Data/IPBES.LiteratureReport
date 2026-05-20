@@ -1,0 +1,320 @@
+---
+title: "Bibliography Pipeline Structure"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bibliography Pipeline Structure}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(comment = "#>", collapse = TRUE)
+```
+
+## Workflow Overview
+
+The IPBES literature workflow couples a `targets` pipeline with a small set of helper
+functions. Each helper returns the path to a saved artifact (CSV, RDS, or ggplot) so
+that `targets` can rely on `format = "file"` tracking. The branch that matters for a
+single Zotero group is defined in `inst/targets_template/_targets.R` and expands as:
+
+1. `group_file`  -  locate `input/groups.csv`.
+2. `groups_df`  -  read the table and split it into per-row `group` objects.
+3. `zotero_group`  -  call `update_group()` to download the Zotero export.
+4. `bibliography`  -  call `load_bibliography()` to build a rich bibliography bundle.
+5. `metrics`  -  call `get_bibliography_measures()` to compute derived indicators.
+6. Plotting targets  -  run `plot_*_data()` and `plot_*()` pairs to create data summaries and figures.
+7. `group_output`  -  collect the file paths created upstream so downstream reports can load them on demand.
+
+The rest of this vignette explains what each helper saves and how the target outputs fit together.
+
+## `update_group()`
+
+`update_group()` (see `R/z_update_group.R`) turns a single `group` list produced by the
+pipeline into a tracked CSV file.
+
+- **Input**: a list with at least `name` and `id`, created from one row of `groups_df`.
+- **Side effects**: ensures `output/zotero_groups/` exists and writes
+  `IPBES_<name>_<id>.csv` (`R/z_update_group.R:46-74`).
+- **Return value**: the absolute path to the CSV so the `zotero_group` target can use
+  `format = "file"` and only re-run when the download changes.
+- **External services**: requests the export via `IPBES.R::zotero_get_group()` using an
+  API key stored in the `keyring` if available.
+
+## `load_bibliography()`
+
+`load_bibliography()` (see `R/z_load_bibliography.R`) consumes the CSV produced above and
+packages everything needed for subsequent targets.
+
+- **Input**: `zotero_group`, a CSV path with a predictable naming scheme. The helper
+  tolerates both bare paths and names without the `.csv` suffix (`R/z_load_bibliography.R:77-85`).
+- **Processing**: extracts the group name and Zotero URL from the file name, reads the
+  CSV into a tibble, normalises DOIs with `openalexPro2::extract_doi()`, fetches matching
+  works from OpenAlex, and flags in-OpenAlex references (`R/z_load_bibliography.R:46-118`).
+- **Return value**: writes a self-contained list to
+  `output/bibliographies/<name>.rds` and returns that path (`R/z_load_bibliography.R:122-133`).
+  The list holds metadata (`timestamp`, `name`, `url`), the raw Zotero table, the OpenAlex
+  works tibble, standardised DOIs, and an `in_oa` logical column.
+- **Target**: `bibliography` therefore caches the RDS file; downstream targets reopen it
+  with `readRDS()`.
+
+### Bibliography object schema
+
+The saved list carries the S3 class `IPBES.bibliography` and has a predictable layout
+(`R/z_load_bibliography.R:69-98`). The elements you are most likely to consume in
+reports are summarised below.
+
+| Element        | Type          | Notes |
+|----------------|---------------|-------|
+| `timestamp`    | POSIXct       | Time the pipeline bundled the bibliography. |
+| `name`         | character     | Group label, parsed from the Zotero file name. |
+| `url`          | character     | Link to the Zotero group. |
+| `bibliography` | tibble        | Raw Zotero export with an extra `doi_short` column (`openalexPro2::extract_doi()`) and a logical `in_oa` flag indicating presence in OpenAlex. Key columns referenced downstream include `Key`, `DOI`, `Publication.Title`, `Publication.Year`, `Item.Type`, `ISBN`, and `ISSN`. |
+| `works`        | tibble        | OpenAlex response returned by `openalexR::oa_fetch()`. Columns used elsewhere include `id`, `doi`, `type`, `publication_year`, `authorships`, and `oa_status`. |
+
+Every plotting or metrics helper that follows begins by reopening this file with
+`readRDS()` and then works off the two embedded tibbles (`bibliography` and `works`).
+
+### Diagram: Bibliography object
+
+```{mermaid, echo = FALSE}
+%% Mermaid class diagram for the IPBES.bibliography object structure
+classDiagram
+    class IPBES_bibliography {
+        +timestamp POSIXct
+        +name character
+        +url character
+        +bibliography zotero_table
+        +works openalex_table
+    }
+
+    class zotero_table {
+        +Key character
+        +Title character
+        +Publication.Title character
+        +Publication.Year integer
+        +Item.Type character
+        +DOI character
+        +doi_short character
+        +ISBN character
+        +ISSN character
+        +in_oa logical
+        +... other Zotero fields
+    }
+
+    class openalex_table {
+        +id character
+        +doi character
+        +type character
+        +publication_year integer
+        +oa_status character
+        +authorships list
+        +... other OpenAlex fields
+    }
+
+    IPBES_bibliography --> zotero_table : bibliography
+    IPBES_bibliography --> openalex_table : works
+```
+
+## `get_bibliography_measures()`
+
+`get_bibliography_measures()` (see `R/z_get_bibliography_measures.R`) derives summary
+metrics from the saved bibliography bundle.
+
+- **Input**: the RDS produced by `load_bibliography()`.
+- **Processing**: reads the bundle, then builds nested lists for
+  OpenAlex DOIs, Zotero DOIs, cross-source DOI comparisons, ISBNs, ISSNs, and type
+  comparisons (`R/z_get_bibliography_measures.R:21-186`). Each helper enforces basic
+  cleaning (duplicate removal, validity checks, percentage shares) using
+  `openalexPro2::extract_doi()` and `IPBES.R::doi_valid()`.
+- **Return value**: a single list that mirrors the input metadata and appends
+  the metric groups plus a `dois_comp` summary (`R/z_get_bibliography_measures.R:188-202`).
+  The list is written to `output/metrics/<name>.rds` and the filename is returned
+  (`R/z_get_bibliography_measures.R:205-212`).
+- **Target**: `metrics` therefore updates only when the bibliography file changes.
+
+### Metrics structure
+
+`get_bibliography_measures()` returns a list that mirrors the metadata from the
+bibliography object and augments it with nested summaries (`R/z_get_bibliography_measures.R:188-202`).
+To make reuse easier, the following subsections step through each element in order.
+
+#### Metadata scaffold
+
+- `timestamp`, `name`, `url`: scalar values copied from the bibliography bundle so every
+  metrics file records when and for which group it was produced.
+
+#### `oa_dois`
+
+- **Source**: `bibliography$works$doi`.
+- **Cleaning**: normalised with `openalexPro2::extract_doi()` and filtered for non-empty
+  values (`R/z_get_bibliography_measures.R:21-38`).
+- **Fields**:
+  - `id`: vector of deduplicated DOIs present in OpenAlex works.
+  - `count`: total DOIs after cleaning.
+  - `pc`: share of OpenAlex works that still hold a DOI (`count / nrow(bibliography$works)`).
+  - `duplicate`: any DOIs that appear more than once in the OpenAlex response.
+  - `unique`: the distinct DOI set (handy for joins).
+
+#### `zotero_dois`
+
+- **Source**: `bibliography$bibliography$DOI` (`R/z_get_bibliography_measures.R:44-86`).
+- **Cleaning**: removes blank entries, strips URL/prefix variations, and keeps a copy
+  in `id_raw` before mutation.
+- **Fields**:
+  - `id`: cleaned DOI values ready for matching.
+  - `id_raw`: unedited strings as they arrived from Zotero.
+  - `count`: number of non-missing DOIs.
+  - `pc`: DOI coverage relative to the Zotero table.
+  - `duplicate` / `unique`: vectors capturing repetition and distinct values.
+  - `valid`: DOIs that pass `IPBES.R::doi_valid()`.
+  - `not_valid`: DOIs that fail the validity check and may need manual review.
+
+#### `dois_comp`
+
+- **Purpose**: compares cleaned Zotero DOIs to the OpenAlex set (`R/z_get_bibliography_measures.R:88-96`).
+- **Fields**:
+  - `zotero_in_oa`: intersection between Zotero and OpenAlex DOIs (good for confirming
+    successful OA lookups).
+  - `zotero_not_in_oa`: Zotero DOIs missing from OpenAlex (useful for gap analysis or
+    additional API calls).
+
+#### `zotero_isbn`
+
+- **Source**: `bibliography$bibliography$ISBN` (`R/z_get_bibliography_measures.R:99-123`).
+- **Fields**:
+  - `id`: vector of available ISBNs keyed by Zotero reference `Key`.
+  - `count`: number of ISBN-bearing entries.
+  - `pc`: percentage of the bibliography with ISBNs.
+  - `duplicate` / `unique`: repeated versus distinct ISBN values.
+
+#### `zotero_issn`
+
+- Mirrors the ISBN structure but uses `bibliography$bibliography$ISSN`
+  (`R/z_get_bibliography_measures.R:126-150`).
+- The returned list contains the same fields (`id`, `count`, `pc`, `duplicate`, `unique`).
+
+#### `types`
+
+- **Source**: joins Zotero item types and OpenAlex work types by DOI
+  (`R/z_get_bibliography_measures.R:153-186`).
+- **Fields**:
+  - `types`: long table combining Zotero and OpenAlex type labels per DOI (after
+    stripping DOI prefixes on the OpenAlex side).
+  - `comparison`: aggregated counts of type combinations (`summarise()` on both type
+    columns) sorted by descending frequency. Handy for spotting mismatches in
+    classification.
+
+The function writes this list to `output/metrics/<name>.rds`, letting downstream reports
+reuse the precomputed structures without repeating validation and aggregation logic.
+
+### Diagram: Metrics object
+
+```{mermaid}
+%% Mermaid class diagram for the bibliography_metrics object structure
+classDiagram
+    class bibliography_metrics {
+        +timestamp POSIXct
+        +name character
+        +url character
+        +oa_dois oa_dois_summary
+        +zotero_dois zotero_dois_summary
+        +dois_comp doi_comparison
+        +zotero_isbn identifier_summary
+        +zotero_issn identifier_summary
+        +types type_summary
+    }
+
+    class oa_dois_summary {
+        +id character[]
+        +count integer
+        +pc numeric
+        +duplicate character[]
+        +unique character[]
+    }
+
+    class zotero_dois_summary {
+        +id character[]
+        +id_raw character[]
+        +count integer
+        +pc numeric
+        +duplicate character[]
+        +unique character[]
+        +valid character[]
+        +not_valid character[]
+    }
+
+    class doi_comparison {
+        +zotero_in_oa character[]
+        +zotero_not_in_oa character[]
+    }
+
+    class identifier_summary {
+        +id character[]
+        +count integer
+        +pc numeric
+        +duplicate character[]
+        +unique character[]
+    }
+
+    class type_summary {
+        +types tibble (columns: doi, type_zenodo, type_openalex)
+        +comparison tibble (columns: type_zenodo, type_openalex, count)
+    }
+
+    bibliography_metrics --> oa_dois_summary : oa_dois
+    bibliography_metrics --> zotero_dois_summary : zotero_dois
+    bibliography_metrics --> doi_comparison : dois_comp
+    bibliography_metrics --> identifier_summary : zotero_isbn
+    bibliography_metrics --> identifier_summary : zotero_issn
+    bibliography_metrics --> type_summary : types
+
+```
+
+## Plotting Helpers
+
+Every plotting helper follows the same two-step pattern: a `plot_*_data()` function that
+hydrates and saves a derived dataset, and a matching `plot_*()` (or specially named
+variant) that turns that dataset into a ggplot object stored on disk.
+
+### Common responsibilities
+
+1. The data helpers (`plot_publication_year_data()`, `plot_oa_status_data()`,
+   `plot_top_journals_data()`, `plot_types_data()`, and `plot_top_country_data()`) read
+   the bibliography RDS, compute the summary of interest, and save it beside other
+   outputs under a dedicated directory (`R/z_plot_publication_year_data.R:40-104`,
+   `R/z_plot_oa_status_data.R:35-53`, `R/z_plot_top_journals_data.R:23-49`,
+   `R/z_plot_types_data.R:15-41`, `R/z_plot_top_country_data.R:15-36`).
+2. The plotting helpers (`plot_publication_year()`, `plot_oa_status()`,
+   `plot_top_journals()`, `plot_types()`) reopen the data file, build a ggplot object, and
+   save it with an `_ggplot.rds` suffix in the same directory
+   (`R/z_plot_publication_year.R:40-66`, `R/z_plot_oa_status.R:35-64`,
+   `R/z_plot_top_journals.R:25-63`, `R/z_plot_types.R:23-55`).
+3. Country-specific plots follow the same convention but add a mapped product:
+   `plot_top_country_data()` stores counts per ISO code, `plot_top_country()` would create
+   a bar chart (note the current function needs a `data_fn` argument to mirror the others),
+   and `plot_top_country_map()` converts the counts into a map-friendly structure and saves
+   an `_map_ggplot.rds` file (`R/z_plot_top_country_data.R:15-36`,
+   `R/z_plot_top_country.R:23-53`, `R/z_plot_top_country_map.R:24-46`).
+
+### Targets and saved files
+
+| Data target               | Helper function                 | Saved dataset                                   | Figure target            | Saved figure suffix        |
+|--------------------------|---------------------------------|-------------------------------------------------|--------------------------|----------------------------|
+| `figure_pub_year_data`   | `plot_publication_year_data()`  | `output/plot_publication_year/<name>.rds`       | `figure_pub_year`        | `_ggplot.rds`
+| `figure_oa_status_data`  | `plot_oa_status_data()`         | `output/plot_oa_status/<name>.rds`              | `figure_oa_status`       | `_ggplot.rds`
+| `figure_top_journals_data` | `plot_top_journals_data()`     | `output/plot_top_journals/<name>.rds`           | `figure_top_journals`    | `_ggplot.rds`
+| `figure_types_data`      | `plot_types_data()`             | `output/plot_types/<name>.rds`                  | `figure_types`           | `_ggplot.rds`
+| `figure_top_country_data` | `plot_top_country_data()`      | `output/plot_top_countries/<name>.rds`          | `figure_top_country`     | `_ggplot.rds` (planned)
+| `figure_top_country_map` | `plot_top_country_map()`        | `output/plot_top_countries/<name>_map_ggplot.rds` | (planned)                | `_map_ggplot.rds`
+
+The country targets are currently commented out in the template, but the helpers already
+write compatible RDS files. Because every function returns a path, the `group_output`
+target can bundle all artefacts for convenient access when rendering reports or dashboards.
+
+## Using the artefacts
+
+With this structure in place, downstream reporting code simply reads the cached files.
+For example, within a report you can call `readRDS(targets::tar_read(figure_pub_year))`
+without re-running any heavy API calls. That separation between data acquisition,
+transformation, and presentation is what keeps the pipeline reproducible and cheap to rerun.
