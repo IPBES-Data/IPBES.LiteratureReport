@@ -33,12 +33,14 @@
 #' @importFrom tibble as_tibble
 #' @importFrom utils read.csv
 #' @importFrom openalexR oa_fetch
+#' @importFrom openalexPro2 extract_doi
 #'
 #' @export
 
 load_bibliography <- function(
-    bibliography_zotero_file = NULL,
-    verbose = FALSE) {
+  bibliography_zotero_file = NULL,
+  verbose = FALSE
+) {
   ##
 
   bibliography_name <- bibliography_zotero_file |>
@@ -59,7 +61,10 @@ load_bibliography <- function(
     strsplit(
       split = "_"
     )
-  bibliography_url <- paste0("https://www.zotero.org/groups/", bibliography_url[[1]][[3]])
+  bibliography_url <- paste0(
+    "https://www.zotero.org/groups/",
+    bibliography_url[[1]][[4]]
+  )
 
   bibliography <- list(
     timestamp = Sys.time(),
@@ -68,7 +73,6 @@ load_bibliography <- function(
   )
 
   class(bibliography) <- c("IPBES.bibliography", class(bibliography))
-
 
   if (!grepl("\\.csv", bibliography_zotero_file)) {
     bibliography_zotero_file <- paste0(bibliography_zotero_file, ".csv")
@@ -84,35 +88,47 @@ load_bibliography <- function(
     bibliography_zotero_file,
     stringsAsFactors = FALSE
   ) |>
+    dplyr::mutate(
+      doi_short = openalexPro2::extract_doi(
+        DOI,
+        non_doi_value = NA_character_
+      )
+    ) |>
     tibble::as_tibble()
 
   #| label: load_bibliography
 
   #| label: get_works
 
-  dois <- bibliography$bibliography$DOI
-  dois <- dois[dois != ""]
-  dois <- dois[!is.na(dois)]
-  dois <- dois |>
-    gsub(pattern = "^https://doi.org/", replacement = "") |>
-    gsub(pattern = "^https://dx.doi.org/", replacement = "") |>
-    gsub(pattern = "^https://hdl.handle.net/", replacement = "") |>
-    gsub(pattern = "^http://doi.org/", replacement = "") |>
-    gsub(pattern = "^http://dx.doi.org/", replacement = "") |>
-    gsub(pattern = "^http://hdl.handle.net/", replacement = "") |>
-    gsub(pattern = "^doi:", replacement = "") |>
-    gsub(pattern = "^DOI ", replacement = "")
-
   bibliography$works <-
     openalexR::oa_fetch(
       entity = "works",
-      doi = names(IPBES.R::doi_valid(bibliography$bibliography$DOI))[IPBES.R::doi_valid(bibliography$bibliography$DOI)],
+      doi = bibliography$bibliography$doi_short[
+        !is.na(bibliography$bibliography$doi_short)
+      ],
       verbose = verbose
     )
 
   #| label: get_standardise_dois_works
 
+  # add in_oa to bibliography_bibliography
+
+  bibliography$bibliography$in_oa <-
+    bibliography$bibliography$doi_short %in%
+    openalexPro2::extract_doi(bibliography$works$doi)
 
   ###
-  return(bibliography)
+
+  dir <- file.path("output", "bibliographies")
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  file <- file.path(dir, basename(bibliography_zotero_file)) |>
+    gsub(
+      pattern = "\\.csv$",
+      replacement = ".rds"
+    )
+
+  saveRDS(bibliography, file = file)
+
+  return(file)
 }

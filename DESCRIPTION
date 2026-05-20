@@ -1,0 +1,23 @@
+Package: LitReport
+Title: Creation of literature reports as well as website and publishing it
+Version: 0.2.0
+Authors@R: 
+    person(given = "First",
+           family = "Last",
+           role = c("aut", "cre"),
+           email = "first.last@example.com")
+Description: More about what it does (one paragraph).
+License: What license is it under?
+Imports: 
+    IPBES.R,
+    dplyr,
+    gert,
+    ggplot2,
+    openalexR,
+    quarto,
+    targets,
+    tibble,
+    withr
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.3.2

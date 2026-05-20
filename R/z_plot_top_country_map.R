@@ -40,7 +40,8 @@
 #' }
 #'
 #' @export
-plot_top_country_map <- function(data) {
+plot_top_country_map <- function(data_fn) {
+  data <- readRDS(data_fn)
   map <- data |>
     dplyr::select(
       iso2c = Country,
@@ -50,5 +51,16 @@ plot_top_country_map <- function(data) {
       value = "count"
     )
 
-  return(map)
+  dir <- file.path("output", "plot_top_countries")
+  dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+
+  file <- file.path(dir, basename(data_fn)) |>
+    gsub(
+      pattern = "\\.rds$",
+      replacement = "_map_ggplot.rds"
+    )
+
+  saveRDS(map, file = file)
+
+  return(file)
 }
