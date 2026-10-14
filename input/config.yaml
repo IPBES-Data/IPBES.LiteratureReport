@@ -3,32 +3,32 @@ assessments:
     id: 4937409
   - name: PAND
     id: 2499181
-  # - name: AFA
-  #   id: 2333070
-  # - name: AMA
-  #   id: 2333011
-  # - name: APA
-  #   id: 2333075
-  # - name: ECA
-  #   id: 2345951
-  # - name: GA1
-  #   id: 2333077
-  # - name: IAS
-  #   id: 2352922
-  # - name: ILK
-  #   id: 2344322
-  # - name: LDR
-  #   id: 2333076
-  # - name: PPA
-  #   id: 2333088
-  # - name: SCM
-  #   id: 2333079
-  # - name: SUA
-  #   id: 2344805
-  # - name: VA
-  #   id: 2345372
-  # - name: IPCC
-  #   id: 2603670
+  - name: AFA
+    id: 2333070
+  - name: AMA
+    id: 2333011
+  - name: APA
+    id: 2333075
+  - name: ECA
+    id: 2345951
+  - name: GA1
+    id: 2333077
+  - name: IAS
+    id: 2352922
+  - name: ILK
+    id: 2344322
+  - name: LDR
+    id: 2333076
+  - name: PPA
+    id: 2333088
+  - name: SCM
+    id: 2333079
+  - name: SUA
+    id: 2344805
+  - name: VA
+    id: 2345372
+  - name: IPCC
+    id: 2603670
   - name: TCA
     id: 4589462
 
