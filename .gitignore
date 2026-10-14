@@ -60,3 +60,6 @@ sanbox/*
 *.code-workspace
 IPBES.LiteratureReport.code-workspace
 website/*
+
+./output/
+.gitignore

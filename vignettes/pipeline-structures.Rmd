@@ -49,7 +49,7 @@ packages everything needed for subsequent targets.
 - **Input**: `zotero_group`, a CSV path with a predictable naming scheme. The helper
   tolerates both bare paths and names without the `.csv` suffix (`R/z_load_bibliography.R:77-85`).
 - **Processing**: extracts the group name and Zotero URL from the file name, reads the
-  CSV into a tibble, normalises DOIs with `openalexPro2::extract_doi()`, fetches matching
+  CSV into a tibble, normalises DOIs with `openalexPro::extract_doi()`, fetches matching
   works from OpenAlex, and flags in-OpenAlex references (`R/z_load_bibliography.R:46-118`).
 - **Return value**: writes a self-contained list to
   `output/bibliographies/<name>.rds` and returns that path (`R/z_load_bibliography.R:122-133`).
@@ -69,7 +69,7 @@ reports are summarised below.
 | `timestamp`    | POSIXct       | Time the pipeline bundled the bibliography. |
 | `name`         | character     | Group label, parsed from the Zotero file name. |
 | `url`          | character     | Link to the Zotero group. |
-| `bibliography` | tibble        | Raw Zotero export with an extra `doi_short` column (`openalexPro2::extract_doi()`) and a logical `in_oa` flag indicating presence in OpenAlex. Key columns referenced downstream include `Key`, `DOI`, `Publication.Title`, `Publication.Year`, `Item.Type`, `ISBN`, and `ISSN`. |
+| `bibliography` | tibble        | Raw Zotero export with an extra `doi_short` column (`openalexPro::extract_doi()`) and a logical `in_oa` flag indicating presence in OpenAlex. Key columns referenced downstream include `Key`, `DOI`, `Publication.Title`, `Publication.Year`, `Item.Type`, `ISBN`, and `ISSN`. |
 | `works`        | tibble        | OpenAlex response returned by `openalexR::oa_fetch()`. Columns used elsewhere include `id`, `doi`, `type`, `publication_year`, `authorships`, and `oa_status`. |
 
 Every plotting or metrics helper that follows begins by reopening this file with
@@ -126,7 +126,7 @@ metrics from the saved bibliography bundle.
   OpenAlex DOIs, Zotero DOIs, cross-source DOI comparisons, ISBNs, ISSNs, and type
   comparisons (`R/z_get_bibliography_measures.R:21-186`). Each helper enforces basic
   cleaning (duplicate removal, validity checks, percentage shares) using
-  `openalexPro2::extract_doi()` and `IPBES.R::doi_valid()`.
+  `openalexPro::extract_doi()` and `IPBES.R::doi_valid()`.
 - **Return value**: a single list that mirrors the input metadata and appends
   the metric groups plus a `dois_comp` summary (`R/z_get_bibliography_measures.R:188-202`).
   The list is written to `output/metrics/<name>.rds` and the filename is returned
@@ -147,7 +147,7 @@ To make reuse easier, the following subsections step through each element in ord
 #### `oa_dois`
 
 - **Source**: `bibliography$works$doi`.
-- **Cleaning**: normalised with `openalexPro2::extract_doi()` and filtered for non-empty
+- **Cleaning**: normalised with `openalexPro::extract_doi()` and filtered for non-empty
   values (`R/z_get_bibliography_measures.R:21-38`).
 - **Fields**:
   - `id`: vector of deduplicated DOIs present in OpenAlex works.

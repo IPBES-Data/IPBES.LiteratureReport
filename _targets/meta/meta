@@ -1,0 +1,35 @@
+name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
+group_report_qmd|stem|5dcb49c53379400b|d3569017d64c778d|2c530c1562a7fbd1|1596031795|input/bibliography_Report.qmd|t20357.3979989595s|s10885b|10885|file|local|vector|||0.528||
+group_file|stem|25945e98a83c0a4a|8c123b86ae1cd8cf|2c530c1562a7fbd1|-1834215763|input/groups.csv|t20593.6906943762s|s33b|33|file|local|vector|||0||
+index_qmd|stem|a6ca730f735458a7|41191acbe0099338|2c530c1562a7fbd1|794045755|input/index.qmd|t20357.4984512721s|s1383b|1383|file|local|vector|||0||
+groups_df|stem|d16fcbbb045b3812|eaf3b867b15516c4|f91146f07f47a6b8|-212901962||t20593.7048937584s|s140b|140|rds|local|vector||groups_df_a4e13f272832aeac*groups_df_3e33f3b043383941|0.001||
+group_cfaed751f17a0f11|branch|683c4c4ce81d9e2f|c1e8be09324cfb0f|2c530c1562a7fbd1|-1424895871||t20593.7048939004s|s132b|132|rds|local|list|group||0||
+group_516f39e9d5557181|branch|aa1fab136b5df100|c1e8be09324cfb0f|2c530c1562a7fbd1|1514386247||t20593.7048939152s|s131b|131|rds|local|list|group||0||
+group|pattern|262116a1e18e67e2|c1e8be09324cfb0f||-777360368||||263|rds|local|list||group_cfaed751f17a0f11*group_516f39e9d5557181|0||
+get_bibliography_measures|function|9ec7863620dc7796
+zotero_works_ebd362e6a87b4ed1|branch||be1967a0ed431af9|f295ffbc9e265193|-1475948145||t20595.5659814323s||0|file|local|vector|zotero_works||0.007||invalid 'path' argument
+metrics_ebd362e6a87b4ed1|branch||66f6666618258285|c6b5987ccb69307a|1097269090||t20595.5679940085s||0|file|local|vector|metrics||0.027||object 'bibliography_fn' not found
+get_metrics|function|2af2770c5156281e
+get_zotero_group|function|5813cc6271354437
+plot_top_country_data|function|97222ec42cd99275
+x|object|ea6e3951dfdac358
+plot_types_data|function|e31d7f939910220d
+plot_types|function|6cfa0120a42aab4f
+load_bibliography|function|4c2bae3aec79bc81
+get_works|function|dacda32d1cc537a4
+plot_top_journals_data|function|61ffd0dc2ae7d1a8
+plot_oa_status_data|function|b6c469a04021c4ff
+combine_for_report|function|269fe6042f2eb752
+plot_oa_status|function|58b5d4284331c805
+plot_top_journals|function|16a0076b07ced2e4
+plot_publication_year_data|function|d9add48b951140a1
+plot_publication_year|function|9a9d426886dba607
+zotero_group_ebd362e6a87b4ed1|branch|c7769e2851a9b496|77e961ebe9db75a2|85b916ed9626ac84|-1154208454|/Users/rkrug/GitHub/IPBES-Data/IPBES.LiteratureReport/output/zotero_groups/IPBES_NFF_4937409|t20740.4818712923s|s509192b|509192|file|local|vector|zotero_group||11.061|path[1]='output/zotero_groups/IPBES_NFF_4937409': No such file or directory|
+zotero_group_33946d9bdd47cd62|branch|ac182d26707fd9a0|77e961ebe9db75a2|d73e7f72f653541b|169938866|/Users/rkrug/GitHub/IPBES-Data/IPBES.LiteratureReport/output/zotero_groups/IPBES_PAND_2499181|t20740.482119394s|s551888b|551888|file|local|vector|zotero_group||21.428|path[1]='output/zotero_groups/IPBES_PAND_2499181': No such file or directory|
+zotero_group|pattern|e3d12e1526dfdf1a|77e961ebe9db75a2||-1218221552||||1061080|file|local|vector||zotero_group_ebd362e6a87b4ed1*zotero_group_33946d9bdd47cd62|32.489||
+zotero_works_40e16f48dfe1f92e|branch|cdc044908576a1c7|be1967a0ed431af9|2dc853dddf146537|1091651762|/Users/rkrug/GitHub/IPBES-Data/IPBES.LiteratureReport/output/zotero_works/IPBES_NFF_4937409/parquet|t20740.4821899676s|s1393292b|1393292|file|local|vector|zotero_works||6.072|input string '  # prevent infinite recursion (pro_rate_limit_status → api_call → ...).' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' This report is designed to help you validate client–API compatibility in' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#'   immediately — no DuckDB queries needed. Delete this file to force' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 1. All identical → keep as-is.' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 2. Any `STRUCT`/`LIST`/`MAP` vs simpler type → complex type wins.' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 3. Multiple `STRUCT` types → pick the one with the most fields.' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 4. Numeric conflicts → widest type wins' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 5. Fallback → `VARCHAR`.' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 1. Identical types → keep as-is.' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 2. Any STRUCT/LIST/MAP vs simpler type → use the complex type.' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 3. Multiple STRUCT types → use the one with the most fields.' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 4. Pure numeric conflicts → use the widest numeric type' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' 5. Fallback → `VARCHAR`.' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' Content downloads cost \strong{$0.01 per file} — 10x the cost of a' cannot be translated from 'US-ASCII' to UTF-8, but is valid UTF-8. input string '#' - `abstract` — plain text reconstructed from `abstract_inverted_index`.' cannot be translated f|
+zotero_works_5f15c350bdc7aae3|branch|80633a9787c7400c|be1967a0ed431af9|b60eb8a688385b6d|1503577189|/Users/rkrug/GitHub/IPBES-Data/IPBES.LiteratureReport/output/zotero_works/IPBES_PAND_2499181/parquet|t20740.4823696433s|s4113994b|4113994|file|local|vector|zotero_works||15.52||
+zotero_works|pattern|45ef7ed372426a6b|be1967a0ed431af9||-1833715632||||5507286|file|local|vector||zotero_works_40e16f48dfe1f92e*zotero_works_5f15c350bdc7aae3|21.592||
+metrics_2f66038ee595fa8c|branch|9b3b862e47c760cd|66f6666618258285|2dcd284c2c099103|1470191864|output/metrics/IPBES_NFF_4937409|t20740.4823707832s|s8578b|8578|file|local|vector|metrics||0.072||
+metrics_523786e58a3d3988|branch|d3b6e60907914a35|66f6666618258285|550c9881220fa715|2104604250|output/metrics/IPBES_PAND_2499181|t20740.482371236s|s37475b|37475|file|local|vector|metrics||0.037||
+metrics|pattern|acdd66c1fa7fd098|66f6666618258285||1271126549||||46053|file|local|vector||metrics_2f66038ee595fa8c*metrics_523786e58a3d3988|0.109||
