@@ -61,5 +61,8 @@ sanbox/*
 IPBES.LiteratureReport.code-workspace
 website/*
 
-./output/
+/output/
 .gitignore
+
+# macOS
+.DS_Store
