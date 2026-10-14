@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Generates bibliography reports for IPBES Zotero groups. For each group listed in [input/groups.csv](input/groups.csv) (columns: `name`, `id`), the pipeline downloads the Zotero library, resolves DOIs to OpenAlex works, computes metrics, and (eventually) renders per-group Quarto reports plus an index page.
+Generates bibliography reports for IPBES Zotero groups. For each group listed in [input/groups.yaml](input/groups.yaml) (a list of entries with `name`, `id`), the pipeline downloads the Zotero library, resolves DOIs to OpenAlex works, computes metrics, and (eventually) renders per-group Quarto reports plus an index page.
 
 The project is mid-refactor: it used to be an R package (`LitReport` / `IPBES.LiteratureReport`) and is being converted into a pure `targets` pipeline. Consequences a fresh Claude should know about:
 
@@ -24,7 +24,7 @@ targets::tar_read(metrics)  # inspect a target
 targets::tar_destroy()      # wipe _targets/ cache
 ```
 
-Edit [input/groups.csv](input/groups.csv) to change which Zotero groups are processed. Dynamic branching maps one branch per row, so adding a row adds a branch without further code changes.
+Edit [input/groups.yaml](input/groups.yaml) to change which Zotero groups are processed. Dynamic branching maps one branch per entry, so adding an entry adds a branch without further code changes.
 
 The README's "open `index.qmd` and render it" workflow refers to the old (package-era) flow and does not match the current `targets`-driven pipeline.
 
@@ -32,7 +32,7 @@ The README's "open `index.qmd` and render it" workflow refers to the old (packag
 
 [_targets.R](_targets.R):
 
-1. `group_file` / `groups_df` / `group` — read [input/groups.csv](input/groups.csv) and fan out one branch per row.
+1. `group_file` / `groups_df` / `group` — read [input/groups.yaml](input/groups.yaml) and fan out one branch per row.
 2. `zotero_group` — [get_zotero_group()](R/get_zotero_group.R) downloads each Zotero group as CSV into `output/zotero_groups/IPBES_<name>_<id>/`. Returns the directory path; target `format = "file"`.
 3. `zotero_works` — [get_works()](R/get_works.R) reads the Zotero CSV(s), extracts DOIs via `openalexPro::extract_doi()`, queries OpenAlex with `openalexPro::pro_query()` + `pro_fetch()`, writes to `output/zotero_works/<group>/`.
 4. `metrics` — [get_metrics.R](R/get_metrics.R) computes per-group metrics.

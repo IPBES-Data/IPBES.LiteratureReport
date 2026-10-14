@@ -19,7 +19,6 @@ targets::tar_option_set(
     # The packages will be loaded befort the pipaline is run
     "dplyr",
     "ggplot2",
-    "openalexR",
     "openalexPro",
     "quarto",
     "tibble",
@@ -27,7 +26,6 @@ targets::tar_option_set(
   ),
   imports = c(
     # The functions in these pacages are tracked for changes.
-    # "openalexR",
     # "knitr",
     # "dplyr",
     # "ggplot2",
@@ -35,11 +33,11 @@ targets::tar_option_set(
 )
 
 list(
-  # Track input groups.csv -------------------------------------------------
+  # Track input groups.yaml ------------------------------------------------
 
   tar_target(
-    group_file,
-    file.path("input", "groups.csv"),
+    config_file,
+    file.path("input", "config.yaml"),
     format = "file"
   ),
 
@@ -57,28 +55,25 @@ list(
     format = "file"
   ),
 
-  # Read full table as data.frame ------------------------------------------
+  # Read config entries ------------------------------------------
 
   tar_target(
-    groups_df,
-    read.csv(group_file, stringsAsFactors = FALSE)
+    assessment,
+    yaml::read_yaml(config_file)$assessments,
+    iteration = "list"
   ),
 
-  # Create one branch per row ----------------------------------------------
-
   tar_target(
-    group,
-    groups_df,
-    pattern = map(groups_df),
-    iteration = "list"
+    metric_names,
+    yaml::read_yaml(config_file)$metrics
   ),
 
   # Get Zotero group file for each row -------------------------------------
 
   tar_target(
     zotero_group,
-    get_zotero_group(group = group),
-    pattern = map(group),
+    get_zotero_group(group = assessment),
+    pattern = map(assessment),
     format = "file"
   ),
 
@@ -93,10 +88,34 @@ list(
 
   # # Calculate metrics ------------------------------------------------------
 
+  # all met_*.R files (measures and helpers), so that changes rerun metrics
+  tar_target(
+    metric_code,
+    list.files("R", pattern = "^met_.*\\.R$", full.names = TRUE),
+    format = "file",
+    cue = tar_cue(mode = "always")
+  ),
+
   tar_target(
     metrics,
-    get_metrics(zotero_group, zotero_works),
+    get_metrics(zotero_group, zotero_works, metric_names, metric_code),
     pattern = map(zotero_group, zotero_works),
+    format = "file"
+  ),
+
+  tar_target(
+    metric_docs,
+    get_metric_docs(metric_names, metric_code)
+  ),
+
+  tar_target(
+    metric_docs_file,
+    {
+      file <- file.path("output", "report", "metrics.md")
+      dir.create(dirname(file), recursive = TRUE, showWarnings = FALSE)
+      writeLines(c("# Metrics", "", metric_docs), file)
+      file
+    },
     format = "file"
   ),
 

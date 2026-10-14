@@ -1,7 +1,16 @@
-#' Used in the pipeline - Load and prepare bibliography
+#' Get the OpenAlex works of a Zotero group
 #'
-#' This function gets the works associated with dois in the zotero library.
-
+#' Extracts the DOIs from the Zotero CSV files and fetches the matching works
+#' from OpenAlex with `openalexPro::pro_query()` and
+#' `openalexPro::pro_fetch()`. The works are saved as a parquet dataset in
+#' `output/zotero_works/<group>/`. An existing directory is deleted first.
+#'
+#' @param zotero_group Directory with the Zotero CSV files, as returned by
+#'   [get_zotero_group()].
+#' @param verbose Not used.
+#'
+#' @return Path to the parquet dataset, as returned by
+#'   `openalexPro::pro_fetch()`.
 get_works <- function(
   zotero_group = NULL,
   verbose = FALSE
@@ -22,45 +31,38 @@ get_works <- function(
     showWarnings = FALSE
   )
 
-  path <- normalizePath(path)
+  path <- normalizePath(path, mustWork = FALSE)
 
   ##
 
-  zotBib <- list.files(
-    zotero_group,
-    pattern = "\\.csv$",
-    full.names = TRUE
-  ) |>
-    lapply(
-      FUN = read.table,
-      header = TRUE,
-      colClasses = "character",
-      sep = ","
-    ) |>
-    dplyr::bind_rows() |>
+  zotBib <- arrow::open_csv_dataset(zotero_group) |>
     dplyr::select(
       Key,
       DOI
     ) |>
+    dplyr::filter(
+      !is.na(DOI)
+    ) |>
+    dplyr::collect() |>
     dplyr::mutate(
       DOI = openalexPro::extract_doi(
         DOI,
         non_doi_value = NA_character_
       )
-    ) |>
-    dplyr::filter(
-      !is.na(DOI)
     )
 
   zotWorksDB <-
     openalexPro::pro_query(
       entity = "works",
-      doi = zotBib$DOI
+      doi = zotBib$DOI,
+      chunk_limit = 200
     ) |>
     openalexPro::pro_fetch(
       project_folder = file.path(path),
       delete_input = TRUE,
-      overwrite = TRUE
+      overwrite = TRUE,
+      compact_parquet = 250000,
+      via = "oqo"
     )
 
   # add in_oa to bibliography_bibliography

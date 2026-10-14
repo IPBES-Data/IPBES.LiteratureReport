@@ -1,0 +1,34 @@
+assessments:
+  - name: NFF
+    id: 4937409
+  - name: PAND
+    id: 2499181
+
+metrics:
+  identifiers:
+    - met_id_doi
+    - met_id_isbn
+    - met_id_issn
+    - met_id_doi_misplaced
+    - met_id_none
+  metadata:
+    - met_meta_fields
+    - met_meta_year
+    - met_meta_duplicates
+  openalex_check:
+    - met_check_found
+    - met_check_retracted
+    - met_check_mismatch
+    - met_check_type
+  profile:
+    - met_prof_year
+    - met_prof_oa
+    - met_prof_journals
+    - met_prof_countries
+    - met_prof_types
+    - met_prof_language
+  maintenance:
+    - met_maint_activity
+    - met_maint_tags
+
+

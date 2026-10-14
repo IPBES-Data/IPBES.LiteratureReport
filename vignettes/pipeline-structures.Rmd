@@ -18,7 +18,7 @@ functions. Each helper returns the path to a saved artifact (CSV, RDS, or ggplot
 that `targets` can rely on `format = "file"` tracking. The branch that matters for a
 single Zotero group is defined in `inst/targets_template/_targets.R` and expands as:
 
-1. `group_file`  -  locate `input/groups.csv`.
+1. `group_file`  -  locate `input/groups.yaml`.
 2. `groups_df`  -  read the table and split it into per-row `group` objects.
 3. `zotero_group`  -  call `update_group()` to download the Zotero export.
 4. `bibliography`  -  call `load_bibliography()` to build a rich bibliography bundle.
