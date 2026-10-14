@@ -35,15 +35,14 @@ get_works <- function(
 
   ##
 
-  zotBib <- arrow::open_csv_dataset(zotero_group) |>
+  zotBib <- read_zotero(zotero_group) |>
     dplyr::select(
       Key,
       DOI
     ) |>
     dplyr::filter(
-      !is.na(DOI)
+      DOI != ""
     ) |>
-    dplyr::collect() |>
     dplyr::mutate(
       DOI = openalexPro::extract_doi(
         DOI,

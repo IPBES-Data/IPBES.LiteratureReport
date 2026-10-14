@@ -25,13 +25,9 @@ get_metrics <- function(
   metric_names,
   metric_code = NULL
 ) {
-  zotero <- list.files(
-    zotero_group,
-    pattern = "\\.csv$",
-    full.names = TRUE
-  ) |>
-    lapply(read.csv, colClasses = "character") |>
-    dplyr::bind_rows()
+  zotero <- read_zotero(zotero_group)
+  # column names as used by the measures, e.g. "Item Type" -> "Item.Type"
+  names(zotero) <- make.names(names(zotero), unique = TRUE)
 
   works <- arrow::open_dataset(zotero_works)
 
