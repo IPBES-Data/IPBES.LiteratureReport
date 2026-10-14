@@ -1,74 +1,73 @@
 ---
-title: "Bibliography Reports"
 date: today
+date-format: "D MMMM YYYY"
 format:
-    html:
-        toc: true
-        toc-depth: 2
-        embed-resources: true
-        code-fold: true
-        code-summary: "Show the code"
+  html:
+    toc: true
+    toc-depth: 2
+    embed-resources: true
+execute:
+  echo: false
+  warning: false
+  message: false
 params:
-    report_files: !expr targets::tar_read(group_reports)
+  metrics: ""
+  reports: ""
+  names: ""
+  ids: ""
+  helpers: ""
+  docs: ""
 ---
 
-# Introduction
-
 ```{r}
-#| label: setup
-#| echo: false
-
-library(knitr)
-library(LitReport)
-
-if (!(exists("params"))) {
-  params <- rmarkdown::yaml_front_matter("./bibliography_report.qmd")$params
-}
-# Make sure that one sees the progress messages when rendering this document
-knitr::opts_chunk$set(message = NA)
-
+#| include: false
+source(params$helpers)
 ```
 
-This document is the starting page to the IPBES Bibliography Reports. Thes reports give information about the bibliographies from IPBES on Zotero.
+These reports show the state of the IPBES Zotero groups, and list the items
+in each group which should be corrected. Open the report of a group for the
+details and for links to the items in Zotero.
 
-## Reports
+## Groups
 
 ```{r}
-#| label: reports_listing
+groups <- lapply(
+  seq_along(params$metrics),
+  function(i) {
+    m <- readRDS(params$metrics[[i]])
+    checks <- rep_checks(m)
+    tibble::tibble(
+      Group = paste0(
+        "[", params$names[[i]], "](", params$reports[[i]], '){target="_blank"}'
+      ),
+      Items = nrow(m$items),
+      `With DOI` = paste0(round(m$identifiers$met_id_doi$zotero$pc), "%"),
+      `Please fix` = sum(checks$count[checks$status == "Please fix"]),
+      `Please check` = sum(checks$count[checks$status == "Please check"]),
+      Zotero = paste0(
+        "[open](https://www.zotero.org/groups/", params$ids[[i]],
+        '){target="_blank"}'
+      )
+    )
+  }
+)
 
-data.frame(
-  Name = params$report_files$full_name,
-  " " = paste0(
-    '<a href="https://www.zotero.org/groups/',
-    params$report_files$id,
-    '" target="_blank">',
-    'Zotero Library',
-    "</a>"
-  ),
-  " " = paste0(
-    '<a href="',
-    gsub(
-      file.path("output", "report", ""),
-      "",
-      params$report_files$file
-    ),
-    '" target="_blank">',
-    'Bibliography Report',
-    "</a>"
-  ),
-  check.names = FALSE
-) |>
-  knitr::kable(
-    format = "html",
-    escape = FALSE,
-    caption = "List of the reports"
-  )
+knitr::kable(
+  dplyr::bind_rows(groups),
+  align = c("l", "r", "r", "r", "r", "l")
+)
 ```
 
-## The pipeline used
+**Please fix**: number of items with errors. **Please check**: number of
+items which may need a correction.
+
+## Metrics documentation
+
+The measures calculated for each group, and what they contain.
 
 ```{r}
-#| echo: false
-
-targets::tar_glimpse()
+#| output: asis
+docs <- readLines(params$docs)
+docs <- docs[docs != "# Metrics"]
+cat(sub("^(#+) ", "\\1# ", docs), sep = "\n")
 ```

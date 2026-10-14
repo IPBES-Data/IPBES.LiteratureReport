@@ -29,8 +29,8 @@ assessments:
   #   id: 2345372
   # - name: IPCC
   #   id: 2603670
-  # - name: TCA
-  #   id: 4589462
+  - name: TCA
+    id: 4589462
 
 metrics:
   identifiers:

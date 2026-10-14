@@ -1,0 +1,382 @@
+---
+date: today
+date-format: "D MMMM YYYY"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-location: left
+    embed-resources: true
+    page-layout: full
+execute:
+  echo: false
+  warning: false
+  message: false
+params:
+  metrics: ""
+  name: ""
+  id: 0
+  helpers: ""
+  docs: ""
+---
+
+```{r}
+#| include: false
+source(params$helpers)
+
+m <- readRDS(params$metrics)
+gid <- params$id
+checks <- rep_checks(m)
+group_url <- paste0("https://www.zotero.org/groups/", gid)
+
+# table of items to fix, or a note if the check was not run
+fix <- function(items, ...) {
+  if (is.null(items)) {
+    htmltools::p(htmltools::em("This check was not run."))
+  } else {
+    rep_fix_table(items, gid, ...)
+  }
+}
+
+# add the Zotero titles to a table which only has item keys
+add_title <- function(items) {
+  dplyr::left_join(
+    items,
+    dplyr::select(m$items, key, Title = title),
+    by = "key"
+  ) |>
+    dplyr::relocate(Title, .after = key)
+}
+
+pc <- function(x) if (is.null(x)) NA else paste0(round(x), "%")
+```
+
+This report shows the state of the Zotero group **`r params$name`**
+([open the group in Zotero](`r group_url`)). It gives an overview of the
+literature in the group, and lists the items which should be corrected.
+
+Each item in the lists can be opened in the Zotero **web** library or in
+the Zotero **app** on your computer, so that it can be corrected directly.
+Corrected items disappear from the lists the next time the report is
+updated. Some checks compare the items with
+[OpenAlex](https://openalex.org), an open catalogue of scholarly
+publications.
+
+## Summary
+
+```{r}
+checks |>
+  dplyr::transmute(
+    Status = rep_status_label(status),
+    Check = paste0("[", check, "](#", id, ")"),
+    Items = count
+  ) |>
+  knitr::kable(align = c("l", "l", "r"))
+```
+
+**Please fix**: these items contain errors. **Please check**: these items
+may need a correction. **For information**: no action needed unless the
+group uses this, e.g. tags.
+
+## Items to fix
+
+The lists are sorted by importance. Use the search field above a list to
+find an item. **web** opens the item in the Zotero web library, **app** in
+the Zotero app.
+
+### Retracted publications {#retracted}
+
+These publications have been retracted. Check whether they should still be
+cited, and mark or remove them in Zotero.
+
+```{r}
+x <- m$openalex_check$met_check_retracted
+fix(
+  if (!is.null(x)) dplyr::transmute(x$items, key, Title = title, DOI = doi),
+  doi_cols = "DOI"
+)
+```
+
+### DOI points to a different publication {#wrong-doi}
+
+The DOI of these items leads to a publication with a different title or
+year. Usually the DOI is wrong: open the DOI to see where it leads, and
+correct it in Zotero. Differences of one year (e.g. published online before
+print) are not listed.
+
+```{r}
+x <- m$openalex_check$met_check_mismatch
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      `Title in Zotero` = title_zotero,
+      `Year in Zotero` = year_zotero,
+      `The DOI leads to` = title_openalex,
+      `Its year` = year_openalex,
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
+### Items which are in the group more than once {#duplicates}
+
+These items are in the group more than once, with the same DOI, or with the
+same title, year and first author. Keep one copy and merge or delete the
+others, e.g. with *Duplicate Items* in the Zotero app.
+
+```{r}
+x <- rep_duplicates(m)
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(x, key = keys, Title = title, Copies = count)
+  }
+)
+```
+
+### DOI field with an invalid DOI {#invalid-doi}
+
+The DOI field of these items contains something which is not a valid DOI.
+Correct or remove it.
+
+```{r}
+x <- m$identifiers$met_id_doi$zotero$invalid
+fix(
+  if (!is.null(x)) {
+    add_title(tibble::tibble(
+      key = names(x),
+      `Content of the DOI field` = unname(x)
+    ))
+  }
+)
+```
+
+### DOI in the wrong field {#misplaced-doi}
+
+These items have no DOI in the DOI field, but a DOI in the URL or Extra
+field. Copy the DOI into the DOI field. If the item type has no DOI field,
+the DOI is fine in Extra.
+
+```{r}
+x <- m$identifiers$met_id_doi_misplaced
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `DOI in URL` = doi_in_url,
+      `DOI in Extra` = doi_in_extra
+    )
+  },
+  doi_cols = c("DOI in URL", "DOI in Extra")
+)
+```
+
+### DOI not found in OpenAlex {#not-found}
+
+These DOIs were not found in OpenAlex. The DOI may be wrong: open it to
+check. If it leads to the right publication, the publication is simply not
+(yet) in OpenAlex and nothing needs to be done.
+
+```{r}
+x <- m$openalex_check$met_check_found$zotero_not_in_oa
+fix(
+  if (!is.null(x)) add_title(tibble::tibble(key = names(x), DOI = unname(x))),
+  doi_cols = "DOI"
+)
+```
+
+### Missing or unusual publication year {#year}
+
+These items have no date, a date from which no year could be read, or a year
+in the future. Correct the date in Zotero.
+
+```{r}
+x <- m$metadata$met_meta_year
+problems <- c(
+  missing = "No date",
+  unparseable = "Year not recognised",
+  future = "Year in the future"
+)
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Date = date,
+      Problem = unname(problems[problem])
+    )
+  }
+)
+```
+
+### Items without DOI, ISBN, ISSN or URL {#no-identifier}
+
+Readers cannot easily find these items. Add a DOI, ISBN, ISSN or URL if one
+exists. Some items, e.g. personal communications, have none.
+
+```{r}
+x <- m$identifiers$met_id_none
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(x$items, key, Title = title, Type = rep_type(type))
+  }
+)
+```
+
+### Items without tags {#untagged}
+
+These items have no tags. This only matters if the group uses tags, e.g. to
+assign items to chapters.
+
+```{r}
+x <- m$maintenance$met_maint_tags
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(x$items, key, Title = title, Type = rep_type(type))
+  }
+)
+```
+
+## The group at a glance
+
+```{r}
+oa <- m$profile$met_prof_oa$total
+open <- c("gold", "diamond", "green", "hybrid", "bronze")
+
+tibble::tribble(
+  ~Figure                                                         , ~Value ,
+  "Items in the group"                                            ,
+  format(nrow(m$items))                                           ,
+  "Items with a valid DOI"                                        ,
+  pc(m$identifiers$met_id_doi$zotero$pc)                          ,
+  "DOIs found in OpenAlex"                                        ,
+  pc(m$openalex_check$met_check_found$pc_in_oa)                   ,
+  "Open access, of the publications found in OpenAlex"            ,
+  if (is.null(oa)) NA else pc(sum(oa$pc[oa$oa_status %in% open])) ,
+  "Grey literature (reports, theses, web pages, preprints, ...)"  ,
+  pc(m$profile$met_prof_types$zotero$pc_grey)                     ,
+  "Items in English"                                              ,
+  pc(m$profile$met_prof_language$zotero$pc_english)               ,
+  "Items without language"                                        ,
+  pc(m$profile$met_prof_language$zotero$pc_missing)
+) |>
+  dplyr::filter(!is.na(Value)) |>
+  knitr::kable(align = c("l", "r"))
+```
+
+### Publication years
+
+```{r}
+#| fig-height: 3.5
+#| fig-width: 9
+years <- m$profile$met_prof_year$zotero$by_year
+if (!is.null(years)) {
+  ggplot2::ggplot(
+    dplyr::filter(years, !is.na(year)),
+    ggplot2::aes(year, count)
+  ) +
+    ggplot2::geom_col(fill = "#2c7fb8") +
+    ggplot2::labs(x = "Publication year", y = "Items") +
+    ggplot2::theme_minimal(base_size = 13)
+}
+```
+
+### Types of items
+
+```{r}
+#| fig-height: 4
+#| fig-width: 9
+types <- m$profile$met_prof_types$zotero$by_type
+if (!is.null(types)) {
+  ggplot2::ggplot(
+    types,
+    ggplot2::aes(
+      count,
+      stats::reorder(rep_type(type), count),
+      fill = ifelse(grey, "Grey literature", "Other")
+    )
+  ) +
+    ggplot2::geom_col() +
+    ggplot2::scale_fill_manual(
+      values = c("Grey literature" = "#9e9e9e", "Other" = "#2c7fb8")
+    ) +
+    ggplot2::labs(x = "Items", y = NULL, fill = NULL) +
+    ggplot2::theme_minimal(base_size = 13)
+}
+```
+
+### Open access
+
+Open access status of the publications found in OpenAlex. *Gold* and
+*diamond*: open in an open access journal; *hybrid*: open in a subscription
+journal; *green*: an open copy is in a repository; *bronze*: free to read on
+the publisher's site; *closed*: not openly available.
+
+```{r}
+#| fig-height: 3
+#| fig-width: 9
+if (!is.null(oa)) {
+  ggplot2::ggplot(
+    dplyr::filter(oa, !is.na(oa_status)),
+    ggplot2::aes(
+      count,
+      factor(oa_status, levels = rev(c(open, "closed")))
+    )
+  ) +
+    ggplot2::geom_col(fill = "#2c7fb8") +
+    ggplot2::labs(x = "Publications", y = NULL) +
+    ggplot2::theme_minimal(base_size = 13)
+}
+```
+
+### Most frequent journals
+
+```{r}
+journals <- m$profile$met_prof_journals$zotero$top
+if (!is.null(journals)) {
+  knitr::kable(
+    utils::head(journals, 10),
+    col.names = c("Journal", "Items"),
+    align = c("l", "r")
+  )
+}
+```
+
+### Countries of the authors
+
+Number of publications with at least one author from the country, for the
+publications found in OpenAlex.
+
+```{r}
+countries <- m$profile$met_prof_countries$by_country
+if (!is.null(countries)) {
+  utils::head(countries, 15) |>
+    dplyr::transmute(
+      Country = countrycode::countrycode(
+        country,
+        "iso2c",
+        "country.name",
+        warn = FALSE
+      ),
+      Publications = count
+    ) |>
+    knitr::kable(align = c("l", "r"))
+}
+```
+
+## How the checks work
+
+::: {.callout-note collapse="true" appearance="simple"}
+## Details of the checks
+
+```{r}
+#| output: asis
+cat(gsub("(?m)^(#+) ", "\\1## ", params$docs, perl = TRUE))
+```
+:::

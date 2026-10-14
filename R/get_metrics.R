@@ -15,8 +15,9 @@
 #'   when a `R/met_*.R` file changes.
 #'
 #' @return Path to the RDS file. It contains a list with one element per
-#'   metric group, each a list with one element per measure, and the group
-#'   `name`.
+#'   metric group, each a list with one element per measure, the group
+#'   `name`, and `items`, a tibble with `key`, `title` and `type` of all
+#'   Zotero items.
 
 get_metrics <- function(
   zotero_group,
@@ -48,6 +49,11 @@ get_metrics <- function(
     simplify = FALSE
   )
   result$name <- basename(zotero_group)
+  result$items <- tibble::tibble(
+    key = zotero$Key,
+    title = zotero$Title,
+    type = zotero$Item.Type
+  )
 
   class(result) <- c(class(result), "bibliography_metrics")
 
