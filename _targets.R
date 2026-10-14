@@ -68,12 +68,22 @@ list(
     yaml::read_yaml(config_file)$metrics
   ),
 
-  # Get Zotero group file for each row -------------------------------------
+  # Check Zotero group version (always), download only when it changed ----
+
+  tar_target(
+    zotero_version,
+    zotFunc::get_group_version(assessment$id, api_key = zotero_api_key()),
+    pattern = map(assessment),
+    cue = tar_cue(mode = "always")
+  ),
 
   tar_target(
     zotero_group,
-    get_zotero_group(group = assessment),
-    pattern = map(assessment),
+    {
+      zotero_version # dependency only: new version -> download again
+      get_zotero_group(group = assessment)
+    },
+    pattern = map(zotero_version, assessment),
     format = "file"
   ),
 

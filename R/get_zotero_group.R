@@ -35,17 +35,11 @@ get_zotero_group <- function(
 
   message(">>>>>>>\nDownloading group ", group$name, " ...")
 
-  api_key <- NULL
-  try(
-    api_key <- keyring::key_get("API_zotero"),
-    silent = TRUE
-  )
-
   get_group(
     group_id = group$id,
     path = path,
     output_format = "csv",
-    api_key = api_key
+    api_key = zotero_api_key()
   )
 
   message("Downloaded group ", group$name, "!\n<<<<<<<\n")
@@ -54,4 +48,19 @@ get_zotero_group <- function(
   message(path)
   message(file.exists(path))
   return(path)
+}
+
+#' Zotero API key
+#'
+#' Reads the Zotero API key with `keyring::key_get("API_zotero")`.
+#'
+#' @return The API key, or `NULL` if none is stored (only public groups can
+#'   then be accessed).
+zotero_api_key <- function() {
+  api_key <- NULL
+  try(
+    api_key <- keyring::key_get("API_zotero"),
+    silent = TRUE
+  )
+  return(api_key)
 }
