@@ -148,11 +148,28 @@ css <- "
 .notes { color: #555; font-size: 0.9em; }
 .warn { color: #c62828; font-weight: bold; }
 .intro { max-width: 60em; }
+.made { opacity: 0.55; }
 table.status { margin-bottom: 10px; }
 table.status th { font-weight: normal; padding: 4px 16px 4px 0; }
 table.status td { padding: 4px 16px 4px 0; }
 table.status .count { text-align: right; }
 "
+
+# table of proposed changes, as shown in the Fixes and Restore tabs
+changes_table <- function(changes, rows, doi, openalex, group_id, check = NULL) {
+  tibble::tibble(
+    Title = vapply(rows, function(r) r$title %||% "", ""),
+    Field = vapply(rows, function(r) r$field %||% "", ""),
+    Change = vapply(rows, function(r) diff_html(r$diff), ""),
+    Why = vapply(rows, function(r) r$reason_for_change %||% "", ""),
+    Check = if (is.null(check)) {
+      vapply(rows, function(r) if (isTRUE(r$ok)) "OK" else r$problem, "")
+    } else {
+      rep(check, length(rows))
+    },
+    Open = paste0(zotero_links(changes$item_key, group_id), doi_link(doi), openalex_link(openalex))
+  )
+}
 
 # ---- proposed changes: table, sending for approval, result ------------------
 # Used by the Fixes and the Restore tab. `compute()` returns
@@ -175,11 +192,13 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
     pending <- reactiveVal(NULL) # list(changes, preview, action)
     not_proposed <- reactiveVal(NULL)
     result <- reactiveVal(NULL)
+    n_done <- reactiveVal(0) # changes left out because they are made already
 
     clear <- function() {
       pending(NULL)
       not_proposed(NULL)
       result(NULL)
+      n_done(0)
     }
     observeEvent(reset(), clear())
 
@@ -197,31 +216,84 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
       # OpenAlex work of the DOI an item gets (or keeps), if it exists
       doi <- ifelse(x$changes$new != "", x$changes$new, x$changes$old)
       doi[x$changes$field != "DOI"] <- NA
-      oa <- openalex_ids(doi)
+      oa <- unname(openalex_ids(doi)[tolower(doi)])
+      # changes whose value is in Zotero already are made: they cannot be
+      # applied again and are shown separately on request
+      now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
+      made <- !is.na(now) & tolower(now) == tolower(x$changes$new)
+      n_done(sum(made))
+      pv_open <- pv
+      pv_open$rows <- pv$rows[!made]
       pending(list(
-        changes = x$changes,
-        preview = pv,
+        changes = x$changes[!made, ],
+        preview = pv_open,
         action = x$action,
-        doi = doi,
-        openalex = unname(oa[tolower(doi)])
+        doi = doi[!made],
+        openalex = oa[!made],
+        done = list(
+          changes = x$changes[made, ],
+          rows = pv$rows[made],
+          doi = doi[made],
+          openalex = oa[made]
+        )
       ))
     })
 
     output$proposals_ui <- renderUI({
-      p <- pending()
-      req(p)
+      pc <- pending()
+      req(pc)
       # the batch limit is handled by sending in several batches
-      b <- unlist(p$preview$blockers)
+      b <- unlist(pc$preview$blockers)
       b <- b[!grepl("^Too many changes", b)]
       tagList(
         hr(),
         h4("Proposed changes"),
-        if (length(b)) {
-          div(class = "warn", "Zotero will refuse these changes: ", tags$ul(lapply(b, tags$li)))
+        if (!nrow(pc$changes)) {
+          p(sprintf("Nothing outstanding — all %d changes are made already.", n_done()))
+        } else {
+          tagList(
+            if (length(b)) {
+              div(class = "warn", "Zotero will refuse these changes: ", tags$ul(lapply(b, tags$li)))
+            },
+            reactable::reactableOutput(ns("proposals")),
+            br(),
+            actionButton(ns("send"), "Send selected changes to Zotero for approval", class = "btn-primary")
+          )
         },
-        reactable::reactableOutput(ns("proposals")),
-        br(),
-        actionButton(ns("send"), "Send selected changes to Zotero for approval", class = "btn-primary")
+        if (n_done()) {
+          tagList(
+            br(),
+            checkboxInput(
+              ns("show_done"),
+              sprintf("Show the %d change%s made already", n_done(), if (n_done() == 1) "" else "s")
+            ),
+            uiOutput(ns("done_ui"))
+          )
+        }
+      )
+    })
+
+    # changes made already: greyed out, without tick boxes
+    output$done_ui <- renderUI({
+      req(isTRUE(input$show_done))
+      d <- pending()$done
+      div(
+        class = "made",
+        p(
+          class = "notes",
+          "These changes are in Zotero already and cannot be applied again. ",
+          "Changes made through Safe Edit can be undone in the Undo tab."
+        ),
+        reactable::reactable(
+          changes_table(d$changes, d$rows, d$doi, d$openalex, group(), check = "Made already"),
+          columns = list(
+            Change = reactable::colDef(html = TRUE, minWidth = 300),
+            Open = reactable::colDef(html = TRUE, minWidth = 90)
+          ),
+          searchable = TRUE,
+          defaultPageSize = 25,
+          wrap = TRUE
+        )
       )
     })
 
@@ -243,23 +315,11 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
 
     output$proposals <- reactable::renderReactable({
       p <- pending()
-      req(p)
+      req(p, nrow(p$changes))
       rows <- p$preview$rows
-      tab <- tibble::tibble(
-        Title = vapply(rows, function(r) r$title %||% "", ""),
-        Field = vapply(rows, function(r) r$field %||% "", ""),
-        Change = vapply(rows, function(r) diff_html(r$diff), ""),
-        Why = vapply(rows, function(r) r$reason_for_change %||% "", ""),
-        Check = vapply(rows, function(r) if (isTRUE(r$ok)) "OK" else r$problem, ""),
-        Open = paste0(
-          zotero_links(p$changes$item_key, group()),
-          doi_link(p$doi),
-          openalex_link(p$openalex)
-        )
-      )
       # rows are selected with the tick boxes only, so that the links work
       reactable::reactable(
-        tab,
+        changes_table(p$changes, rows, p$doi, p$openalex, group()),
         selection = "multiple",
         defaultSelected = which(vapply(rows, function(r) isTRUE(r$ok), TRUE)),
         columns = list(
@@ -537,7 +597,7 @@ server <- function(input, output, session) {
           "Items: from the report data of ", format(fc$time, "%Y-%m-%d %H:%M"), ". ",
           "Fixed: of these, items which have the proposed value in Zotero now",
           if (!fc$in_zotero) " (–: the group is not in this Zotero)",
-          ". Click a fix to show its proposed changes."
+          ". Click a fix to show its outstanding proposed changes."
         )
       )
     )
