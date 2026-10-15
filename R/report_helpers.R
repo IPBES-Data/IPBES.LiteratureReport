@@ -150,6 +150,8 @@ rep_checks <- function(
     n(m$identifiers$met_id_doi$zotero$count_invalid), "fix",
     "doi-form", "DOI field with a link or prefix instead of the DOI",
     n(m$identifiers$met_id_doi_form$count), "fix",
+    "issn-form", "ISSN not in the standard form",
+    n(m$identifiers$met_id_issn_form$count), "check",
     "misplaced-doi", "DOI in the wrong field",
     n(m$identifiers$met_id_doi_misplaced$count), "check",
     "not-found", "DOI not found in OpenAlex",

@@ -3,8 +3,9 @@
 #' Journal articles with an empty journal, volume, issue or pages field whose
 #' DOI was found in OpenAlex with these details: the values in OpenAlex are
 #' proposed. The journal is only taken if the publication is in a journal in
-#' OpenAlex (not e.g. a repository). Items whose DOI points to a different
-#' publication are left out.
+#' OpenAlex (not e.g. a repository). Page ranges which end before they start
+#' (e.g. `1260-2`, shortened or wrong) are not proposed. Items whose DOI
+#' points to a different publication are left out.
 #'
 #' @param zotero Zotero items as read from the CSV export (data frame).
 #' @param openalex OpenAlex works (arrow dataset).
@@ -39,6 +40,10 @@ met_check_fill <- function(
     source <- works$primary_location$source
     first <- works$biblio$first_page
     last <- works$biblio$last_page
+    # ranges ending before they start (e.g. "1260-2", shortened or wrong) are
+    # not proposed
+    odd <- suppressWarnings(as.numeric(last) < as.numeric(first)) %in% TRUE
+    first[odd] <- NA
     works <- tibble::tibble(
       doi = works$doi,
       publicationTitle = ifelse(source$type %in% "journal", source$display_name, NA),

@@ -1,4 +1,4 @@
-#' Fix: OpenAlex ID → Extra
+#' Fix: no OpenAlex ID → OpenAlex ID in Extra field
 #'
 #' Proposes to add a line `OpenAlex: W…` to the Extra field of items whose DOI
 #' was found in OpenAlex, as found by `met_check_openalex_id`. The line is

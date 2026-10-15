@@ -176,6 +176,28 @@ fix(
 )
 ```
 
+### ISSN not in the standard form {#issn-form}
+
+The ISSN field of these items is not in the standard form `1234-567X`
+(several separated by ", "), or contains something which is not a valid
+ISSN, e.g. an ISBN.
+
+```{r}
+x <- m$identifiers$met_id_issn_form
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `Content of the ISSN field` = issn,
+      `Standard form` = standard,
+      `Not a valid ISSN` = invalid
+    )
+  }
+)
+```
+
 ### DOI in the wrong field {#misplaced-doi}
 
 These items have no DOI in the DOI field, but a DOI in the URL or Extra

@@ -1,4 +1,4 @@
-#' Fix: DOI link or prefix in the DOI field → DOI
+#' Fix: DOI as link or with prefix → DOI only in DOI field
 #'
 #' Proposes to replace the content of the DOI field by the DOI only, for items
 #' for which `met_id_doi_form` found the DOI as a link or with a prefix. The

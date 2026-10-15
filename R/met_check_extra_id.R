@@ -10,13 +10,15 @@
 #'   0.8, see [title_similarity()]).
 #'
 #' @param zotero Zotero items as read from the CSV export (data frame).
-#' @param openalex Not used.
+#' @param openalex OpenAlex works (arrow dataset), for the ID of the item's
+#'   DOI.
 #' @param extra_ids OpenAlex IDs in Extra, as saved by [get_extra_ids()].
 #'
 #' @return A list with
 #' - `items`: tibble with `key`, `title`, `value` (after `OpenAlex:`),
-#'   `oa_title`, `oa_doi` (of the work in OpenAlex) and `problem`, one row per
-#'   line which is not valid
+#'   `oa_title`, `oa_doi` (of the work in OpenAlex), `problem`, `extra`
+#'   (content of Extra) and `doi_id` (OpenAlex ID of the item's DOI, `NA` if
+#'   none), one row per line which is not valid
 #' - `count`: number of items with a line which is not valid
 #' - `count_checked`: number of items with an OpenAlex line
 met_check_extra_id <- function(
@@ -31,7 +33,9 @@ met_check_extra_id <- function(
     value = character(),
     oa_title = character(),
     oa_doi = character(),
-    problem = character()
+    problem = character(),
+    extra = character(),
+    doi_id = character()
   )
   if (is.null(extra_ids) || nrow(extra_ids) == 0) {
     metrics$count <- 0L
@@ -61,9 +65,23 @@ met_check_extra_id <- function(
   )
   x <- x[!is.na(x$problem), ]
 
+  # the right ID: the one of the item's DOI
+  x$extra <- zotero$Extra[match(x$key, zotero$Key)]
+  x$doi_id <- NA_character_
+  if (nrow(x) && "id" %in% names(openalex)) {
+    works <- openalex |>
+      dplyr::select(
+        doi,
+        id
+      ) |>
+      dplyr::collect()
+    j <- oa_join(zotero[zotero$Key %in% x$key, ], openalex, works)
+    x$doi_id <- sub("^https://openalex.org/", "", j$id[match(x$key, j$Key)])
+  }
+
   metrics$items <- dplyr::bind_rows(
     metrics$items,
-    dplyr::select(x, key, title, value, oa_title, oa_doi, problem)
+    dplyr::select(x, key, title, value, oa_title, oa_doi, problem, extra, doi_id)
   )
   metrics$count <- length(unique(x$key))
   metrics$count_checked <- length(unique(extra_ids$key))

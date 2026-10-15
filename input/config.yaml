@@ -39,6 +39,7 @@ metrics:
     - met_id_doi
     - met_id_isbn
     - met_id_issn
+    - met_id_issn_form
     - met_id_doi_misplaced
     - met_id_doi_form
     - met_id_none

@@ -17,30 +17,45 @@ groups <- stats::setNames(
   vapply(cfg$assessments, function(a) a$name, "")
 )
 
-# fix types: label -> function(m, group_id)
-fixes <- list(
-  "DOI in URL or Extra → DOI field" = fix_doi_misplaced,
-  "DOI link or prefix → DOI" = fix_doi_form,
-  "Language → language code" = fix_language,
-  "Missing date → date from OpenAlex" = fix_date,
-  "Empty journal, volume, issue, pages → from OpenAlex" = fix_fill,
-  "No DOI → DOI found in OpenAlex" = fix_doi_candidates,
-  "OpenAlex ID → Extra" = fix_openalex_id
+# fixes: problem → value in field, the fix function(m, group_id), the check
+# in the report (rep_checks()) for its status, and whether it is sent with one
+# button, without a table (nothing to check)
+fix_info <- tibble::tribble(
+  ~problem, ~value, ~field, ~fun, ~check, ~bulk,
+  "DOI in wrong field", "DOI from other field (URL, Extra)", "DOI", fix_doi_misplaced, "misplaced-doi", FALSE,
+  "DOI as link or with prefix", "DOI without link or prefix", "DOI", fix_doi_form, "doi-form", FALSE,
+  "Language not as ISO code", "ISO language code", "Language", fix_language, "language", FALSE,
+  "No date", "Date from OpenAlex", "Date", fix_date, "year", FALSE,
+  "Empty fields", "Values from OpenAlex", "Journal, Volume, Issue, Pages", fix_fill, "fill", FALSE,
+  "No DOI", "DOI found in OpenAlex", "DOI", fix_doi_candidates, "doi-candidates", FALSE,
+  "No OpenAlex ID", "OpenAlex ID of the DOI", "Extra", fix_openalex_id, "openalex-id", TRUE,
+  "ISSN not in standard form", "ISSN in standard form", "ISSN", fix_issn_form, "issn-form", FALSE,
+  "OpenAlex ID not valid", "OpenAlex ID of the DOI", "Extra", fix_extra_id, "extra-id", FALSE
 )
-
-# fixes without anything to check: sent to Zotero with one button, no table
-bulk_fixes <- c("OpenAlex ID → Extra")
-
-# check in the report (rep_checks()) each fix belongs to, for its status
-fix_checks <- c(
-  "DOI in URL or Extra → DOI field" = "misplaced-doi",
-  "DOI link or prefix → DOI" = "doi-form",
-  "Language → language code" = "language",
-  "Missing date → date from OpenAlex" = "year",
-  "Empty journal, volume, issue, pages → from OpenAlex" = "fill",
-  "No DOI → DOI found in OpenAlex" = "doi-candidates",
-  "OpenAlex ID → Extra" = "openalex-id"
+fix_info$label <- paste0(
+  fix_info$problem, " → ", fix_info$value, " in ",
+  fix_info$field, ifelse(grepl(",", fix_info$field), " fields", " field")
 )
+# sorted by field: DOI first, as the fixes with values from OpenAlex rely on
+# it, Extra (identifiers for other tools) last (order within a field as above)
+fix_info <- fix_info[order(
+  fix_info$field != "DOI",
+  fix_info$field == "Extra",
+  tolower(fix_info$field)
+), ]
+fixes <- stats::setNames(fix_info$fun, fix_info$label)
+fix_checks <- stats::setNames(fix_info$check, fix_info$label)
+bulk_fixes <- fix_info$label[fix_info$bulk]
+
+# readable names of Zotero fields, as shown in the tables
+field_label <- function(field) {
+  labels <- c(
+    DOI = "DOI", publicationTitle = "Journal", volume = "Volume", issue = "Issue",
+    pages = "Pages", date = "Date", language = "Language", extra = "Extra",
+    url = "URL", ISBN = "ISBN", ISSN = "ISSN", title = "Title"
+  )
+  ifelse(field %in% names(labels), labels[field], field)
+}
 
 # whether Zotero has the new value of a change already; DOIs are not case
 # sensitive, other fields are (`EN` -> `en` is a change)
@@ -265,7 +280,7 @@ changes_table <- function(changes, rows, doi, openalex, group_id, check = NULL) 
       dplyr::na_if(vapply(rows, function(r) r$title %||% "", ""), ""),
       changes$title
     ),
-    Field = vapply(rows, function(r) r$field %||% "", ""),
+    Field = field_label(vapply(rows, function(r) r$field %||% "", "")),
     Change = vapply(rows, function(r) diff_html(r$diff), ""),
     Why = vapply(rows, function(r) r$reason_for_change %||% "", ""),
     Check = if (is.null(check)) {
@@ -292,7 +307,7 @@ not_proposed_table <- function(x) {
   dplyr::transmute(
     x,
     Title = title,
-    Field = field,
+    Field = field_label(field),
     Value = old,
     Note = ifelse(
       fixed,
@@ -575,7 +590,7 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
         tibble::tibble(Title = character(), Field = character(), Status = character(), Reason = character()),
         lapply(results, function(x) tibble::tibble(
           Title = unname(titles[x$item_key]) %||% x$item_key,
-          Field = x$field,
+          Field = field_label(x$field),
           Status = x$status,
           Reason = x$reason %||% ""
         ))
@@ -731,7 +746,7 @@ server <- function(input, output, session) {
       ),
       p(
         class = "notes",
-        "Fields which may be edited: ", paste(unlist(s$allowed_fields), collapse = ", "),
+        "Fields which may be edited: ", paste(field_label(unlist(s$allowed_fields)), collapse = ", "),
         " · at most ", s$max_batch_size, " changes per approval (set in Zotero: Settings → Safe Edit)"
       )
     )
@@ -792,6 +807,7 @@ server <- function(input, output, session) {
       } else {
         "For information"
       }
+      info <- fix_info[fix_info$label == r$label, ]
       tags$tr(
         tags$th(tags$a(
           href = "#",
@@ -799,8 +815,10 @@ server <- function(input, output, session) {
             "Shiny.setInputValue('goto_fix', %s, {priority: 'event'}); return false;",
             jsonlite::toJSON(r$label, auto_unbox = TRUE)
           ),
-          r$label
+          info$problem
         )),
+        tags$td(info$value),
+        tags$td(info$field),
         tags$td(class = "count", r$items),
         tags$td(class = "count", if (is.na(r$fixed)) "–" else r$fixed),
         tags$td(HTML(rep_status_label(status))),
@@ -812,7 +830,9 @@ server <- function(input, output, session) {
       tags$table(
         class = "status",
         tags$tr(
-          tags$th("Fix"),
+          tags$th("Problem"),
+          tags$th("Value"),
+          tags$th("Field"),
           tags$th(class = "count", "Items"),
           tags$th(class = "count", "Fixed"),
           tags$th("Status"),
@@ -826,8 +846,15 @@ server <- function(input, output, session) {
           "Items: from the report data of ", format(fc$time, "%Y-%m-%d %H:%M"), ". ",
           "Fixed: of these, items which have the proposed value in Zotero now",
           if (!fc$in_zotero) " (–: the group is not in this Zotero)",
-          ". Click a fix to show its outstanding proposed changes."
+          ". Click a problem to show its outstanding proposed changes."
         )
+      ),
+      p(
+        class = "notes",
+        "Some fixes build on others: once an item has a DOI (from another field or ",
+        "found in OpenAlex), the fixes with values from OpenAlex (date, empty fields, ",
+        "OpenAlex ID) can only find it after the next sync and run of the pipeline. ",
+        "So several rounds may be needed: fix, sync, run the pipeline, fix again."
       )
     )
   })
@@ -1031,7 +1058,7 @@ server <- function(input, output, session) {
       By = x$client,
       Action = x$action,
       Title = x$title %||% "",
-      Field = x$field,
+      Field = field_label(x$field),
       Old = x$old,
       New = x$new,
       Status = x$status,
