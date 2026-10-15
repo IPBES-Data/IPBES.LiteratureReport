@@ -22,12 +22,19 @@ fixes <- list(
   "DOI in URL or Extra → DOI field" = fix_doi_misplaced
 )
 
+# check in the report (rep_checks()) each fix belongs to, for its status
+fix_checks <- c(
+  "DOI in URL or Extra → DOI field" = "misplaced-doi"
+)
+
+metrics_file <- function(group_id) {
+  name <- names(groups)[groups == group_id]
+  file.path(project, "output", "metrics", paste0("IPBES_", name, "_", group_id, ".rds"))
+}
+
 read_metrics <- function(group_id) {
   name <- names(groups)[groups == group_id]
-  file <- file.path(
-    project, "output", "metrics",
-    paste0("IPBES_", name, "_", group_id, ".rds")
-  )
+  file <- metrics_file(group_id)
   if (!file.exists(file)) {
     stop("No metrics for group ", name, " — run the pipeline first.", call. = FALSE)
   }
@@ -143,7 +150,8 @@ css <- "
 .intro { max-width: 60em; }
 table.status { margin-bottom: 10px; }
 table.status th { font-weight: normal; padding: 4px 16px 4px 0; }
-table.status td { padding: 4px 0; }
+table.status td { padding: 4px 16px 4px 0; }
+table.status .count { text-align: right; }
 "
 
 # ---- proposed changes: table, sending for approval, result ------------------
@@ -175,7 +183,7 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
     }
     observeEvent(reset(), clear())
 
-    observeEvent(load(), {
+    observeEvent(load(), ignoreInit = TRUE, {
       clear()
       x <- compute()
       if (is.null(x)) return()
@@ -316,12 +324,16 @@ ui <- fluidPage(
     column(8, br(), actionButton("refresh", "Refresh"), textOutput("connection", inline = TRUE))
   ),
   tabsetPanel(
+    id = "tabs",
     tabPanel(
       "Status",
       br(),
       uiOutput("status"),
       actionButton("backup", "Make a backup of this group"),
-      actionButton("register", "Register this app in Zotero")
+      actionButton("register", "Register this app in Zotero"),
+      br(),
+      br(),
+      uiOutput("fixes_status")
     ),
     tabPanel(
       "Fixes",
@@ -442,6 +454,118 @@ server <- function(input, output, session) {
     )
   })
 
+  # supported fixes: items to fix (report data), items fixed since (current
+  # values in Zotero, via the plugin) and status as in the report
+  fix_counts <- reactive({
+    tick()
+    file <- metrics_file(group())
+    if (!file.exists(file)) {
+      return(NULL)
+    }
+    m <- readRDS(file)
+    checks <- rep_checks(m)
+    in_zotero <- isTRUE(group_status()$in_zotero)
+    rows <- lapply(names(fixes), function(label) {
+      x <- fixes[[label]](m, group())
+      proposed <- x[x$proposed, ]
+      fixed <- if (!nrow(proposed)) 0L else NA_integer_
+      if (nrow(proposed) && in_zotero) {
+        pv <- tryCatch(se_preview(proposed), error = function(e) NULL)
+        if (!is.null(pv)) {
+          now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
+          fixed <- sum(tolower(now) == tolower(proposed$new), na.rm = TRUE)
+        }
+      }
+      list(
+        label = label,
+        items = nrow(proposed),
+        fixed = fixed,
+        not_proposed = sum(!x$proposed),
+        severity = checks$severity[checks$id == fix_checks[[label]]]
+      )
+    })
+    list(rows = rows, time = file.mtime(file), in_zotero = in_zotero)
+  })
+
+  output$fixes_status <- renderUI({
+    fc <- fix_counts()
+    if (is.null(fc)) {
+      return(p(class = "warn", "No report data for this group — run the pipeline first."))
+    }
+    rows <- lapply(fc$rows, function(r) {
+      open <- r$items - if (is.na(r$fixed)) 0 else r$fixed
+      status <- if (open == 0) {
+        "OK"
+      } else if (identical(r$severity, "fix")) {
+        "Please fix"
+      } else if (identical(r$severity, "check")) {
+        "Please check"
+      } else {
+        "For information"
+      }
+      tags$tr(
+        tags$th(tags$a(
+          href = "#",
+          onclick = sprintf(
+            "Shiny.setInputValue('goto_fix', %s, {priority: 'event'}); return false;",
+            jsonlite::toJSON(r$label, auto_unbox = TRUE)
+          ),
+          r$label
+        )),
+        tags$td(class = "count", r$items),
+        tags$td(class = "count", if (is.na(r$fixed)) "–" else r$fixed),
+        tags$td(HTML(rep_status_label(status))),
+        tags$td(class = "notes", if (r$not_proposed) sprintf("%d not proposed", r$not_proposed))
+      )
+    })
+    tagList(
+      h4("Fixes"),
+      tags$table(
+        class = "status",
+        tags$tr(
+          tags$th("Fix"),
+          tags$th(class = "count", "Items"),
+          tags$th(class = "count", "Fixed"),
+          tags$th("Status"),
+          tags$th("")
+        ),
+        rows
+      ),
+      p(
+        class = "notes",
+        paste0(
+          "Items: from the report data of ", format(fc$time, "%Y-%m-%d %H:%M"), ". ",
+          "Fixed: of these, items which have the proposed value in Zotero now",
+          if (!fc$in_zotero) " (–: the group is not in this Zotero)",
+          ". Click a fix to show its proposed changes."
+        )
+      )
+    )
+  })
+
+  # clicking a fix in the Status tab opens it in the Fixes tab
+  fix_load <- reactiveVal(0)
+  goto_pending <- reactiveVal(NULL)
+  observeEvent(input$load_fix, fix_load(fix_load() + 1))
+  observeEvent(input$goto_fix, {
+    label <- input$goto_fix
+    req(label %in% names(fixes))
+    updateTabsetPanel(session, "tabs", selected = "Fixes")
+    if (identical(input$fix, label)) {
+      fix_load(fix_load() + 1)
+    } else {
+      goto_pending(label)
+      updateSelectInput(session, "fix", selected = label)
+    }
+  })
+  # after the proposals were cleared because the fix changed
+  observeEvent(input$fix, priority = -10, {
+    if (identical(goto_pending(), input$fix)) {
+      goto_pending(NULL)
+      fix_load(fix_load() + 1)
+    }
+  })
+
   observeEvent(input$register, {
     ok <- safely(function() se_register())
     if (isTRUE(ok)) showNotification("Registered. The token is stored in the keyring.")
@@ -462,7 +586,7 @@ server <- function(input, output, session) {
     "fixes",
     group = group,
     status = status,
-    load = reactive(input$load_fix),
+    load = fix_load,
     reset = reactive(list(input$group, input$fix)),
     compute = function() {
       m <- safely(function() read_metrics(group()))
