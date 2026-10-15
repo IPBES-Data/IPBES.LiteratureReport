@@ -179,8 +179,7 @@ fix(
 ### DOI in the wrong field {#misplaced-doi}
 
 These items have no DOI in the DOI field, but a DOI in the URL or Extra
-field. Copy the DOI into the DOI field. If the item type has no DOI field,
-the DOI is fine in Extra.
+field. Copy the DOI into the DOI field.
 
 ```{r}
 x <- m$identifiers$met_id_doi_misplaced
@@ -328,6 +327,30 @@ fix(
       `Year (OpenAlex)` = cand_year,
       `Author (OpenAlex)` = cand_author,
       Match = ifelse(is.na(note), match, paste0(match, ": ", note)),
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
+### Items without their OpenAlex ID in Extra {#openalex-id}
+
+These items were found in OpenAlex by their DOI, but their Extra field has
+no line `OpenAlex: W…` with the ID of the publication in OpenAlex, or a
+different one. The ID links the item to OpenAlex. A different ID can come
+from OpenAlex merging records; open both to check.
+
+```{r}
+x <- m$openalex_check$met_check_openalex_id
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `OpenAlex ID` = id,
+      `ID in Extra` = extra_id,
       DOI = doi
     )
   },

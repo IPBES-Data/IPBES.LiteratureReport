@@ -2,15 +2,16 @@
 #'
 #' Proposes to set the empty DOI field of items for which
 #' `met_id_doi_misplaced` found a DOI in the URL or Extra field. Items with
-#' different DOIs in URL and Extra are not proposed. The plugin rejects items
-#' whose type has no DOI field (the DOI is fine in Extra there).
+#' different DOIs in URL and Extra are not proposed.
 #'
 #' All `fix_*` functions take the metrics of a group and its id and return a
 #' tibble with `group_id`, `item_key`, `title`, `field`, `old`, `new`,
 #' `reason`, `proposed` and `note`, and optionally `doi` (the item's DOI, for
 #' the DOI and OpenAlex links, if the field changed is not the DOI field),
 #' `choice` (rows with the same value are alternatives, of which only one can
-#' be selected) and `preselect` (`FALSE` for rows not selected at the start).
+#' be selected), `preselect` (`FALSE` for rows not selected at the start) and
+#' `append` (a line to add: the change is then based on the current value in
+#' Zotero).
 #'
 #' @param m Metrics of one group, as saved by [get_metrics()].
 #' @param group_id Zotero group id.

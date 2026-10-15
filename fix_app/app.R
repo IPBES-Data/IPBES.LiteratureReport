@@ -24,8 +24,12 @@ fixes <- list(
   "Language → language code" = fix_language,
   "Missing date → date from OpenAlex" = fix_date,
   "Empty journal, volume, issue, pages → from OpenAlex" = fix_fill,
-  "No DOI → DOI found in OpenAlex" = fix_doi_candidates
+  "No DOI → DOI found in OpenAlex" = fix_doi_candidates,
+  "OpenAlex ID → Extra" = fix_openalex_id
 )
+
+# fixes without anything to check: sent to Zotero with one button, no table
+bulk_fixes <- c("OpenAlex ID → Extra")
 
 # check in the report (rep_checks()) each fix belongs to, for its status
 fix_checks <- c(
@@ -34,7 +38,8 @@ fix_checks <- c(
   "Language → language code" = "language",
   "Missing date → date from OpenAlex" = "year",
   "Empty journal, volume, issue, pages → from OpenAlex" = "fill",
-  "No DOI → DOI found in OpenAlex" = "doi-candidates"
+  "No DOI → DOI found in OpenAlex" = "doi-candidates",
+  "OpenAlex ID → Extra" = "openalex-id"
 )
 
 # whether Zotero has the new value of a change already; DOIs are not case
@@ -167,8 +172,9 @@ css <- "
   background: radial-gradient(#0b6bcb 45%, transparent 50%); border-color: #0b6bcb; }
 /* round buttons; related buttons grouped in a labelled pill (pill()) */
 .btn { border-radius: 999px; }
-.btn-default { background: #e3eefa; border-color: #9cbfe3; color: #1d4f7c; }
-.btn-default:hover, .btn-default:focus { background: #cfe1f5; border-color: #6a9fd4; color: #1d4f7c; }
+.btn-default:not(.btn-primary) { background: #e3eefa; border-color: #9cbfe3; color: #1d4f7c; }
+.btn-default:not(.btn-primary):hover, .btn-default:not(.btn-primary):focus {
+  background: #cfe1f5; border-color: #6a9fd4; color: #1d4f7c; }
 .btn:disabled, .btn.disabled { background: #e6e6e6 !important; border-color: #ccc !important;
   color: #999 !important; opacity: 1; cursor: not-allowed; }
 .pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 4px 4px 16px;
@@ -187,6 +193,64 @@ table.status th { font-weight: normal; padding: 4px 16px 4px 0; }
 table.status td { padding: 4px 16px 4px 0; }
 table.status .count { text-align: right; }
 "
+
+# changes adding a line (`append` column) are based on the current value in
+# Zotero, so that other changes of the field since the report do not get in
+# the way; a line which is there already counts as made (new = current)
+rebase_append <- function(changes, now) {
+  if (!"append" %in% names(changes)) {
+    return(changes)
+  }
+  i <- which(!is.na(now))
+  there <- vapply(i, function(k) changes$append[k] %in% strsplit(now[k], "\n")[[1]], NA)
+  changes$old[i] <- now[i]
+  changes$new[i] <- ifelse(
+    there,
+    now[i],
+    ifelse(now[i] == "", changes$append[i], paste0(now[i], "\n", changes$append[i]))
+  )
+  changes
+}
+
+# whether changes only add one line at the end of the field, or remove it
+# again (as the plugin checks for its line batches)
+is_line_change <- function(old, new) {
+  added <- function(a, b) {
+    start <- ifelse(a == "", "", paste0(a, "\n"))
+    line <- substring(b, nchar(start) + 1)
+    startsWith(b, start) & trimws(line) != "" & !grepl("\n", line, fixed = TRUE)
+  }
+  added(old, new) | added(new, old)
+}
+
+# largest batch the plugin accepts for these changes: large batches of added
+# lines if allowed in the plugin settings, else the normal limit
+max_batch <- function(s, old, new) {
+  n <- s$max_batch_size %||% 25
+  if (isTRUE(s$line_batches) && length(old) > n && all(is_line_change(old, new))) {
+    s$max_line_batch_size
+  } else {
+    n
+  }
+}
+
+# sends changes to Zotero for approval, in batches of at most `max_batch`;
+# stops at the first batch which is cancelled or refused. Returns the results.
+apply_batches <- function(changes, action, max_batch) {
+  batches <- split(seq_len(nrow(changes)), ceiling(seq_len(nrow(changes)) / max_batch))
+  results <- list()
+  for (i in seq_along(batches)) {
+    showNotification(sprintf("Batch %d of %d: approve the changes in Zotero …", i, length(batches)))
+    r <- safely(function() se_apply(changes[batches[[i]], ], action = action))
+    if (is.null(r)) break
+    if (!identical(r$status, "done")) {
+      showNotification(paste0("Batch ", i, ": ", r$status, explain(r)), type = "warning", duration = NULL)
+      break # cancelled or refused: do not open further dialogs
+    }
+    results <- c(results, r$results)
+  }
+  results
+}
 
 # related buttons, grouped under a label
 pill <- function(label, ...) {
@@ -285,6 +349,12 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
       }
       pv <- safely(function() se_preview(x$changes))
       if (is.null(pv)) return()
+      if ("append" %in% names(x$changes)) {
+        now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
+        x$changes <- rebase_append(x$changes, now)
+        pv <- safely(function() se_preview(x$changes))
+        if (is.null(pv)) return()
+      }
       # OpenAlex work of the DOI an item gets (or keeps), if it exists
       doi <- ifelse(x$changes$new != "", x$changes$new, x$changes$old)
       doi[x$changes$field != "DOI"] <- NA
@@ -493,20 +563,8 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
         showNotification("No changes selected.")
         return()
       }
-      max_batch <- status()$max_batch_size %||% 25
       changes <- p$changes[sel, ]
-      batches <- split(seq_len(nrow(changes)), ceiling(seq_len(nrow(changes)) / max_batch))
-      results <- list()
-      for (i in seq_along(batches)) {
-        showNotification(sprintf("Batch %d of %d: approve the changes in Zotero …", i, length(batches)))
-        r <- safely(function() se_apply(changes[batches[[i]], ], action = p$action))
-        if (is.null(r)) break
-        if (!identical(r$status, "done")) {
-          showNotification(paste0("Batch ", i, ": ", r$status, explain(r)), type = "warning", duration = NULL)
-          break # cancelled or refused: do not open further dialogs
-        }
-        results <- c(results, r$results)
-      }
+      results <- apply_batches(changes, p$action, max_batch(status(), changes$old, changes$new))
       titles <- stats::setNames(
         vapply(p$preview$rows, function(r) r$title %||% "", ""),
         vapply(p$preview$rows, function(r) r$item_key %||% "", "")
@@ -560,7 +618,8 @@ ui <- fluidPage(
         "Zotero, where you approve them."
       ),
       selectInput("fix", "Fix", choices = names(fixes)),
-      actionButton("load_fix", "Show proposed changes"),
+      uiOutput("fix_action"),
+      uiOutput("bulk_result"),
       changes_ui("fixes")
     ),
     tabPanel(
@@ -697,7 +756,7 @@ server <- function(input, output, session) {
         pv <- tryCatch(se_preview(proposed), error = function(e) NULL)
         if (!is.null(pv)) {
           now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
-          made <- is_made(now, proposed)
+          made <- is_made(now, rebase_append(proposed, now))
           fixed <- if ("choice" %in% names(proposed)) {
             length(unique(proposed$choice[made]))
           } else {
@@ -819,6 +878,7 @@ server <- function(input, output, session) {
     load = fix_load,
     reset = reactive(list(input$group, input$fix)),
     compute = function() {
+      if (input$fix %in% bulk_fixes) return(NULL) # no table, see below
       m <- safely(function() read_metrics(group()))
       if (is.null(m)) return(NULL)
       all <- fixes[[input$fix]](m, group())
@@ -830,6 +890,68 @@ server <- function(input, output, session) {
     },
     done = bump
   )
+
+  # fixes without anything to check: one button, sends all outstanding changes
+  output$fix_action <- renderUI({
+    if (!input$fix %in% bulk_fixes) {
+      return(actionButton("load_fix", "Show proposed changes"))
+    }
+    m <- tryCatch(read_metrics(group()), error = function(e) NULL)
+    n <- if (is.null(m)) 0 else sum(fixes[[input$fix]](m, group())$proposed)
+    tagList(
+      p(
+        class = "notes",
+        "Nothing to check here: the changes are sent to Zotero without a table, ",
+        "where you approve them. Each change only adds a line, so all can be approved ",
+        "at once if \"Allow large batches which only add a line\" is ticked in Zotero ",
+        "(Settings → Safe Edit); otherwise at most ", status()$max_batch_size %||% 25,
+        " per approval. They are in the log on the Undo tab. Changes made already are left out."
+      ),
+      pill(
+        sprintf("%d item%s", n, if (n == 1) "" else "s"),
+        actionButton("bulk_fix", "Send all to Zotero for approval", class = "btn-primary btn-sm", disabled = n == 0)
+      )
+    )
+  })
+
+  bulk_result <- reactiveVal(NULL)
+  observeEvent(list(input$group, input$fix), bulk_result(NULL))
+  observeEvent(input$bulk_fix, {
+    bulk_result(NULL)
+    m <- safely(function() read_metrics(group()))
+    req(m)
+    x <- fixes[[input$fix]](m, group())
+    x <- x[x$proposed, ]
+    pv <- safely(function() se_preview(x))
+    req(pv)
+    now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
+    x <- rebase_append(x, now)
+    open <- !is.na(now) & !is_made(now, x)
+    if (!any(open)) {
+      showNotification("Nothing to change: all changes are made already.")
+      return()
+    }
+    x <- x[open, ]
+    results <- apply_batches(x, "edit", max_batch(status(), x$old, x$new))
+    n <- table(factor(
+      vapply(results, function(r) r$status, ""),
+      levels = c("applied", "skipped", "deselected", "failed")
+    ))
+    bulk_result(sprintf(
+      "%d of %d changes applied%s.",
+      n[["applied"]], sum(open),
+      if (sum(n) > n[["applied"]]) {
+        sprintf(" (%d skipped, %d deselected, %d failed)", n[["skipped"]], n[["deselected"]], n[["failed"]])
+      } else {
+        ""
+      }
+    ))
+    bump()
+  })
+  output$bulk_result <- renderUI({
+    req(bulk_result())
+    p(br(), strong(bulk_result()))
+  })
 
   # ---- restore ---------------------------------------------------------------
 
@@ -959,8 +1081,9 @@ server <- function(input, output, session) {
       return()
     }
     ids <- log_table()$id[sel]
-    max_batch <- status()$max_batch_size %||% 25
-    for (b in split(ids, ceiling(seq_along(ids) / max_batch))) {
+    e <- Filter(function(x) x$id %in% ids, log_entries())
+    n <- max_batch(status(), vapply(e, function(x) x$old %||% "", ""), vapply(e, function(x) x$new %||% "", ""))
+    for (b in split(ids, ceiling(seq_along(ids) / n))) {
       r <- safely(function() se_undo(group(), b))
       if (is.null(r) || !identical(r$status, "done")) {
         if (!is.null(r)) {

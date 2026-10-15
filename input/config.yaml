@@ -55,6 +55,7 @@ metrics:
     - met_check_type
     - met_check_date
     - met_check_fill
+    - met_check_openalex_id
   profile:
     - met_prof_year
     - met_prof_oa
