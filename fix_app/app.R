@@ -59,6 +59,28 @@ diff_html <- function(diff) {
   ))
 }
 
+# links to open items in Zotero. Browsers often block zotero:// links, so the
+# "app" link asks the server (running on this computer) to open it.
+zotero_links <- function(keys, group_id) {
+  url <- paste0("zotero://select/groups/", group_id, "/items/", keys)
+  paste0(
+    '<a href="https://www.zotero.org/groups/', group_id, "/items/", keys,
+    '" target="_blank">web</a> &middot; ',
+    '<a href="#" onclick="Shiny.setInputValue(\'open_zotero\', \'', url,
+    '\', {priority: \'event\'}); return false;">app</a>'
+  )
+}
+
+# opens a zotero:// link with the system; only links to items are accepted
+open_in_zotero <- function(url) {
+  if (!is.character(url) || length(url) != 1 ||
+    !grepl("^zotero://select/groups/[0-9]+/items/[A-Z0-9]+$", url)) {
+    return(invisible(FALSE))
+  }
+  utils::browseURL(url)
+  invisible(TRUE)
+}
+
 # times from the plugin (UTC, ISO 8601) in local time
 local_time <- function(x) {
   format(
@@ -155,7 +177,16 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
       }
       pv <- safely(function() se_preview(x$changes))
       if (is.null(pv)) return()
-      pending(list(changes = x$changes, preview = pv, action = x$action))
+      # OpenAlex work of the DOI an item gets (or keeps), if it exists
+      doi <- ifelse(x$changes$new != "", x$changes$new, x$changes$old)
+      doi[x$changes$field != "DOI"] <- NA
+      oa <- openalex_ids(doi)
+      pending(list(
+        changes = x$changes,
+        preview = pv,
+        action = x$action,
+        openalex = unname(oa[tolower(doi)])
+      ))
     })
 
     output$proposals_ui <- renderUI({
@@ -202,12 +233,12 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
         Change = vapply(rows, function(r) diff_html(r$diff), ""),
         Why = vapply(rows, function(r) r$reason_for_change %||% "", ""),
         Check = vapply(rows, function(r) if (isTRUE(r$ok)) "OK" else r$problem, ""),
-        Open = rep_zotero_links(p$changes$item_key, group())
+        Open = paste0(zotero_links(p$changes$item_key, group()), openalex_link(p$openalex))
       )
+      # rows are selected with the tick boxes only, so that the links work
       reactable::reactable(
         tab,
         selection = "multiple",
-        onClick = "select",
         defaultSelected = which(vapply(rows, function(r) isTRUE(r$ok), TRUE)),
         columns = list(
           Change = reactable::colDef(html = TRUE, minWidth = 300),
@@ -329,6 +360,9 @@ server <- function(input, output, session) {
   observeEvent(input$refresh, bump())
 
   group <- reactive(as.numeric(input$group))
+
+  # "app" links in the tables
+  observeEvent(input$open_zotero, open_in_zotero(input$open_zotero))
 
   status <- reactive({
     tick()
