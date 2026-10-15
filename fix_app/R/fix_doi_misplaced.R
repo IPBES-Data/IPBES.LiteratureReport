@@ -17,17 +17,7 @@ fix_doi_misplaced <- function(
 ) {
   x <- m$identifiers$met_id_doi_misplaced$items
   if (is.null(x) || nrow(x) == 0) {
-    return(tibble::tibble(
-      group_id = numeric(),
-      item_key = character(),
-      title = character(),
-      field = character(),
-      old = character(),
-      new = character(),
-      reason = character(),
-      proposed = logical(),
-      note = character()
-    ))
+    return(no_changes())
   }
 
   ambiguous <- !is.na(x$doi_in_url) &
@@ -48,5 +38,20 @@ fix_doi_misplaced <- function(
     ),
     proposed = !ambiguous,
     note = ifelse(ambiguous, "Different DOIs in URL and Extra", NA_character_)
+  )
+}
+
+#' No changes, in the form returned by the `fix_*` functions
+no_changes <- function() {
+  tibble::tibble(
+    group_id = numeric(),
+    item_key = character(),
+    title = character(),
+    field = character(),
+    old = character(),
+    new = character(),
+    reason = character(),
+    proposed = logical(),
+    note = character()
   )
 }

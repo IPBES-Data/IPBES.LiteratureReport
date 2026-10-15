@@ -20,6 +20,56 @@ per_source <- function(
   return(lapply(args, fun))
 }
 
+#' Standard language codes
+#'
+#' Converts language values to standard codes (ISO 639-1, optionally with a
+#' region: `en`, `en-US`), using the ISO 639-2 list of the R package ISOcodes.
+#' Recognised are two-letter codes in any spelling (`EN`, `en_us`),
+#' three-letter codes (`eng`, `fre`, `fra`) and the English names of the
+#' languages, incl. alternative names (`Flemish` for Dutch).
+#'
+#' @param x Language values.
+#'
+#' @return The standard codes, `NA` where a value is not recognised.
+language_code <- function(
+  x
+) {
+  iso <- ISOcodes::ISO_639_2
+  iso <- iso[!is.na(iso$Alpha_2), ]
+  names_all <- strsplit(iso$Name, ";\\s*")
+  by_name <- stats::setNames(
+    rep(iso$Alpha_2, lengths(names_all)),
+    tolower(unlist(names_all))
+  )
+  by_three <- c(
+    stats::setNames(iso$Alpha_2, iso$Alpha_3_B),
+    stats::setNames(iso$Alpha_2, iso$Alpha_3_T)
+  )
+
+  vapply(
+    trimws(x),
+    function(v) {
+      if (is.na(v) || v == "") {
+        return(as.character(NA))
+      }
+      m <- regmatches(v, regexec("^([A-Za-z]{2})(?:[-_]([A-Za-z]{2}))?$", v, perl = TRUE))[[1]]
+      if (length(m) && tolower(m[2]) %in% iso$Alpha_2) {
+        return(if (nzchar(m[3])) paste0(tolower(m[2]), "-", toupper(m[3])) else tolower(m[2]))
+      }
+      l <- tolower(v)
+      if (l %in% names(by_three)) {
+        return(unname(by_three[l]))
+      }
+      if (l %in% names(by_name)) {
+        return(unname(by_name[l]))
+      }
+      as.character(NA)
+    },
+    "",
+    USE.NAMES = FALSE
+  )
+}
+
 #' Common bibliography columns
 #'
 #' Extracts the same columns from the Zotero items or the OpenAlex works, so

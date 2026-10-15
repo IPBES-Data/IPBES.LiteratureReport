@@ -154,6 +154,28 @@ fix(
 )
 ```
 
+### DOI field with a link or prefix instead of the DOI {#doi-form}
+
+The DOI field of these items contains the DOI as a link
+(`https://doi.org/…`) or with a prefix (`DOI …`). Citation styles add the
+link themselves, so it would appear twice. Replace it with the DOI only.
+
+```{r}
+x <- m$identifiers$met_id_doi_form
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `Content of the DOI field` = doi_raw,
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
 ### DOI in the wrong field {#misplaced-doi}
 
 These items have no DOI in the DOI field, but a DOI in the URL or Extra
@@ -202,6 +224,7 @@ problems <- c(
   unparseable = "Year not recognised",
   future = "Year in the future"
 )
+oa <- m$openalex_check$met_check_date$items
 fix(
   if (!is.null(x)) {
     dplyr::transmute(
@@ -209,7 +232,31 @@ fix(
       key,
       Title = title,
       Date = date,
-      Problem = unname(problems[problem])
+      Problem = unname(problems[problem]),
+      `Date in OpenAlex` = if (is.null(oa)) NA_character_ else oa$date[match(key, oa$key)]
+    )
+  }
+)
+```
+
+### Language not given as a language code {#language}
+
+The language of these items is not given as a language code (`en`, `fr`,
+`en-US`), e.g. as `English` or `eng`. Citation styles only recognise the
+codes. Where the language was recognised, the code is shown; otherwise look
+up the code in the
+[ISO 639-1 list](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).
+
+```{r}
+x <- m$metadata$met_meta_language
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Language = language,
+      `Language code` = code
     )
   }
 )

@@ -19,13 +19,26 @@ groups <- stats::setNames(
 
 # fix types: label -> function(m, group_id)
 fixes <- list(
-  "DOI in URL or Extra → DOI field" = fix_doi_misplaced
+  "DOI in URL or Extra → DOI field" = fix_doi_misplaced,
+  "DOI link or prefix → DOI" = fix_doi_form,
+  "Language → language code" = fix_language,
+  "Missing date → date from OpenAlex" = fix_date
 )
 
 # check in the report (rep_checks()) each fix belongs to, for its status
 fix_checks <- c(
-  "DOI in URL or Extra → DOI field" = "misplaced-doi"
+  "DOI in URL or Extra → DOI field" = "misplaced-doi",
+  "DOI link or prefix → DOI" = "doi-form",
+  "Language → language code" = "language",
+  "Missing date → date from OpenAlex" = "year"
 )
+
+# whether Zotero has the new value of a change already; DOIs are not case
+# sensitive, other fields are (`EN` -> `en` is a change)
+is_made <- function(now, changes) {
+  doi <- changes$field == "DOI"
+  !is.na(now) & ifelse(doi, tolower(now) == tolower(changes$new), now == changes$new)
+}
 
 metrics_file <- function(group_id) {
   name <- names(groups)[groups == group_id]
@@ -171,6 +184,32 @@ changes_table <- function(changes, rows, doi, openalex, group_id, check = NULL) 
   )
 }
 
+# changes which are not proposed, to be fixed by hand. Items whose value in
+# Zotero was changed since the report are marked as fixed locally (not
+# marked if the plugin cannot be reached).
+not_proposed_table <- function(x) {
+  now <- rep(NA_character_, nrow(x))
+  if (nrow(x)) {
+    pv <- tryCatch(se_preview(x), error = function(e) NULL)
+    if (!is.null(pv)) {
+      now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
+    }
+  }
+  fixed <- !is.na(now) & now != x$old
+  dplyr::transmute(
+    x,
+    Title = title,
+    Field = field,
+    Value = old,
+    Note = ifelse(
+      fixed,
+      paste0("Fixed locally (now: ", ifelse(now == "", "empty", now), ")"),
+      note
+    ),
+    Open = zotero_links(item_key, group_id)
+  )
+}
+
 # ---- proposed changes: table, sending for approval, result ------------------
 # Used by the Fixes and the Restore tab. `compute()` returns
 # list(changes, not_proposed, action) or NULL; `reset` lists the inputs whose
@@ -220,7 +259,7 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
       # changes whose value is in Zotero already are made: they cannot be
       # applied again and are shown separately on request
       now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
-      made <- !is.na(now) & tolower(now) == tolower(x$changes$new)
+      made <- is_made(now, x$changes)
       n_done(sum(made))
       pv_open <- pv
       pv_open$rows <- pv$rows[!made]
@@ -300,7 +339,17 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
     output$not_proposed_ui <- renderUI({
       x <- not_proposed()
       req(!is.null(x), nrow(x) > 0)
-      tagList(hr(), h4("Not proposed"), reactable::reactable(x, compact = TRUE, wrap = TRUE))
+      tagList(
+        hr(),
+        h4("Not proposed"),
+        p("Fix these by hand in Zotero."),
+        reactable::reactable(
+          x,
+          columns = list(Open = reactable::colDef(html = TRUE, minWidth = 90)),
+          compact = TRUE,
+          wrap = TRUE
+        )
+      )
     })
 
     output$result_ui <- renderUI({
@@ -533,7 +582,7 @@ server <- function(input, output, session) {
         pv <- tryCatch(se_preview(proposed), error = function(e) NULL)
         if (!is.null(pv)) {
           now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
-          fixed <- sum(tolower(now) == tolower(proposed$new), na.rm = TRUE)
+          fixed <- sum(is_made(now, proposed))
         }
       }
       list(
@@ -654,7 +703,7 @@ server <- function(input, output, session) {
       all <- fixes[[input$fix]](m, group())
       list(
         changes = all[all$proposed, ],
-        not_proposed = dplyr::transmute(all[!all$proposed, ], Title = title, Note = note),
+        not_proposed = not_proposed_table(all[!all$proposed, ]),
         action = "edit"
       )
     },
@@ -691,7 +740,11 @@ server <- function(input, output, session) {
       list(
         changes = dplyr::bind_rows(lapply(r$changes, tibble::as_tibble)),
         not_proposed = dplyr::bind_rows(lapply(r$not_restored, function(x) {
-          tibble::tibble(Item = x$item_key, Note = paste0(x$field, ": not restored (field not allowed)"))
+          tibble::tibble(
+            Item = x$item_key,
+            Note = paste0(x$field, ": not restored (field not allowed)"),
+            Open = zotero_links(x$item_key, group())
+          )
         })),
         action = "restore"
       )

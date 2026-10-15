@@ -49,6 +49,21 @@ DOI field.
 - `count`: number of items with a misplaced DOI
 - `pc`: percentage of all items with a misplaced DOI
 
+### DOIs in the wrong form (`met_id_doi_form`)
+
+Items whose DOI field contains a valid DOI, but not as a bare DOI: as a link
+(`https://doi.org/10.…`), with a prefix (`doi:`, `DOI `), URL-encoded
+(`%5B` for `[`) or with spaces or other characters around it. Citation
+styles add the link themselves, so a link in the DOI field appears twice in
+a bibliography. The bare DOI is the one recognised by
+`openalexPro::extract_doi()`, keeping its upper and lower case.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi_raw` (content of the DOI field)
+  and `doi` (the bare DOI)
+- `count`: number of items with a DOI in the wrong form
+- `pc`: percentage of all items with a DOI in the wrong form
+
 ### Items without identifier (`met_id_none`)
 
 Items with none of DOI, ISBN, ISSN or Url. These items can neither be
@@ -98,6 +113,24 @@ publication year and first word of the first author.
 - `count_doi`, `count_title`: number of surplus copies, i.e. items which
   could be removed
 
+### Language not given as a standard code (`met_meta_language`)
+
+Items whose language is not given as a standard language code, i.e. a
+two-letter ISO 639-1 code, optionally with a region (`en`, `en-US`), but
+e.g. as a name (`English`), a three-letter code (`eng`) or in a different
+spelling (`EN`, `en_us`). Citation styles and other tools only recognise the
+codes. Where the value is recognised, the standard code is proposed, based
+on the ISO 639-2 list (R package ISOcodes): codes, three-letter codes and
+the English names of the languages. Other values, e.g. names in the language
+itself, several languages or other text, are listed without a proposal.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `language` (as entered) and `code`
+  (proposed standard code, `NA` if not recognised)
+- `count`: number of items whose language is not a standard code
+- `count_recognised`: of these, items for which a code is proposed
+- `pc`: percentage of all items whose language is not a standard code
+
 ## openalex_check
 
 ### Zotero DOIs found in OpenAlex (`met_check_found`)
@@ -141,6 +174,17 @@ same DOI.
 
 **Result:** A list with
 - `comparison`: tibble with `type_zotero`, `type_openalex` and `count`
+
+### Missing dates found in OpenAlex (`met_check_date`)
+
+Items without a date whose DOI was found in OpenAlex: the publication date
+in OpenAlex is proposed. OpenAlex gives 1 January when only the year is
+known, so such dates are proposed as the year only.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi` and `date` (the publication
+  date in OpenAlex, `YYYY-MM-DD`, or `YYYY` if only the year is known)
+- `count`: number of items without a date for which OpenAlex has one
 
 ## profile
 
