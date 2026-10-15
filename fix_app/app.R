@@ -34,29 +34,38 @@ read_metrics <- function(group_id) {
   readRDS(file)
 }
 
-# before / after lines of a difference, as computed by the plugin
+# before / after lines of a difference, as computed by the plugin. Built
+# without any whitespace between the parts: values are shown with
+# white-space: pre-wrap, so whitespace between tags would appear in the value.
 diff_html <- function(diff) {
+  span <- function(text, class = NULL) {
+    paste0(
+      "<span", if (!is.null(class)) paste0(' class="', class, '"'), ">",
+      htmltools::htmlEscape(text),
+      "</span>"
+    )
+  }
   line <- function(show, class) {
-    parts <- Filter(Negate(is.null), lapply(diff$segments, function(s) {
+    parts <- unlist(lapply(diff$segments, function(s) {
       if (s$type == "same") {
-        htmltools::span(s$display)
+        span(s$display)
       } else if (s$type == show) {
-        htmltools::span(class = s$type, s$display)
+        span(s$display, s$type)
       }
     }))
     if (!length(parts)) {
-      parts <- list(htmltools::span(class = "empty", "(empty)"))
+      parts <- span("(empty)", "empty")
     }
-    htmltools::div(class = paste("value", class), parts)
+    paste0('<div class="value ', class, '">', paste0(parts, collapse = ""), "</div>")
   }
   notes <- unlist(diff$notes)
-  as.character(htmltools::tagList(
+  paste0(
     line("removed", "before"),
     line("added", "after"),
     if (length(notes)) {
-      htmltools::div(class = "notes", paste("Note:", paste(notes, collapse = "; ")))
+      paste0('<div class="notes">', htmltools::htmlEscape(paste("Note:", paste(notes, collapse = "; "))), "</div>")
     }
-  ))
+  )
 }
 
 # links to open items in Zotero. Browsers often block zotero:// links, so the
@@ -64,7 +73,7 @@ diff_html <- function(diff) {
 zotero_links <- function(keys, group_id) {
   url <- paste0("zotero://select/groups/", group_id, "/items/", keys)
   paste0(
-    '<a href="https://www.zotero.org/groups/', group_id, "/items/", keys,
+    'Zotero: <a href="https://www.zotero.org/groups/', group_id, "/items/", keys,
     '" target="_blank">web</a> &middot; ',
     '<a href="#" onclick="Shiny.setInputValue(\'open_zotero\', \'', url,
     '\', {priority: \'event\'}); return false;">app</a>'
@@ -185,6 +194,7 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
         changes = x$changes,
         preview = pv,
         action = x$action,
+        doi = doi,
         openalex = unname(oa[tolower(doi)])
       ))
     })
@@ -233,7 +243,11 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
         Change = vapply(rows, function(r) diff_html(r$diff), ""),
         Why = vapply(rows, function(r) r$reason_for_change %||% "", ""),
         Check = vapply(rows, function(r) if (isTRUE(r$ok)) "OK" else r$problem, ""),
-        Open = paste0(zotero_links(p$changes$item_key, group()), openalex_link(p$openalex))
+        Open = paste0(
+          zotero_links(p$changes$item_key, group()),
+          doi_link(p$doi),
+          openalex_link(p$openalex)
+        )
       )
       # rows are selected with the tick boxes only, so that the links work
       reactable::reactable(

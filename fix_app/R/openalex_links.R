@@ -31,6 +31,24 @@ openalex_ids <- function(
   return(ids)
 }
 
+#' Link to resolve a DOI at doi.org, or an empty string
+#'
+#' DOIs come from the Zotero data, so they are encoded for the URL and
+#' escaped for HTML.
+doi_link <- function(
+  doi
+) {
+  ifelse(
+    is.na(doi) | doi == "",
+    "",
+    paste0(
+      '<br><a href="https://doi.org/',
+      htmltools::htmlEscape(utils::URLencode(doi), attribute = TRUE),
+      '" target="_blank">DOI</a>'
+    )
+  )
+}
+
 #' Link to an OpenAlex work, or an empty string
 openalex_link <- function(
   id
@@ -38,6 +56,6 @@ openalex_link <- function(
   ifelse(
     is.na(id),
     "",
-    paste0(' &middot; <a href="', id, '" target="_blank">OpenAlex</a>')
+    paste0('<br><a href="', id, '" target="_blank">OpenAlex</a>')
   )
 }
