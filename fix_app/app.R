@@ -680,10 +680,16 @@ server <- function(input, output, session) {
   # "app" links in the tables
   observeEvent(input$open_zotero, open_in_zotero(input$open_zotero))
 
-  status <- reactive({
+  # status of the plugin, or NULL; the reason why not is in status_error()
+  status_raw <- reactive({
     tick()
-    safely(function() se_status(groups))
+    tryCatch(se_status(groups), error = function(e) structure(list(), error = conditionMessage(e)))
   })
+  status <- reactive({
+    s <- status_raw()
+    if (is.null(attr(s, "error"))) s else NULL
+  })
+  status_error <- reactive(attr(status_raw(), "error"))
 
   group_status <- reactive({
     g <- Filter(function(x) x$group_id == group(), status()$groups %||% list())
@@ -714,10 +720,19 @@ server <- function(input, output, session) {
   output$status <- renderUI({
     s <- status()
     if (is.null(s)) {
-      return(p(
-        "Cannot connect. Is Zotero running with the Safe Edit plugin, and is ",
-        "this app registered (button below)?"
-      ))
+      err <- status_error() %||% ""
+      if (grepl("token", err)) {
+        return(div(
+          class = "warn",
+          p("This app is not registered in Zotero: its token is missing, unknown or revoked."),
+          p(
+            "To register it: click \"Register this app\" below and confirm in Zotero. ",
+            "Or add it in Zotero (Settings → Safe Edit → Add application), copy the ",
+            "token and store it in R with keyring::key_set(\"zotero_safe_edit_token\")."
+          )
+        ))
+      }
+      return(p(class = "warn", "Cannot connect to Zotero. ", err))
     }
     g <- group_status()
     age <- g$backup_age_minutes
@@ -1057,6 +1072,12 @@ server <- function(input, output, session) {
       Time = local_time(x$time),
       By = x$client,
       Action = x$action,
+      Why = switch(
+        x$action %||% "",
+        undo = "Undo of an earlier change",
+        restore = "Restore from backup",
+        x$reason_for_change %||% ""
+      ),
       Title = x$title %||% "",
       Field = field_label(x$field),
       Old = x$old,
@@ -1067,12 +1088,14 @@ server <- function(input, output, session) {
     )))
     # batches numbered in the order they were approved
     batches <- unique(tab$batch_id)
+    # what a batch did: the most frequent reason, and the fields changed (the
+    # number of changes is added by the table)
     labels <- vapply(seq_along(batches), function(i) {
       b <- tab[tab$batch_id == batches[i], ]
-      # the number of changes is added by the table
+      why <- names(sort(table(b$Why), decreasing = TRUE))[1]
       sprintf(
-        "Batch %d · %s · %s",
-        i, substr(b$Time[1], 1, 16), paste(unique(b$Action), collapse = "/")
+        "%s · %s · %s",
+        substr(b$Time[1], 1, 16), why, paste(sort(unique(b$Field)), collapse = ", ")
       )
     }, "")
     tab$Batch <- labels[match(tab$batch_id, batches)]
@@ -1088,9 +1111,9 @@ server <- function(input, output, session) {
       columns = list(
         id = reactable::colDef(show = FALSE),
         batch_id = reactable::colDef(show = FALSE),
-        Batch = reactable::colDef(minWidth = 260),
-        Time = reactable::colDef(aggregate = "unique"),
-        Action = reactable::colDef(aggregate = "unique"),
+        Batch = reactable::colDef(minWidth = 320),
+        Action = reactable::colDef(show = FALSE),
+        Why = reactable::colDef(show = FALSE),
         Status = reactable::colDef(aggregate = "frequency"),
         `Since then` = reactable::colDef(aggregate = "frequency"),
         Synced = reactable::colDef(aggregate = "frequency")

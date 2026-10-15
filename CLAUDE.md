@@ -4,14 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-Generates bibliography reports for IPBES Zotero groups. For each group listed in [input/groups.yaml](input/groups.yaml) (a list of entries with `name`, `id`), the pipeline downloads the Zotero library, resolves DOIs to OpenAlex works, computes metrics, and (eventually) renders per-group Quarto reports plus an index page.
+Generates quality reports for the Zotero groups of the IPBES assessments. For each group listed under `assessments` in [input/config.yaml](input/config.yaml) (`name`, `id`), the `targets` pipeline downloads the Zotero library, resolves DOIs to OpenAlex works, computes the `met_*` measures, and renders per-group Quarto reports plus an index into `output/report/` (published via GitHub Pages). A local Shiny app ([fix_app/](fix_app/)) proposes fixes and writes them through the Zotero Safe Edit plugin.
 
-The project is mid-refactor: it used to be an R package (`LitReport` / `IPBES.LiteratureReport`) and is being converted into a pure `targets` pipeline. Consequences a fresh Claude should know about:
+It used to be an R package; the package files (`DESCRIPTION`, `NAMESPACE`, `man/`, vignettes, old plot and helper functions) have been removed. Things a fresh Claude should know:
 
-- `DESCRIPTION`, `man/`, and most `pipeline_*` / old-style helper files have been deleted (visible as `D` in `git status`) but [NAMESPACE](NAMESPACE) still references the removed exports — it is stale and not currently used. Do not rely on it as a source of truth.
-- Files in [R/](R/) are **not loaded as a package**. [_targets.R](_targets.R) sources every `*.R` in `R/` at pipeline start (see lines 7–15).
-- Files ending in `.R.tofix` (e.g. [R/plot_top_country.R.tofix](R/plot_top_country.R.tofix)) are intentionally skipped by that `*.R$` glob — they are broken/WIP and excluded from sourcing.
-- The old `plot_*` functions in [R/](R/) belong to the package-era flow (they read a `bibliography` file that no longer exists) and are not used by the pipeline; the report draws its own charts from the metrics.
+- Files in [R/](R/) are **not loaded as a package**. [_targets.R](_targets.R) sources every `*.R` in `R/` at pipeline start.
+- `output/` is not in git except `output/report/` (the published reports); the other subdirectories are caches and intermediate results.
 
 ## Running the pipeline
 
@@ -26,7 +24,6 @@ targets::tar_destroy()      # wipe _targets/ cache
 
 Edit `assessments` in [input/config.yaml](input/config.yaml) to change which Zotero groups are processed, and `metrics` to change which measures are calculated. Dynamic branching maps one branch per assessment, so adding an entry adds a branch without further code changes.
 
-The README's "open `index.qmd` and render it" workflow refers to the old (package-era) flow and does not match the current `targets`-driven pipeline.
 
 ## Pipeline shape
 
