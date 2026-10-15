@@ -50,3 +50,11 @@ Outputs land under [output/](output/) in fixed subdirs (`zotero_groups/`, `zoter
 ## Dependencies worth knowing
 
 Non-CRAN / IPBES-internal packages used by the pipeline (declared in `tar_option_set(packages = ...)`): `openalexPro`, `zotFunc`. These must be installed from their respective sources before `tar_make()` will run.
+
+## Fix app (not part of the pipeline)
+
+`run_fix_app()` ([R/run_fix_app.R](R/run_fix_app.R)) starts a local Shiny app ([fix_app/](fix_app/)) which proposes fixes for problems found by the metrics and sends them to Zotero through the **Zotero Safe Edit** plugin (separate repo `IPBES-Data/zotero-safe-edit`, Zotero 10). The plugin does all checks (token, auto-sync off, fresh backup, allowed fields, expected old value, batch limit), shows the approval dialog, writes, and keeps the log; the app stores nothing.
+
+- Client functions `se_*()`: [fix_app/R/safe_edit_client.R](fix_app/R/safe_edit_client.R); token in the keyring as `zotero_safe_edit_token` (`se_register()` stores it).
+- Fixes are `fix_*(m, group_id)` functions in `fix_app/R/`, returning `group_id, item_key, title, field, old, new, reason, proposed, note`; register new ones in the `fixes` list in [fix_app/app.R](fix_app/app.R). Field names are Zotero field names (`DOI`, `extra`, …), and the field must be allowed in the plugin settings.
+- The app must run on the same computer as Zotero.

@@ -31,8 +31,12 @@ met_check_mismatch <- function(
   a <- norm(pairs$title_zotero)
   b <- norm(pairs$title_openalex)
 
-  pairs$title_similarity <- 1 -
-    unname(mapply(utils::adist, a, b)) / pmax(nchar(a), nchar(b), 1)
+  distance <- vapply(
+    seq_along(a),
+    function(i) as.numeric(utils::adist(a[i], b[i])),
+    numeric(1)
+  )
+  pairs$title_similarity <- 1 - distance / pmax(nchar(a), nchar(b), 1)
   pairs$year_diff <- abs(pairs$year_zotero - pairs$year_openalex)
 
   metrics <- list()

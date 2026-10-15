@@ -1,0 +1,570 @@
+# Local app to fix Zotero items found by the report, through the Zotero Safe
+# Edit plugin. The app proposes changes and shows them; the plugin checks them,
+# asks for approval in Zotero, writes them and keeps the log. The app stores
+# nothing itself. Start with run_fix_app() from the project directory.
+
+library(shiny)
+
+project <- getOption("fix_app.project", normalizePath(".."))
+source(file.path(project, "R", "report_helpers.R"))
+for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) {
+  source(f)
+}
+
+cfg <- yaml::read_yaml(file.path(project, "input", "config.yaml"))
+groups <- stats::setNames(
+  vapply(cfg$assessments, function(a) as.numeric(a$id), numeric(1)),
+  vapply(cfg$assessments, function(a) a$name, "")
+)
+
+# fix types: label -> function(m, group_id)
+fixes <- list(
+  "DOI in URL or Extra → DOI field" = fix_doi_misplaced
+)
+
+read_metrics <- function(group_id) {
+  name <- names(groups)[groups == group_id]
+  file <- file.path(
+    project, "output", "metrics",
+    paste0("IPBES_", name, "_", group_id, ".rds")
+  )
+  if (!file.exists(file)) {
+    stop("No metrics for group ", name, " — run the pipeline first.", call. = FALSE)
+  }
+  readRDS(file)
+}
+
+# before / after lines of a difference, as computed by the plugin
+diff_html <- function(diff) {
+  line <- function(show, class) {
+    parts <- Filter(Negate(is.null), lapply(diff$segments, function(s) {
+      if (s$type == "same") {
+        htmltools::span(s$display)
+      } else if (s$type == show) {
+        htmltools::span(class = s$type, s$display)
+      }
+    }))
+    if (!length(parts)) {
+      parts <- list(htmltools::span(class = "empty", "(empty)"))
+    }
+    htmltools::div(class = paste("value", class), parts)
+  }
+  notes <- unlist(diff$notes)
+  as.character(htmltools::tagList(
+    line("removed", "before"),
+    line("added", "after"),
+    if (length(notes)) {
+      htmltools::div(class = "notes", paste("Note:", paste(notes, collapse = "; ")))
+    }
+  ))
+}
+
+# times from the plugin (UTC, ISO 8601) in local time
+local_time <- function(x) {
+  format(
+    as.POSIXct(x, format = "%Y-%m-%dT%H:%M:%OS", tz = "UTC"),
+    tz = "",
+    "%Y-%m-%d %H:%M:%S"
+  )
+}
+
+# traffic light in the colours of the report (rep_status_label)
+light <- function(ok, text) {
+  span(
+    style = paste0("color:", if (ok) "#1a7f37" else "#c62828", "; font-weight: bold;"),
+    HTML("&#9679; "),
+    text
+  )
+}
+
+# run f, show errors as notification
+safely <- function(f) {
+  tryCatch(f(), error = function(e) {
+    showNotification(conditionMessage(e), type = "error", duration = NULL)
+    NULL
+  })
+}
+
+# readable reasons why the plugin did not apply (some) changes
+explain <- function(r) {
+  reasons <- c(
+    unlist(r$reasons),
+    vapply(r$refused %||% list(), function(x) x$reason, ""),
+    vapply(
+      Filter(function(x) !isTRUE(x$ok), r$rows %||% list()),
+      function(x) paste0(x$title %||% x$item_key, ": ", x$problem),
+      ""
+    )
+  )
+  if (length(reasons)) paste0(" — ", paste(unique(reasons), collapse = "; ")) else ""
+}
+
+css <- "
+.value { white-space: pre-wrap; overflow-wrap: anywhere; font-family: monospace;
+         padding: 1px 4px; background: #f7f7f7; margin: 1px 0; }
+.value.before::before { content: 'before: '; color: #888; }
+.value.after::before { content: 'after: '; color: #888; }
+.removed { background: #ffd7d5; text-decoration: line-through; }
+.added { background: #ccf0d4; }
+.empty { color: #999; font-style: italic; }
+.notes { color: #555; font-size: 0.9em; }
+.warn { color: #c62828; font-weight: bold; }
+.intro { max-width: 60em; }
+table.status { margin-bottom: 10px; }
+table.status th { font-weight: normal; padding: 4px 16px 4px 0; }
+table.status td { padding: 4px 0; }
+"
+
+# ---- proposed changes: table, sending for approval, result ------------------
+# Used by the Fixes and the Restore tab. `compute()` returns
+# list(changes, not_proposed, action) or NULL; `reset` lists the inputs whose
+# change makes the shown proposals obsolete.
+
+changes_ui <- function(id) {
+  ns <- NS(id)
+  # sections appear only when they have content
+  tagList(
+    uiOutput(ns("result_ui")),
+    uiOutput(ns("proposals_ui")),
+    uiOutput(ns("not_proposed_ui"))
+  )
+}
+
+changes_server <- function(id, group, status, load, reset, compute, done) {
+  moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    pending <- reactiveVal(NULL) # list(changes, preview, action)
+    not_proposed <- reactiveVal(NULL)
+    result <- reactiveVal(NULL)
+
+    clear <- function() {
+      pending(NULL)
+      not_proposed(NULL)
+      result(NULL)
+    }
+    observeEvent(reset(), clear())
+
+    observeEvent(load(), {
+      clear()
+      x <- compute()
+      if (is.null(x)) return()
+      not_proposed(x$not_proposed)
+      if (!nrow(x$changes)) {
+        showNotification("Nothing to change.")
+        return()
+      }
+      pv <- safely(function() se_preview(x$changes))
+      if (is.null(pv)) return()
+      pending(list(changes = x$changes, preview = pv, action = x$action))
+    })
+
+    output$proposals_ui <- renderUI({
+      p <- pending()
+      req(p)
+      # the batch limit is handled by sending in several batches
+      b <- unlist(p$preview$blockers)
+      b <- b[!grepl("^Too many changes", b)]
+      tagList(
+        hr(),
+        h4("Proposed changes"),
+        if (length(b)) {
+          div(class = "warn", "Zotero will refuse these changes: ", tags$ul(lapply(b, tags$li)))
+        },
+        reactable::reactableOutput(ns("proposals")),
+        br(),
+        actionButton(ns("send"), "Send selected changes to Zotero for approval", class = "btn-primary")
+      )
+    })
+
+    output$not_proposed_ui <- renderUI({
+      x <- not_proposed()
+      req(!is.null(x), nrow(x) > 0)
+      tagList(hr(), h4("Not proposed"), reactable::reactable(x, compact = TRUE, wrap = TRUE))
+    })
+
+    output$result_ui <- renderUI({
+      x <- result()
+      req(!is.null(x))
+      tagList(
+        hr(),
+        h4("Result"),
+        if (nrow(x)) reactable::reactable(x, compact = TRUE, wrap = TRUE) else p("No change was written.")
+      )
+    })
+
+    output$proposals <- reactable::renderReactable({
+      p <- pending()
+      req(p)
+      rows <- p$preview$rows
+      tab <- tibble::tibble(
+        Title = vapply(rows, function(r) r$title %||% "", ""),
+        Field = vapply(rows, function(r) r$field %||% "", ""),
+        Change = vapply(rows, function(r) diff_html(r$diff), ""),
+        Why = vapply(rows, function(r) r$reason_for_change %||% "", ""),
+        Check = vapply(rows, function(r) if (isTRUE(r$ok)) "OK" else r$problem, ""),
+        Open = rep_zotero_links(p$changes$item_key, group())
+      )
+      reactable::reactable(
+        tab,
+        selection = "multiple",
+        onClick = "select",
+        defaultSelected = which(vapply(rows, function(r) isTRUE(r$ok), TRUE)),
+        columns = list(
+          Change = reactable::colDef(html = TRUE, minWidth = 300),
+          Open = reactable::colDef(html = TRUE, minWidth = 90)
+        ),
+        searchable = TRUE,
+        defaultPageSize = 25,
+        wrap = TRUE
+      )
+    })
+
+    observeEvent(input$send, {
+      p <- pending()
+      req(p)
+      sel <- reactable::getReactableState("proposals", "selected")
+      if (!length(sel)) {
+        showNotification("No changes selected.")
+        return()
+      }
+      max_batch <- status()$max_batch_size %||% 25
+      changes <- p$changes[sel, ]
+      batches <- split(seq_len(nrow(changes)), ceiling(seq_len(nrow(changes)) / max_batch))
+      results <- list()
+      for (i in seq_along(batches)) {
+        showNotification(sprintf("Batch %d of %d: approve the changes in Zotero …", i, length(batches)))
+        r <- safely(function() se_apply(changes[batches[[i]], ], action = p$action))
+        if (is.null(r)) break
+        if (!identical(r$status, "done")) {
+          showNotification(paste0("Batch ", i, ": ", r$status, explain(r)), type = "warning", duration = NULL)
+          break # cancelled or refused: do not open further dialogs
+        }
+        results <- c(results, r$results)
+      }
+      titles <- stats::setNames(
+        vapply(p$preview$rows, function(r) r$title %||% "", ""),
+        vapply(p$preview$rows, function(r) r$item_key %||% "", "")
+      )
+      pending(NULL)
+      not_proposed(NULL)
+      result(dplyr::bind_rows(
+        tibble::tibble(Title = character(), Field = character(), Status = character(), Reason = character()),
+        lapply(results, function(x) tibble::tibble(
+          Title = unname(titles[x$item_key]) %||% x$item_key,
+          Field = x$field,
+          Status = x$status,
+          Reason = x$reason %||% ""
+        ))
+      ))
+      done()
+    })
+  })
+}
+
+# ---- UI ------------------------------------------------------------------------
+
+ui <- fluidPage(
+  tags$head(tags$style(HTML(css))),
+  titlePanel("Fix Zotero groups"),
+  fluidRow(
+    column(4, selectInput("group", "Group", choices = groups)),
+    column(8, br(), actionButton("refresh", "Refresh"), textOutput("connection", inline = TRUE))
+  ),
+  tabsetPanel(
+    tabPanel(
+      "Status",
+      br(),
+      uiOutput("status"),
+      actionButton("backup", "Make a backup of this group"),
+      actionButton("register", "Register this app in Zotero")
+    ),
+    tabPanel(
+      "Fixes",
+      br(),
+      p(
+        class = "intro",
+        "Changes proposed for problems found in the report. They are sent to ",
+        "Zotero, where you approve them."
+      ),
+      selectInput("fix", "Fix", choices = names(fixes)),
+      actionButton("load_fix", "Show proposed changes"),
+      changes_ui("fixes")
+    ),
+    tabPanel(
+      "Undo",
+      br(),
+      p(
+        class = "intro",
+        "All changes made through Safe Edit in this group, grouped by the batch ",
+        "in which they were approved. Tick a batch to undo all its changes, or ",
+        "open it (▸) to tick single changes. A change can only be undone if the ",
+        "field still has the value Safe Edit set — changes made by hand since then ",
+        "are never overwritten."
+      ),
+      uiOutput("log_ui")
+    ),
+    tabPanel(
+      "Restore",
+      br(),
+      p(
+        class = "intro",
+        "Brings the group back to the state of a backup (made with \"Make a ",
+        "backup of this group\" on the Status tab). Every difference in the fields ",
+        "Safe Edit may change is proposed, including changes made by hand or ",
+        "by others. The newest backup is usually the one made just before the ",
+        "last changes — choose an older one to go back further."
+      ),
+      uiOutput("snapshot_ui"),
+      actionButton("load_restore", "Show proposed changes"),
+      changes_ui("restore")
+    )
+  )
+)
+
+# ---- server --------------------------------------------------------------------
+
+server <- function(input, output, session) {
+  tick <- reactiveVal(0)
+  bump <- function() tick(tick() + 1)
+  observeEvent(input$refresh, bump())
+
+  group <- reactive(as.numeric(input$group))
+
+  status <- reactive({
+    tick()
+    safely(function() se_status(groups))
+  })
+
+  group_status <- reactive({
+    g <- Filter(function(x) x$group_id == group(), status()$groups %||% list())
+    if (length(g)) g[[1]] else NULL
+  })
+
+  output$connection <- renderText({
+    s <- status()
+    if (is.null(s)) {
+      return("  Not connected")
+    }
+    sprintf(
+      "  Connected as \"%s\" · Safe Edit %s · Zotero %s",
+      s$client, s$plugin_version, s$zotero_version
+    )
+  })
+
+  # ---- status ----------------------------------------------------------------
+
+  output$status <- renderUI({
+    s <- status()
+    if (is.null(s)) {
+      return(p(
+        "Cannot connect. Is Zotero running with the Safe Edit plugin, and is ",
+        "this app registered (button below)?"
+      ))
+    }
+    g <- group_status()
+    age <- g$backup_age_minutes
+    fresh <- !is.null(age) && age <= s$max_backup_age_minutes
+
+    rows <- list(
+      list("Automatic sync", !isTRUE(s$auto_sync),
+        if (isTRUE(s$auto_sync)) "on — switch it off in Zotero (Settings → Sync) before editing" else "off"),
+      list("Backup of this group", fresh,
+        if (is.null(age)) {
+          "none — make one before editing"
+        } else if (!fresh) {
+          sprintf("%.0f minutes old (at most %s) — make a new one", age, s$max_backup_age_minutes)
+        } else {
+          sprintf("%.0f minutes old", age)
+        }),
+      list("Group in this Zotero", isTRUE(g$in_zotero), if (isTRUE(g$in_zotero)) "yes" else "no"),
+      list("You can edit this group", isTRUE(g$editable), if (isTRUE(g$editable)) "yes" else "no")
+    )
+    tagList(
+      tags$table(
+        class = "status",
+        lapply(rows, function(r) {
+          tags$tr(tags$th(r[[1]]), tags$td(light(r[[2]], r[[3]])))
+        })
+      ),
+      p(
+        class = "notes",
+        "Fields which may be edited: ", paste(unlist(s$allowed_fields), collapse = ", "),
+        " · at most ", s$max_batch_size, " changes per approval (set in Zotero: Settings → Safe Edit)"
+      )
+    )
+  })
+
+  observeEvent(input$register, {
+    ok <- safely(function() se_register())
+    if (isTRUE(ok)) showNotification("Registered. The token is stored in the keyring.")
+    bump()
+  })
+
+  observeEvent(input$backup, {
+    b <- safely(function() se_backup(group()))
+    if (!is.null(b)) {
+      showNotification(sprintf("Backup created: %s items (Zotero database backup: %s)", b$items, b$db_backup))
+    }
+    bump()
+  })
+
+  # ---- fixes -----------------------------------------------------------------
+
+  changes_server(
+    "fixes",
+    group = group,
+    status = status,
+    load = reactive(input$load_fix),
+    reset = reactive(list(input$group, input$fix)),
+    compute = function() {
+      m <- safely(function() read_metrics(group()))
+      if (is.null(m)) return(NULL)
+      all <- fixes[[input$fix]](m, group())
+      list(
+        changes = all[all$proposed, ],
+        not_proposed = dplyr::transmute(all[!all$proposed, ], Title = title, Note = note),
+        action = "edit"
+      )
+    },
+    done = bump
+  )
+
+  # ---- restore ---------------------------------------------------------------
+
+  output$snapshot_ui <- renderUI({
+    backups <- group_status()$backups %||% list()
+    if (!length(backups)) {
+      return(p(class = "warn", "No backups of this group — make one on the Status tab."))
+    }
+    selectInput(
+      "snapshot",
+      "Backup to restore from",
+      choices = stats::setNames(
+        vapply(backups, function(b) b$name, ""),
+        vapply(backups, function(b) local_time(b$created), "")
+      )
+    )
+  })
+
+  changes_server(
+    "restore",
+    group = group,
+    status = status,
+    load = reactive(input$load_restore),
+    reset = reactive(list(input$group, input$snapshot)),
+    compute = function() {
+      req(input$snapshot)
+      r <- safely(function() se_restore(group(), input$snapshot))
+      if (is.null(r)) return(NULL)
+      list(
+        changes = dplyr::bind_rows(lapply(r$changes, tibble::as_tibble)),
+        not_proposed = dplyr::bind_rows(lapply(r$not_restored, function(x) {
+          tibble::tibble(Item = x$item_key, Note = paste0(x$field, ": not restored (field not allowed)"))
+        })),
+        action = "restore"
+      )
+    },
+    done = bump
+  )
+
+  # ---- undo (log) ------------------------------------------------------------
+
+  # groups which are not in this Zotero have no log
+  log_entries <- reactive({
+    tick()
+    if (!isTRUE(group_status()$in_zotero)) {
+      return(list())
+    }
+    safely(function() se_log(group())) %||% list()
+  })
+
+  output$log_ui <- renderUI({
+    if (!isTRUE(group_status()$in_zotero)) {
+      return(p(class = "warn", "This group is not in this Zotero."))
+    }
+    if (!length(log_entries())) {
+      return(p("No changes have been made through Safe Edit in this group."))
+    }
+    tagList(
+      reactable::reactableOutput("log"),
+      br(),
+      actionButton("undo", "Undo selected changes")
+    )
+  })
+
+  # log as table, newest first, with one label per approval batch
+  log_table <- reactive({
+    e <- log_entries()
+    req(length(e))
+    tab <- dplyr::bind_rows(lapply(e, function(x) tibble::tibble(
+      id = x$id,
+      batch_id = x$batch_id,
+      Time = local_time(x$time),
+      By = x$client,
+      Action = x$action,
+      Title = x$title %||% "",
+      Field = x$field,
+      Old = x$old,
+      New = x$new,
+      Status = x$status,
+      `Since then` = if (isTRUE(x$undone)) "undone" else x$state %||% "",
+      Synced = if (is.null(x$synced)) "" else if (isTRUE(x$synced)) "yes" else "only local"
+    )))
+    # batches numbered in the order they were approved
+    batches <- unique(tab$batch_id)
+    labels <- vapply(seq_along(batches), function(i) {
+      b <- tab[tab$batch_id == batches[i], ]
+      # the number of changes is added by the table
+      sprintf(
+        "Batch %d · %s · %s",
+        i, substr(b$Time[1], 1, 16), paste(unique(b$Action), collapse = "/")
+      )
+    }, "")
+    tab$Batch <- labels[match(tab$batch_id, batches)]
+    tab[rev(seq_len(nrow(tab))), c("Batch", setdiff(names(tab), "Batch"))]
+  })
+
+  output$log <- reactable::renderReactable({
+    tab <- log_table()
+    reactable::reactable(
+      tab,
+      groupBy = "Batch",
+      selection = "multiple",
+      columns = list(
+        id = reactable::colDef(show = FALSE),
+        batch_id = reactable::colDef(show = FALSE),
+        Batch = reactable::colDef(minWidth = 260),
+        Time = reactable::colDef(aggregate = "unique"),
+        Action = reactable::colDef(aggregate = "unique"),
+        Status = reactable::colDef(aggregate = "frequency"),
+        `Since then` = reactable::colDef(aggregate = "frequency"),
+        Synced = reactable::colDef(aggregate = "frequency")
+      ),
+      searchable = TRUE,
+      defaultPageSize = 25,
+      wrap = TRUE
+    )
+  })
+
+  observeEvent(input$undo, {
+    sel <- reactable::getReactableState("log", "selected")
+    if (!length(sel)) {
+      showNotification("No changes selected.")
+      return()
+    }
+    ids <- log_table()$id[sel]
+    max_batch <- status()$max_batch_size %||% 25
+    for (b in split(ids, ceiling(seq_along(ids) / max_batch))) {
+      r <- safely(function() se_undo(group(), b))
+      if (is.null(r) || !identical(r$status, "done")) {
+        if (!is.null(r)) {
+          showNotification(paste0("Undo: ", r$status, explain(r)), type = "warning", duration = NULL)
+        }
+        break
+      }
+    }
+    bump()
+  })
+}
+
+shinyApp(ui, server)
