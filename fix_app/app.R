@@ -227,22 +227,22 @@ rebase_append <- function(changes, now) {
   changes
 }
 
-# whether changes only add one line at the end of the field, or remove it
-# again (as the plugin checks for its line batches)
-is_line_change <- function(old, new) {
+# whether changes only add one line at the end of the Extra field, or remove
+# it again (as the plugin checks for its line batches)
+is_line_change <- function(old, new, field) {
   added <- function(a, b) {
     start <- ifelse(a == "", "", paste0(a, "\n"))
     line <- substring(b, nchar(start) + 1)
     startsWith(b, start) & trimws(line) != "" & !grepl("\n", line, fixed = TRUE)
   }
-  added(old, new) | added(new, old)
+  field == "extra" & (added(old, new) | added(new, old))
 }
 
 # largest batch the plugin accepts for these changes: large batches of added
 # lines if allowed in the plugin settings, else the normal limit
-max_batch <- function(s, old, new) {
+max_batch <- function(s, old, new, field) {
   n <- s$max_batch_size %||% 25
-  if (isTRUE(s$line_batches) && length(old) > n && all(is_line_change(old, new))) {
+  if (isTRUE(s$line_batches) && length(old) > n && all(is_line_change(old, new, field))) {
     s$max_line_batch_size
   } else {
     n
@@ -579,7 +579,7 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
         return()
       }
       changes <- p$changes[sel, ]
-      results <- apply_batches(changes, p$action, max_batch(status(), changes$old, changes$new))
+      results <- apply_batches(changes, p$action, max_batch(status(), changes$old, changes$new, changes$field))
       titles <- stats::setNames(
         vapply(p$preview$rows, function(r) r$title %||% "", ""),
         vapply(p$preview$rows, function(r) r$item_key %||% "", "")
@@ -959,7 +959,7 @@ server <- function(input, output, session) {
       return()
     }
     x <- x[open, ]
-    results <- apply_batches(x, "edit", max_batch(status(), x$old, x$new))
+    results <- apply_batches(x, "edit", max_batch(status(), x$old, x$new, x$field))
     n <- table(factor(
       vapply(results, function(r) r$status, ""),
       levels = c("applied", "skipped", "deselected", "failed")
@@ -1109,7 +1109,12 @@ server <- function(input, output, session) {
     }
     ids <- log_table()$id[sel]
     e <- Filter(function(x) x$id %in% ids, log_entries())
-    n <- max_batch(status(), vapply(e, function(x) x$old %||% "", ""), vapply(e, function(x) x$new %||% "", ""))
+    n <- max_batch(
+      status(),
+      vapply(e, function(x) x$old %||% "", ""),
+      vapply(e, function(x) x$new %||% "", ""),
+      vapply(e, function(x) x$field %||% "", "")
+    )
     for (b in split(ids, ceiling(seq_along(ids) / n))) {
       r <- safely(function() se_undo(group(), b))
       if (is.null(r) || !identical(r$status, "done")) {
