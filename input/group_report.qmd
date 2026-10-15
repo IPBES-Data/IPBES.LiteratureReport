@@ -334,6 +334,29 @@ fix(
 )
 ```
 
+### OpenAlex ID in Extra not valid {#extra-id}
+
+The line `OpenAlex: …` in the Extra field of these items is not an OpenAlex
+ID, is not in OpenAlex (wrong, or the record was merged into another one), or
+leads to a different publication. Open the item and the OpenAlex record to
+check, and correct or remove the line.
+
+```{r}
+x <- m$openalex_check$met_check_extra_id
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `OpenAlex ID in Extra` = value,
+      `Title in OpenAlex` = oa_title,
+      Problem = problem
+    )
+  }
+)
+```
+
 ### Items without their OpenAlex ID in Extra {#openalex-id}
 
 These items were found in OpenAlex by their DOI, but their Extra field has

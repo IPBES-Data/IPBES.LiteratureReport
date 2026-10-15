@@ -164,6 +164,8 @@ rep_checks <- function(
     n(m$identifiers$met_id_none$count), "check",
     "doi-candidates", "Items without DOI, for which OpenAlex has one",
     n(m$identifiers$met_id_candidates$count_items), "check",
+    "extra-id", "OpenAlex ID in Extra not valid",
+    n(m$openalex_check$met_check_extra_id$count), "check",
     "openalex-id", "Items without their OpenAlex ID in Extra",
     n(nrow(m$openalex_check$met_check_openalex_id$items)), "info",
     "untagged", "Items without tags",

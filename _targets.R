@@ -105,6 +105,15 @@ list(
     format = "file"
   ),
 
+  # Look up the OpenAlex IDs in Extra ---------------------------------------
+
+  tar_target(
+    extra_ids,
+    get_extra_ids(zotero_group),
+    pattern = map(zotero_group),
+    format = "file"
+  ),
+
   # # Calculate metrics ------------------------------------------------------
 
   # all met_*.R files (measures and helpers), so that changes rerun metrics
@@ -117,8 +126,8 @@ list(
 
   tar_target(
     metrics,
-    get_metrics(zotero_group, zotero_works, metric_names, doi_candidates, metric_code),
-    pattern = map(zotero_group, zotero_works, doi_candidates),
+    get_metrics(zotero_group, zotero_works, metric_names, doi_candidates, extra_ids, metric_code),
+    pattern = map(zotero_group, zotero_works, doi_candidates, extra_ids),
     format = "file"
   ),
 

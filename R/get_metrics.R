@@ -14,6 +14,9 @@
 #' @param doi_candidates RDS file with the works found in OpenAlex for items
 #'   without a DOI, as returned by [get_doi_candidates()]. Passed as
 #'   `candidates` to the measures which have that argument.
+#' @param extra_ids RDS file with the OpenAlex IDs in Extra, as returned by
+#'   [get_extra_ids()]. Passed as `extra_ids` to the measures which have that
+#'   argument.
 #' @param metric_code Not used. Only passed so that targets reruns the metrics
 #'   when a `R/met_*.R` file changes.
 #'
@@ -27,6 +30,7 @@ get_metrics <- function(
   zotero_works,
   metric_names,
   doi_candidates = NULL,
+  extra_ids = NULL,
   metric_code = NULL
 ) {
   zotero <- read_zotero(zotero_group)
@@ -34,7 +38,11 @@ get_metrics <- function(
   names(zotero) <- make.names(names(zotero), unique = TRUE)
 
   works <- arrow::open_dataset(zotero_works)
-  candidates <- if (!is.null(doi_candidates)) readRDS(doi_candidates)
+  # further sources, passed to the measures which have an argument of that name
+  sources <- list(
+    candidates = if (!is.null(doi_candidates)) readRDS(doi_candidates),
+    extra_ids = if (!is.null(extra_ids)) readRDS(extra_ids)
+  )
 
   # Run metrics from config ------------------------------------------------
 
@@ -45,10 +53,10 @@ get_metrics <- function(
         group,
         function(m) {
           f <- match.fun(m)
-          args <- list(zotero = zotero, openalex = works)
-          if ("candidates" %in% names(formals(f))) {
-            args$candidates <- candidates
-          }
+          args <- c(
+            list(zotero = zotero, openalex = works),
+            sources[intersect(names(sources), names(formals(f)))]
+          )
           do.call(f, args)
         },
         simplify = FALSE
