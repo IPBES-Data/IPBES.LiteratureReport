@@ -22,7 +22,8 @@ fixes <- list(
   "DOI in URL or Extra → DOI field" = fix_doi_misplaced,
   "DOI link or prefix → DOI" = fix_doi_form,
   "Language → language code" = fix_language,
-  "Missing date → date from OpenAlex" = fix_date
+  "Missing date → date from OpenAlex" = fix_date,
+  "Empty journal, volume, issue, pages → from OpenAlex" = fix_fill
 )
 
 # check in the report (rep_checks()) each fix belongs to, for its status
@@ -30,7 +31,8 @@ fix_checks <- c(
   "DOI in URL or Extra → DOI field" = "misplaced-doi",
   "DOI link or prefix → DOI" = "doi-form",
   "Language → language code" = "language",
-  "Missing date → date from OpenAlex" = "year"
+  "Missing date → date from OpenAlex" = "year",
+  "Empty journal, volume, issue, pages → from OpenAlex" = "fill"
 )
 
 # whether Zotero has the new value of a change already; DOIs are not case
@@ -171,7 +173,11 @@ table.status .count { text-align: right; }
 # table of proposed changes, as shown in the Fixes and Restore tabs
 changes_table <- function(changes, rows, doi, openalex, group_id, check = NULL) {
   tibble::tibble(
-    Title = vapply(rows, function(r) r$title %||% "", ""),
+    # from Zotero; from the report if the item is not in this Zotero
+    Title = dplyr::coalesce(
+      dplyr::na_if(vapply(rows, function(r) r$title %||% "", ""), ""),
+      changes$title
+    ),
     Field = vapply(rows, function(r) r$field %||% "", ""),
     Change = vapply(rows, function(r) diff_html(r$diff), ""),
     Why = vapply(rows, function(r) r$reason_for_change %||% "", ""),
@@ -255,6 +261,8 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
       # OpenAlex work of the DOI an item gets (or keeps), if it exists
       doi <- ifelse(x$changes$new != "", x$changes$new, x$changes$old)
       doi[x$changes$field != "DOI"] <- NA
+      # fixes taking values from the DOI's work give the DOI in a `doi` column
+      if ("doi" %in% names(x$changes)) doi <- dplyr::coalesce(doi, x$changes$doi)
       oa <- unname(openalex_ids(doi)[tolower(doi)])
       # changes whose value is in Zotero already are made: they cannot be
       # applied again and are shown separately on request

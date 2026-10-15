@@ -179,12 +179,28 @@ same DOI.
 
 Items without a date whose DOI was found in OpenAlex: the publication date
 in OpenAlex is proposed. OpenAlex gives 1 January when only the year is
-known, so such dates are proposed as the year only.
+known, so such dates are proposed as the year only. Items whose DOI points
+to a different publication are left out.
 
 **Result:** A list with
 - `items`: tibble with `key`, `title`, `doi` and `date` (the publication
   date in OpenAlex, `YYYY-MM-DD`, or `YYYY` if only the year is known)
 - `count`: number of items without a date for which OpenAlex has one
+
+### Empty fields found in OpenAlex (`met_check_fill`)
+
+Journal articles with an empty journal, volume, issue or pages field whose
+DOI was found in OpenAlex with these details: the values in OpenAlex are
+proposed. The journal is only taken if the publication is in a journal in
+OpenAlex (not e.g. a repository). Items whose DOI points to a different
+publication are left out.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi`, `field` (Zotero field:
+  `publicationTitle`, `volume`, `issue` or `pages`) and `value` (in
+  OpenAlex), one row per empty field, sorted by publication
+- `count`: number of items with at least one field to fill
+- `count_fields`: number of fields to fill
 
 ## profile
 

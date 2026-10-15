@@ -53,6 +53,7 @@ metrics:
     - met_check_mismatch
     - met_check_type
     - met_check_date
+    - met_check_fill
   profile:
     - met_prof_year
     - met_prof_oa

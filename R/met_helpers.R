@@ -70,6 +70,38 @@ language_code <- function(
   )
 }
 
+#' Zotero items with the OpenAlex work of their DOI
+#'
+#' Joins the Zotero items with OpenAlex works on the DOI. Items whose DOI
+#' points to a different publication (see [met_check_mismatch()]) are left
+#' out, so that nothing is taken from the wrong work.
+#'
+#' @param zotero Zotero items as read from the CSV export (data frame).
+#' @param openalex OpenAlex works (arrow dataset).
+#' @param works Collected columns of `openalex`, including `doi`.
+#'
+#' @return The Zotero items (all columns, plus `doi`) with the columns of
+#'   `works`.
+oa_join <- function(
+  zotero,
+  openalex,
+  works
+) {
+  works$doi <- openalexPro::extract_doi(
+    works$doi,
+    non_doi_value = as.character(NA),
+    what = "doi"
+  )
+  works <- works[!is.na(works$doi), ] |>
+    dplyr::distinct(doi, .keep_all = TRUE)
+
+  zotero$doi <- as_bib(zotero)$doi
+  wrong <- met_check_mismatch(zotero, openalex)$items$key
+  zotero <- zotero[!is.na(zotero$doi) & !zotero$Key %in% wrong, ]
+
+  dplyr::inner_join(zotero, works, by = "doi")
+}
+
 #' Common bibliography columns
 #'
 #' Extracts the same columns from the Zotero items or the OpenAlex works, so

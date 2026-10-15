@@ -156,6 +156,8 @@ rep_checks <- function(
     n(m$openalex_check$met_check_found$count_not_in_oa), "check",
     "year", "Missing or unusual publication year",
     n(m$metadata$met_meta_year$count), "check",
+    "fill", "Empty journal, volume, issue or pages, found in OpenAlex",
+    n(m$openalex_check$met_check_fill$count), "check",
     "language", "Language not given as a language code",
     n(m$metadata$met_meta_language$count), "check",
     "no-identifier", "Items without DOI, ISBN, ISSN or URL",

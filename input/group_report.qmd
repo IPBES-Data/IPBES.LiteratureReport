@@ -239,6 +239,35 @@ fix(
 )
 ```
 
+### Empty journal, volume, issue or pages, found in OpenAlex {#fill}
+
+These journal articles have an empty journal, volume, issue or pages field,
+and OpenAlex has the value for their DOI. Check it with the DOI and fill in
+the field.
+
+```{r}
+x <- m$openalex_check$met_check_fill
+labels <- c(
+  publicationTitle = "Journal",
+  volume = "Volume",
+  issue = "Issue",
+  pages = "Pages"
+)
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Field = unname(labels[field]),
+      `Value in OpenAlex` = value,
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
 ### Language not given as a language code {#language}
 
 The language of these items is not given as a language code (`en`, `fr`,

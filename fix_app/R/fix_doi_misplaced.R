@@ -7,7 +7,8 @@
 #'
 #' All `fix_*` functions take the metrics of a group and its id and return a
 #' tibble with `group_id`, `item_key`, `title`, `field`, `old`, `new`,
-#' `reason`, `proposed` and `note`.
+#' `reason`, `proposed` and `note`, and optionally `doi` (the item's DOI, for
+#' the DOI and OpenAlex links, if the field changed is not the DOI field).
 #'
 #' @param m Metrics of one group, as saved by [get_metrics()].
 #' @param group_id Zotero group id.

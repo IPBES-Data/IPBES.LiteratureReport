@@ -23,6 +23,7 @@ fix_date <- function(
     new = x$date,
     reason = "Date of the DOI in OpenAlex",
     proposed = TRUE,
-    note = NA_character_
+    note = NA_character_,
+    doi = x$doi
   )
 }
