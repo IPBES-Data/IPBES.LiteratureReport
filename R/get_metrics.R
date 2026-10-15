@@ -11,6 +11,9 @@
 #' @param metric_names Named list of metric groups, each a character vector
 #'   of `met_*` function names (`metrics` in `input/config.yaml`). Each
 #'   measure is called as `f(zotero = zotero, openalex = works)`.
+#' @param doi_candidates RDS file with the works found in OpenAlex for items
+#'   without a DOI, as returned by [get_doi_candidates()]. Passed as
+#'   `candidates` to the measures which have that argument.
 #' @param metric_code Not used. Only passed so that targets reruns the metrics
 #'   when a `R/met_*.R` file changes.
 #'
@@ -23,6 +26,7 @@ get_metrics <- function(
   zotero_group,
   zotero_works,
   metric_names,
+  doi_candidates = NULL,
   metric_code = NULL
 ) {
   zotero <- read_zotero(zotero_group)
@@ -30,6 +34,7 @@ get_metrics <- function(
   names(zotero) <- make.names(names(zotero), unique = TRUE)
 
   works <- arrow::open_dataset(zotero_works)
+  candidates <- if (!is.null(doi_candidates)) readRDS(doi_candidates)
 
   # Run metrics from config ------------------------------------------------
 
@@ -38,7 +43,14 @@ get_metrics <- function(
     function(group) {
       sapply(
         group,
-        function(m) match.fun(m)(zotero = zotero, openalex = works),
+        function(m) {
+          f <- match.fun(m)
+          args <- list(zotero = zotero, openalex = works)
+          if ("candidates" %in% names(formals(f))) {
+            args$candidates <- candidates
+          }
+          do.call(f, args)
+        },
         simplify = FALSE
       )
     },

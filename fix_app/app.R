@@ -23,7 +23,8 @@ fixes <- list(
   "DOI link or prefix → DOI" = fix_doi_form,
   "Language → language code" = fix_language,
   "Missing date → date from OpenAlex" = fix_date,
-  "Empty journal, volume, issue, pages → from OpenAlex" = fix_fill
+  "Empty journal, volume, issue, pages → from OpenAlex" = fix_fill,
+  "No DOI → DOI found in OpenAlex" = fix_doi_candidates
 )
 
 # check in the report (rep_checks()) each fix belongs to, for its status
@@ -32,7 +33,8 @@ fix_checks <- c(
   "DOI link or prefix → DOI" = "doi-form",
   "Language → language code" = "language",
   "Missing date → date from OpenAlex" = "year",
-  "Empty journal, volume, issue, pages → from OpenAlex" = "fill"
+  "Empty journal, volume, issue, pages → from OpenAlex" = "fill",
+  "No DOI → DOI found in OpenAlex" = "doi-candidates"
 )
 
 # whether Zotero has the new value of a change already; DOIs are not case
@@ -158,6 +160,22 @@ css <- "
 .value.before::before { content: 'before: '; color: #888; }
 .value.after::before { content: 'after: '; color: #888; }
 .removed { background: #ffd7d5; text-decoration: line-through; }
+/* alternatives: round tick boxes, as only one per item can be selected */
+.choices .rt-td-inner input[type=checkbox] { appearance: none; width: 14px; height: 14px;
+  border: 1px solid #767676; border-radius: 50%; vertical-align: middle; }
+.choices .rt-td-inner input[type=checkbox]:checked {
+  background: radial-gradient(#0b6bcb 45%, transparent 50%); border-color: #0b6bcb; }
+/* round buttons; related buttons grouped in a labelled pill (pill()) */
+.btn { border-radius: 999px; }
+.btn-default { background: #e3eefa; border-color: #9cbfe3; color: #1d4f7c; }
+.btn-default:hover, .btn-default:focus { background: #cfe1f5; border-color: #6a9fd4; color: #1d4f7c; }
+.btn:disabled, .btn.disabled { background: #e6e6e6 !important; border-color: #ccc !important;
+  color: #999 !important; opacity: 1; cursor: not-allowed; }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 4px 4px 16px;
+  border: 1px solid #ccc; border-radius: 999px; margin: 4px 0; }
+/* selecting all options of an item (or of all items) is not possible */
+.choices input[aria-label='Select all rows in group'],
+.choices input[aria-label='Select all rows'] { display: none !important; }
 .added { background: #ccf0d4; }
 .empty { color: #999; font-style: italic; }
 .notes { color: #555; font-size: 0.9em; }
@@ -169,6 +187,11 @@ table.status th { font-weight: normal; padding: 4px 16px 4px 0; }
 table.status td { padding: 4px 16px 4px 0; }
 table.status .count { text-align: right; }
 "
+
+# related buttons, grouped under a label
+pill <- function(label, ...) {
+  div(class = "pill", span(label), ...)
+}
 
 # table of proposed changes, as shown in the Fixes and Restore tabs
 changes_table <- function(changes, rows, doi, openalex, group_id, check = NULL) {
@@ -212,7 +235,10 @@ not_proposed_table <- function(x) {
       paste0("Fixed locally (now: ", ifelse(now == "", "empty", now), ")"),
       note
     ),
-    Open = zotero_links(item_key, group_id)
+    Open = paste0(
+      zotero_links(item_key, group_id),
+      doi_link(if ("doi" %in% names(x)) doi else NA_character_)
+    )
   )
 }
 
@@ -238,6 +264,7 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
     not_proposed <- reactiveVal(NULL)
     result <- reactiveVal(NULL)
     n_done <- reactiveVal(0) # changes left out because they are made already
+    selected <- reactiveVal(integer()) # rows selected, to keep one per choice
 
     clear <- function() {
       pending(NULL)
@@ -269,14 +296,25 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
       now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
       made <- is_made(now, x$changes)
       n_done(sum(made))
+      # alternatives (same `choice`) of a change which is made are left out
+      open <- !made
+      if ("choice" %in% names(x$changes)) {
+        open <- open & !x$changes$choice %in% x$changes$choice[made]
+      }
       pv_open <- pv
-      pv_open$rows <- pv$rows[!made]
+      pv_open$rows <- pv$rows[open]
+      ok <- vapply(pv_open$rows, function(r) isTRUE(r$ok), TRUE)
+      if ("preselect" %in% names(x$changes)) {
+        ok <- ok & x$changes$preselect[open]
+      }
+      selected(unname(which(ok)))
       pending(list(
-        changes = x$changes[!made, ],
+        changes = x$changes[open, ],
         preview = pv_open,
         action = x$action,
-        doi = doi[!made],
-        openalex = oa[!made],
+        selected = unname(which(ok)),
+        doi = doi[open],
+        openalex = oa[open],
         done = list(
           changes = x$changes[made, ],
           rows = pv$rows[made],
@@ -304,7 +342,23 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
             },
             reactable::reactableOutput(ns("proposals")),
             br(),
-            actionButton(ns("send"), "Send selected changes to Zotero for approval", class = "btn-primary")
+            pill(
+              "Submit Selected to Zotero for approval",
+              # rows of the current page (not group rows), by their hidden row number
+              tags$button(
+                type = "button",
+                class = "btn btn-primary btn-sm",
+                disabled = if (length(b)) NA,
+                onclick = sprintf(
+                  "var s = Reactable.getState('%s');
+                   Shiny.setInputValue('%s', s.pageRows.filter(function(r) { return !r._subRows; })
+                     .map(function(r) { return r['.row']; }), {priority: 'event'});",
+                  ns("proposals"), ns("send_page")
+                ),
+                "Current Page"
+              ),
+              actionButton(ns("send"), "All Pages", class = "btn-sm", disabled = length(b) > 0)
+            )
           )
         },
         if (n_done()) {
@@ -374,12 +428,27 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
       p <- pending()
       req(p, nrow(p$changes))
       rows <- p$preview$rows
+      tbl <- changes_table(p$changes, rows, p$doi, p$openalex, group())
+      tbl$.row <- seq_len(nrow(tbl)) # for "on this page only"
+      # alternatives (same `choice`) are indented under their item, and only
+      # one of them can be selected (see below)
+      choices <- "choice" %in% names(p$changes)
+      if (choices) {
+        ch <- p$changes$choice
+        twice <- tbl$Title %in% tbl$Title[duplicated(tbl$Title) & !duplicated(ch)]
+        tbl$Title <- ifelse(twice, paste0(tbl$Title, " (", ch, ")"), tbl$Title)
+      }
       # rows are selected with the tick boxes only, so that the links work
       reactable::reactable(
-        changes_table(p$changes, rows, p$doi, p$openalex, group()),
+        tbl,
         selection = "multiple",
-        defaultSelected = which(vapply(rows, function(r) isTRUE(r$ok), TRUE)),
+        defaultSelected = p$selected,
+        groupBy = if (choices) "Title",
+        defaultExpanded = TRUE,
+        class = if (choices) "choices",
         columns = list(
+          Title = reactable::colDef(minWidth = 200),
+          .row = reactable::colDef(show = FALSE),
           Change = reactable::colDef(html = TRUE, minWidth = 300),
           Open = reactable::colDef(html = TRUE, minWidth = 90)
         ),
@@ -389,10 +458,37 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
       )
     })
 
-    observeEvent(input$send, {
+    # one selected change per choice: a newly ticked alternative replaces the
+    # one ticked before
+    observeEvent(reactable::getReactableState("proposals", "selected"), ignoreNULL = FALSE, {
+      p <- pending()
+      req(p, "choice" %in% names(p$changes))
+      sel <- reactable::getReactableState("proposals", "selected") %||% integer()
+      ch <- p$changes$choice
+      new <- setdiff(sel, selected())
+      keep <- sel
+      for (c in unique(ch[sel])) {
+        rows <- sel[ch[sel] == c]
+        if (length(rows) > 1) {
+          pick <- c(intersect(new, rows), rows)[1]
+          keep <- setdiff(keep, setdiff(rows, pick))
+        }
+      }
+      selected(keep)
+      if (!setequal(keep, sel)) {
+        reactable::updateReactable("proposals", selected = keep)
+      }
+    })
+
+    observeEvent(input$send, send(reactable::getReactableState("proposals", "selected")))
+    observeEvent(input$send_page, {
+      sel <- reactable::getReactableState("proposals", "selected")
+      send(intersect(sel, unlist(input$send_page)))
+    })
+
+    send <- function(sel) {
       p <- pending()
       req(p)
-      sel <- reactable::getReactableState("proposals", "selected")
       if (!length(sel)) {
         showNotification("No changes selected.")
         return()
@@ -427,7 +523,7 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
         ))
       ))
       done()
-    })
+    }
   })
 }
 
@@ -446,8 +542,11 @@ ui <- fluidPage(
       "Status",
       br(),
       uiOutput("status"),
-      actionButton("backup", "Make a backup of this group"),
-      actionButton("register", "Register this app in Zotero"),
+      pill(
+        "Zotero",
+        actionButton("backup", "Make a backup of this group", class = "btn-sm"),
+        actionButton("register", "Register this app", class = "btn-sm")
+      ),
       br(),
       br(),
       uiOutput("fixes_status")
@@ -515,6 +614,14 @@ server <- function(input, output, session) {
   group_status <- reactive({
     g <- Filter(function(x) x$group_id == group(), status()$groups %||% list())
     if (length(g)) g[[1]] else NULL
+  })
+
+  # buttons which cannot be used: registering when connected already, backup
+  # when the group is not in this Zotero
+  observe({
+    s <- status()
+    updateActionButton(session, "register", disabled = !is.null(s))
+    updateActionButton(session, "backup", disabled = is.null(s) || !isTRUE(group_status()$in_zotero))
   })
 
   output$connection <- renderText({
@@ -590,12 +697,18 @@ server <- function(input, output, session) {
         pv <- tryCatch(se_preview(proposed), error = function(e) NULL)
         if (!is.null(pv)) {
           now <- vapply(pv$rows, function(r) r$current %||% NA_character_, "")
-          fixed <- sum(is_made(now, proposed))
+          made <- is_made(now, proposed)
+          fixed <- if ("choice" %in% names(proposed)) {
+            length(unique(proposed$choice[made]))
+          } else {
+            sum(made)
+          }
         }
       }
       list(
         label = label,
-        items = nrow(proposed),
+        # alternatives (same `choice`) count as one item
+        items = if ("choice" %in% names(proposed)) length(unique(proposed$choice)) else nrow(proposed),
         fixed = fixed,
         not_proposed = sum(!x$proposed),
         severity = checks$severity[checks$id == fix_checks[[label]]]

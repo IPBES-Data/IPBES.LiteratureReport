@@ -305,6 +305,36 @@ fix(
 )
 ```
 
+### Items without DOI, for which OpenAlex has one {#doi-candidates}
+
+OpenAlex was searched by title for items without a DOI (journal articles,
+books, book sections, reports, conference papers, theses, preprints). The
+publications found are compared by title, year and first author: a *likely*
+match agrees in all three, a *possible* match has a similar title, but e.g.
+a different year or author. Open the DOI to check that it is the same
+publication, and add the DOI in Zotero.
+
+```{r}
+x <- m$identifiers$met_id_candidates
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Year = year,
+      Author = author,
+      `Found in OpenAlex` = cand_title,
+      `Year (OpenAlex)` = cand_year,
+      `Author (OpenAlex)` = cand_author,
+      Match = ifelse(is.na(note), match, paste0(match, ": ", note)),
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
 ### Items without tags {#untagged}
 
 These items have no tags. This only matters if the group uses tags, e.g. to

@@ -70,6 +70,29 @@ language_code <- function(
   )
 }
 
+#' Similarity of titles
+#'
+#' Compares titles without case, spaces and punctuation: 1 minus the edit
+#' distance divided by the length of the longer title.
+#'
+#' @param a,b Titles, compared pairwise.
+#'
+#' @return Similarity between 0 (completely different) and 1 (same).
+title_similarity <- function(
+  a,
+  b
+) {
+  norm <- function(x) tolower(gsub("[^[:alnum:]]", "", x))
+  a <- norm(a)
+  b <- norm(b)
+  distance <- vapply(
+    seq_along(a),
+    function(i) as.numeric(utils::adist(a[i], b[i])),
+    numeric(1)
+  )
+  1 - distance / pmax(nchar(a), nchar(b), 1)
+}
+
 #' Zotero items with the OpenAlex work of their DOI
 #'
 #' Joins the Zotero items with OpenAlex works on the DOI. Items whose DOI

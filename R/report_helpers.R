@@ -162,6 +162,8 @@ rep_checks <- function(
     n(m$metadata$met_meta_language$count), "check",
     "no-identifier", "Items without DOI, ISBN, ISSN or URL",
     n(m$identifiers$met_id_none$count), "check",
+    "doi-candidates", "Items without DOI, for which OpenAlex has one",
+    n(m$identifiers$met_id_candidates$count_items), "check",
     "untagged", "Items without tags",
     n(m$maintenance$met_maint_tags$count), "info"
   )

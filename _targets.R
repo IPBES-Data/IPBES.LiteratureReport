@@ -96,6 +96,15 @@ list(
     format = "file"
   ),
 
+  # Search OpenAlex for items without DOI (cached per item) -----------------
+
+  tar_target(
+    doi_candidates,
+    get_doi_candidates(zotero_group),
+    pattern = map(zotero_group),
+    format = "file"
+  ),
+
   # # Calculate metrics ------------------------------------------------------
 
   # all met_*.R files (measures and helpers), so that changes rerun metrics
@@ -108,8 +117,8 @@ list(
 
   tar_target(
     metrics,
-    get_metrics(zotero_group, zotero_works, metric_names, metric_code),
-    pattern = map(zotero_group, zotero_works),
+    get_metrics(zotero_group, zotero_works, metric_names, doi_candidates, metric_code),
+    pattern = map(zotero_group, zotero_works, doi_candidates),
     format = "file"
   ),
 

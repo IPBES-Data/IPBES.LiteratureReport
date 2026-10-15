@@ -42,6 +42,7 @@ metrics:
     - met_id_doi_misplaced
     - met_id_doi_form
     - met_id_none
+    - met_id_candidates
   metadata:
     - met_meta_fields
     - met_meta_year

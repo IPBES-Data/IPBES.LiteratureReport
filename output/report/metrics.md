@@ -74,6 +74,32 @@ checked against OpenAlex nor easily be retrieved by readers.
 - `count`: number of items without identifier
 - `pc`: percentage of all items without identifier
 
+### DOIs found in OpenAlex for items without a DOI (`met_id_candidates`)
+
+For items without a DOI, OpenAlex was searched by title (see
+[get_doi_candidates()]). The works found are compared with the item:
+title (ignoring case and punctuation), year and the surname of the first
+author. A work is a *likely* match if the titles are (nearly) the same
+(similarity at least 0.95), the years differ by at most 1 and the first
+authors have the same surname (year or author are not compared if the item
+has none), and the title has at least 4 words (short titles like
+"Zoonoses" are too general). It is a *possible* match if the titles are similar (at least
+0.8). Only the best work with a DOI is kept per item. A likely match is
+only proposed if no other likely match has a different DOI, and if the DOI
+is not used by another item in the group (which would make it a
+duplicate).
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `year`, `author` (first author) of
+  the item, and `doi`, `id`, `cand_title`, `cand_year`, `cand_author`,
+  `cand_journal` of the work found, `similarity` (titles), `match`
+  (`likely` or `possible`) and `note` (why a likely match is not
+  proposed, else `NA`)
+- `count_searched`: number of items searched
+- `count_likely`: items with a likely match which is proposed
+- `count_possible`: items with a possible match, or a likely one which is
+  not proposed
+
 ## metadata
 
 ### Filled fields per item type (`met_meta_fields`)
