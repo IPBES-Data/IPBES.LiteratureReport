@@ -31,23 +31,33 @@ assessments:
     id: 2603670
   - name: TCA
     id: 4589462
+  # - name: Safe_Edit_Test
+  #   id: 6719916
 
 metrics:
   identifiers:
     - met_id_doi
     - met_id_isbn
     - met_id_issn
+    - met_id_issn_form
     - met_id_doi_misplaced
+    - met_id_doi_form
     - met_id_none
+    - met_id_candidates
   metadata:
     - met_meta_fields
     - met_meta_year
     - met_meta_duplicates
+    - met_meta_language
   openalex_check:
     - met_check_found
     - met_check_retracted
     - met_check_mismatch
     - met_check_type
+    - met_check_date
+    - met_check_fill
+    - met_check_openalex_id
+    - met_check_extra_id
   profile:
     - met_prof_year
     - met_prof_oa

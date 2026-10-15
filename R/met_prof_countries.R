@@ -30,7 +30,7 @@ met_prof_countries <- function(
   metrics <- list()
 
   metrics$by_country <- tibble::tibble(
-    country = unlist(countries)
+    country = as.character(unlist(countries))
   ) |>
     dplyr::count(
       country,

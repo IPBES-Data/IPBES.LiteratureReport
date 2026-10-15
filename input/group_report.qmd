@@ -154,11 +154,54 @@ fix(
 )
 ```
 
+### DOI field with a link or prefix instead of the DOI {#doi-form}
+
+The DOI field of these items contains the DOI as a link
+(`https://doi.org/…`) or with a prefix (`DOI …`). Citation styles add the
+link themselves, so it would appear twice. Replace it with the DOI only.
+
+```{r}
+x <- m$identifiers$met_id_doi_form
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `Content of the DOI field` = doi_raw,
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
+### ISSN not in the standard form {#issn-form}
+
+The ISSN field of these items is not in the standard form `1234-567X`
+(several separated by ", "), or contains something which is not a valid
+ISSN, e.g. an ISBN.
+
+```{r}
+x <- m$identifiers$met_id_issn_form
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `Content of the ISSN field` = issn,
+      `Standard form` = standard,
+      `Not a valid ISSN` = invalid
+    )
+  }
+)
+```
+
 ### DOI in the wrong field {#misplaced-doi}
 
 These items have no DOI in the DOI field, but a DOI in the URL or Extra
-field. Copy the DOI into the DOI field. If the item type has no DOI field,
-the DOI is fine in Extra.
+field. Copy the DOI into the DOI field.
 
 ```{r}
 x <- m$identifiers$met_id_doi_misplaced
@@ -202,6 +245,7 @@ problems <- c(
   unparseable = "Year not recognised",
   future = "Year in the future"
 )
+oa <- m$openalex_check$met_check_date$items
 fix(
   if (!is.null(x)) {
     dplyr::transmute(
@@ -209,7 +253,60 @@ fix(
       key,
       Title = title,
       Date = date,
-      Problem = unname(problems[problem])
+      Problem = unname(problems[problem]),
+      `Date in OpenAlex` = if (is.null(oa)) NA_character_ else oa$date[match(key, oa$key)]
+    )
+  }
+)
+```
+
+### Empty journal, volume, issue or pages, found in OpenAlex {#fill}
+
+These journal articles have an empty journal, volume, issue or pages field,
+and OpenAlex has the value for their DOI. Check it with the DOI and fill in
+the field.
+
+```{r}
+x <- m$openalex_check$met_check_fill
+labels <- c(
+  publicationTitle = "Journal",
+  volume = "Volume",
+  issue = "Issue",
+  pages = "Pages"
+)
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Field = unname(labels[field]),
+      `Value in OpenAlex` = value,
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
+### Language not given as a language code {#language}
+
+The language of these items is not given as a language code (`en`, `fr`,
+`en-US`), e.g. as `English` or `eng`. Citation styles only recognise the
+codes. Where the language was recognised, the code is shown; otherwise look
+up the code in the
+[ISO 639-1 list](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes).
+
+```{r}
+x <- m$metadata$met_meta_language
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Language = language,
+      `Language code` = code
     )
   }
 )
@@ -226,6 +323,83 @@ fix(
   if (!is.null(x)) {
     dplyr::transmute(x$items, key, Title = title, Type = rep_type(type))
   }
+)
+```
+
+### Items without DOI, for which OpenAlex has one {#doi-candidates}
+
+OpenAlex was searched by title for items without a DOI (journal articles,
+books, book sections, reports, conference papers, theses, preprints). The
+publications found are compared by title, year and first author: a *likely*
+match agrees in all three, a *possible* match has a similar title, but e.g.
+a different year or author. Open the DOI to check that it is the same
+publication, and add the DOI in Zotero.
+
+```{r}
+x <- m$identifiers$met_id_candidates
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Year = year,
+      Author = author,
+      `Found in OpenAlex` = cand_title,
+      `Year (OpenAlex)` = cand_year,
+      `Author (OpenAlex)` = cand_author,
+      Match = ifelse(is.na(note), match, paste0(match, ": ", note)),
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
+### OpenAlex ID in Extra not valid {#extra-id}
+
+The line `OpenAlex: …` in the Extra field of these items is not an OpenAlex
+ID, is not in OpenAlex (wrong, or the record was merged into another one), or
+leads to a different publication. Open the item and the OpenAlex record to
+check, and correct or remove the line.
+
+```{r}
+x <- m$openalex_check$met_check_extra_id
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `OpenAlex ID in Extra` = value,
+      `Title in OpenAlex` = oa_title,
+      Problem = problem
+    )
+  }
+)
+```
+
+### Items without their OpenAlex ID in Extra {#openalex-id}
+
+These items were found in OpenAlex by their DOI, but their Extra field has
+no line `OpenAlex: W…` with the ID of the publication in OpenAlex, or a
+different one. The ID links the item to OpenAlex. A different ID can come
+from OpenAlex merging records; open both to check.
+
+```{r}
+x <- m$openalex_check$met_check_openalex_id
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `OpenAlex ID` = id,
+      `ID in Extra` = extra_id,
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
 )
 ```
 

@@ -27,12 +27,10 @@ met_check_mismatch <- function(
     suffix = c("_zotero", "_openalex")
   )
 
-  norm <- function(x) tolower(gsub("[^[:alnum:]]", "", x))
-  a <- norm(pairs$title_zotero)
-  b <- norm(pairs$title_openalex)
-
-  pairs$title_similarity <- 1 -
-    unname(mapply(utils::adist, a, b)) / pmax(nchar(a), nchar(b), 1)
+  pairs$title_similarity <- title_similarity(
+    pairs$title_zotero,
+    pairs$title_openalex
+  )
   pairs$year_diff <- abs(pairs$year_zotero - pairs$year_openalex)
 
   metrics <- list()

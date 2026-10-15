@@ -38,6 +38,20 @@ which should have one (`journalArticle`, `magazineArticle`).
 - `pc`: percentage of all items with an ISSN
 - `pc_expected`: percentage of journal and magazine articles with an ISSN
 
+### ISSN not in the standard form (`met_id_issn_form`)
+
+Items whose ISSN field is not in the standard form: each ISSN as
+`1234-567X` (with hyphen, capital X), several separated by ", ". The ISSNs
+are checked with their check digit. If all are valid, the standard form is
+proposed; otherwise the item is listed with the ISSNs which are not valid.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `issn` (as entered), `standard`
+  (standard form, `NA` if an ISSN is not valid) and `invalid` (ISSNs which
+  are not valid, `NA` if none)
+- `count`: number of items whose ISSN field is not in the standard form
+- `count_invalid`: of these, items with an ISSN which is not valid
+
 ### DOIs in the wrong field (`met_id_doi_misplaced`)
 
 Items with an empty DOI field but a DOI in the `Url` or `Extra` field.
@@ -49,6 +63,21 @@ DOI field.
 - `count`: number of items with a misplaced DOI
 - `pc`: percentage of all items with a misplaced DOI
 
+### DOIs in the wrong form (`met_id_doi_form`)
+
+Items whose DOI field contains a valid DOI, but not as a bare DOI: as a link
+(`https://doi.org/10.…`), with a prefix (`doi:`, `DOI `), URL-encoded
+(`%5B` for `[`) or with spaces or other characters around it. Citation
+styles add the link themselves, so a link in the DOI field appears twice in
+a bibliography. The bare DOI is the one recognised by
+`openalexPro::extract_doi()`, keeping its upper and lower case.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi_raw` (content of the DOI field)
+  and `doi` (the bare DOI)
+- `count`: number of items with a DOI in the wrong form
+- `pc`: percentage of all items with a DOI in the wrong form
+
 ### Items without identifier (`met_id_none`)
 
 Items with none of DOI, ISBN, ISSN or Url. These items can neither be
@@ -58,6 +87,32 @@ checked against OpenAlex nor easily be retrieved by readers.
 - `items`: tibble with `key`, `type` and `title`
 - `count`: number of items without identifier
 - `pc`: percentage of all items without identifier
+
+### DOIs found in OpenAlex for items without a DOI (`met_id_candidates`)
+
+For items without a DOI, OpenAlex was searched by title (see
+[get_doi_candidates()]). The works found are compared with the item:
+title (ignoring case and punctuation), year and the surname of the first
+author. A work is a *likely* match if the titles are (nearly) the same
+(similarity at least 0.95), the years differ by at most 1 and the first
+authors have the same surname (year or author are not compared if the item
+has none), and the title has at least 4 words (short titles like
+"Zoonoses" are too general). It is a *possible* match if the titles are similar (at least
+0.8). All likely and possible works with a DOI are kept, sorted per item,
+best first. DOIs used by another item in the group are noted (the item
+would be a duplicate).
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `year`, `author` (first author) of
+  the item, and `doi`, `id`, `cand_title`, `cand_year`, `cand_author`,
+  `cand_journal` of the work found, `similarity` (titles), `match`
+  (`likely` or `possible`), `note` (DOI used by another item, else `NA`)
+  and `single` (`TRUE` for the only likely match of an item), one row per
+  item and work
+- `count_items`: number of items with at least one match
+- `count_searched`: number of items searched
+- `count_likely`: items with exactly one likely match
+- `count_choice`: items with several or only possible matches
 
 ## metadata
 
@@ -97,6 +152,24 @@ publication year and first word of the first author.
   duplicates, `title` and `count`
 - `count_doi`, `count_title`: number of surplus copies, i.e. items which
   could be removed
+
+### Language not given as a standard code (`met_meta_language`)
+
+Items whose language is not given as a standard language code, i.e. a
+two-letter ISO 639-1 code, optionally with a region (`en`, `en-US`), but
+e.g. as a name (`English`), a three-letter code (`eng`) or in a different
+spelling (`EN`, `en_us`). Citation styles and other tools only recognise the
+codes. Where the value is recognised, the standard code is proposed, based
+on the ISO 639-2 list (R package ISOcodes): codes, three-letter codes and
+the English names of the languages. Other values, e.g. names in the language
+itself, several languages or other text, are listed without a proposal.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `language` (as entered) and `code`
+  (proposed standard code, `NA` if not recognised)
+- `count`: number of items whose language is not a standard code
+- `count_recognised`: of these, items for which a code is proposed
+- `pc`: percentage of all items whose language is not a standard code
 
 ## openalex_check
 
@@ -141,6 +214,71 @@ same DOI.
 
 **Result:** A list with
 - `comparison`: tibble with `type_zotero`, `type_openalex` and `count`
+
+### Missing dates found in OpenAlex (`met_check_date`)
+
+Items without a date whose DOI was found in OpenAlex: the publication date
+in OpenAlex is proposed. OpenAlex gives 1 January when only the year is
+known, so such dates are proposed as the year only. Items whose DOI points
+to a different publication are left out.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi` and `date` (the publication
+  date in OpenAlex, `YYYY-MM-DD`, or `YYYY` if only the year is known)
+- `count`: number of items without a date for which OpenAlex has one
+
+### Empty fields found in OpenAlex (`met_check_fill`)
+
+Journal articles with an empty journal, volume, issue or pages field whose
+DOI was found in OpenAlex with these details: the values in OpenAlex are
+proposed. The journal is only taken if the publication is in a journal in
+OpenAlex (not e.g. a repository). Page ranges which end before they start
+(e.g. `1260-2`, shortened or wrong) are not proposed. Items whose DOI
+points to a different publication are left out.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi`, `field` (Zotero field:
+  `publicationTitle`, `volume`, `issue` or `pages`) and `value` (in
+  OpenAlex), one row per empty field, sorted by publication
+- `count`: number of items with at least one field to fill
+- `count_fields`: number of fields to fill
+
+### OpenAlex ID in the Extra field (`met_check_openalex_id`)
+
+Items whose DOI was found in OpenAlex, compared with the OpenAlex ID noted
+in their Extra field (a line `OpenAlex: W…`). Items without such a line
+can get it, which links them to OpenAlex for later checks. Items with a
+different ID are listed for checking: OpenAlex merges records, and the ID
+of a merged record redirects to the new one. Items whose DOI points to a
+different publication are left out.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi`, `id` (OpenAlex ID of the
+  DOI, e.g. `W2741809807`), `extra_id` (ID in the Extra field, `NA` if
+  none), `extra` (content of Extra) and `line` (line to add to Extra),
+  for items without the ID or
+  with a different one
+- `count_missing`: items without an OpenAlex ID in Extra
+- `count_different`: items with a different OpenAlex ID in Extra
+
+### OpenAlex ID in the Extra field not valid (`met_check_extra_id`)
+
+Checks the lines `OpenAlex: …` in the Extra field (looked up by
+[get_extra_ids()]). A line is not valid if
+- it is not an OpenAlex work ID (`W` and digits),
+- the item has several lines with different IDs,
+- the ID is not in OpenAlex (wrong, or merged into another record), or
+- the work is a different publication: its DOI is not the DOI of the item,
+  or, for items without DOI, its title is not similar (similarity below
+  0.8, see [title_similarity()]).
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `value` (after `OpenAlex:`),
+  `oa_title`, `oa_doi` (of the work in OpenAlex), `problem`, `extra`
+  (content of Extra) and `doi_id` (OpenAlex ID of the item's DOI, `NA` if
+  none), one row per line which is not valid
+- `count`: number of items with a line which is not valid
+- `count_checked`: number of items with an OpenAlex line
 
 ## profile
 
