@@ -7,7 +7,7 @@ library(shiny)
 
 project <- getOption("fix_app.project", normalizePath(".."))
 # shared with the pipeline: report helpers, the fixes and their table
-for (f in list.files(file.path(project, "R"), pattern = "^(report_helpers|fix_.*)\\.R$", full.names = TRUE)) {
+for (f in list.files(file.path(project, "R"), pattern = "^(report_helpers|repo_version|fix_.*)\\.R$", full.names = TRUE)) {
   source(f)
 }
 for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) {
@@ -164,6 +164,9 @@ css <- "
   border: 1px solid #767676; border-radius: 50%; vertical-align: middle; }
 .choices .rt-td-inner input[type=checkbox]:checked {
   background: radial-gradient(#0b6bcb 45%, transparent 50%); border-color: #0b6bcb; }
+/* when the fixes were updated, next to the group */
+.updated { display: inline-block; margin: 0 8px; padding: 3px 12px; border-radius: 999px;
+  background: #fff4d6; border: 1px solid #e6c56b; font-weight: 600; }
 /* round buttons; related buttons grouped in a labelled pill (pill()) */
 .btn { border-radius: 999px; }
 .btn-default:not(.btn-primary) { background: #e3eefa; border-color: #9cbfe3; color: #1d4f7c; }
@@ -583,10 +586,16 @@ changes_server <- function(id, group, status, load, reset, compute, done) {
 
 ui <- fluidPage(
   tags$head(tags$style(HTML(css))),
-  titlePanel("Fix Zotero groups"),
+  titlePanel(
+    tagList("Fix Zotero groups ", tags$small(class = "notes", "IPBES Literature Report ", repo_version(file.path(project, "VERSION")))),
+    windowTitle = "Fix Zotero groups"
+  ),
   fluidRow(
     column(4, selectInput("group", "Group", choices = groups)),
-    column(8, br(), actionButton("refresh", "Refresh"), textOutput("connection", inline = TRUE))
+    column(
+      8, br(), actionButton("refresh", "Refresh"), uiOutput("updated", inline = TRUE),
+      textOutput("connection", inline = TRUE)
+    )
   ),
   tabsetPanel(
     id = "tabs",
@@ -681,6 +690,20 @@ server <- function(input, output, session) {
     s <- status()
     updateActionButton(session, "register", disabled = !is.null(s))
     updateActionButton(session, "backup", disabled = is.null(s) || !isTRUE(group_status()$in_zotero))
+  })
+
+  # when the pipeline last calculated the fixes of this group
+  output$updated <- renderUI({
+    tick()
+    file <- metrics_file(group())
+    span(
+      class = "updated",
+      if (file.exists(file)) {
+        paste("Fixes updated:", format(file.mtime(file), "%d %B %Y, %H:%M"))
+      } else {
+        "No fixes yet: run the pipeline"
+      }
+    )
   })
 
   output$connection <- renderText({
@@ -837,7 +860,7 @@ server <- function(input, output, session) {
       p(
         class = "notes",
         paste0(
-          "Items: from the report data of ", format(fc$time, "%Y-%m-%d %H:%M"), ". ",
+          "Items: from the fixes updated on ", format(fc$time, "%Y-%m-%d %H:%M"), ". ",
           "Fixed: of these, items which have the proposed value in Zotero now",
           if (!fc$in_zotero) " (–: the group is not in this Zotero)",
           ". Click a problem to show its outstanding proposed changes."

@@ -18,11 +18,34 @@ params:
   helpers: ""
   docs: ""
   plugins: ""
+  version: ""
+  repository: ""
+  doi: ""
 ---
 
 ```{r}
 #| include: false
 source(params$helpers)
+```
+
+```{r}
+#| output: asis
+# source code, DOI and the date of the Zotero data
+downloaded <- as.Date(do.call(c, lapply(params$metrics, function(f) readRDS(f)$downloaded)))
+data_dates <- if (min(downloaded) == max(downloaded)) {
+  format(min(downloaded), "%d %B %Y")
+} else {
+  paste(format(min(downloaded), "%d %B %Y"), "to", format(max(downloaded), "%d %B %Y"))
+}
+cat(
+  if (nzchar(params$doi)) {
+    paste0("[![DOI](https://zenodo.org/badge/DOI/", params$doi, ".svg)](https://doi.org/", params$doi, ") ")
+  },
+  "IPBES Literature Report ", params$version,
+  " · source code on [GitHub](", params$repository, '){target="_blank"}',
+  " · Zotero data of ", data_dates, "\n\n",
+  sep = ""
+)
 ```
 
 These reports show the state of the IPBES Zotero groups, and list the items
@@ -45,6 +68,7 @@ groups <- lapply(
       `With DOI` = paste0(round(m$identifiers$met_id_doi$zotero$pc), "%"),
       `Please fix` = sum(checks$count[checks$status == "Please fix"]),
       `Please check` = sum(checks$count[checks$status == "Please check"]),
+      `Zotero data of` = format(as.Date(m$downloaded), "%d %b %Y"),
       Zotero = paste0(
         "[open](https://www.zotero.org/groups/", params$ids[[i]],
         '){target="_blank"}'
@@ -55,7 +79,7 @@ groups <- lapply(
 
 knitr::kable(
   dplyr::bind_rows(groups),
-  align = c("l", "r", "r", "r", "r", "l")
+  align = c("l", "r", "r", "r", "r", "r", "l")
 )
 ```
 
@@ -75,7 +99,7 @@ knitr::kable(
   data.frame(
     Plugin = vapply(plugins, function(p) paste0("**", p$name, "**"), ""),
     Version = vapply(plugins, function(p) p$version, ""),
-    Download = vapply(plugins, function(p) paste0("[", basename(p$download), "](", p$download, ")"), ""),
+    Download = vapply(plugins, function(p) paste0("[download](", p$download, ")"), ""),
     `What it does` = vapply(plugins, function(p) p$description, ""),
     check.names = FALSE
   )
@@ -102,3 +126,13 @@ docs <- readLines(params$docs)
 docs <- docs[docs != "# Metrics"]
 cat(sub("^(#+) ", "\\1# ", docs), sep = "\n")
 ```
+
+---
+
+IPBES Literature Report `r params$version` ·
+[source code on GitHub](`r params$repository`){target="_blank"}
+(© IPBES.LiteratureReport authors,
+[MIT licence](https://opensource.org/license/mit){target="_blank"}) ·
+reports and data on this website:
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/){target="_blank"}
+(no rights reserved)

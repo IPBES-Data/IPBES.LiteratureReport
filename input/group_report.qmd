@@ -18,6 +18,8 @@ params:
   id: 0
   helpers: ""
   docs: ""
+  version: ""
+  repository: ""
 ---
 
 ```{r}
@@ -50,6 +52,11 @@ add_title <- function(items) {
 
 pc <- function(x) if (is.null(x)) NA else paste0(round(x), "%")
 ```
+
+Zotero data of `r format(as.Date(m$downloaded), "%d %B %Y")` ·
+IPBES Literature Report `r params$version` ·
+[source code on GitHub](`r params$repository`){target="_blank"}
+
 
 This report shows the state of the Zotero group **`r params$name`**
 ([open the group in Zotero](`r group_url`)). It gives an overview of the
@@ -554,3 +561,13 @@ if (!is.null(countries)) {
 cat(gsub("(?m)^(#+) ", "\\1## ", params$docs, perl = TRUE))
 ```
 :::
+
+---
+
+IPBES Literature Report `r params$version` ·
+[source code on GitHub](`r params$repository`){target="_blank"}
+(© IPBES.LiteratureReport authors,
+[MIT licence](https://opensource.org/license/mit){target="_blank"}) ·
+reports and data on this website:
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/){target="_blank"}
+(no rights reserved)

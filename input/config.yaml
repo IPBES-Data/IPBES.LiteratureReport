@@ -1,3 +1,9 @@
+# The website: link to the source code, and the DOI of the repository
+# (e.g. Zenodo; the badge is shown on the index page once it is set)
+site:
+  repository: https://github.com/IPBES-Data/IPBES.LiteratureReport
+  doi: ""
+
 assessments:
   - name: NFF
     id: 4937409

@@ -94,4 +94,7 @@ from OpenAlex find it only after the next sync and pipeline run.
 
 ## Licence
 
-MIT, see [LICENSE](LICENSE).
+The code is under the MIT licence, see [LICENSE](LICENSE). The reports and
+data published on the website (reports, `fixes/`) are under
+[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/): no rights
+reserved.

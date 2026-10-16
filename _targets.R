@@ -64,6 +64,17 @@ list(
   ),
 
   tar_target(
+    site,
+    yaml::read_yaml(config_file)$site
+  ),
+
+  tar_target(
+    version_file,
+    "VERSION",
+    format = "file"
+  ),
+
+  tar_target(
     metric_names,
     yaml::read_yaml(config_file)$metrics
   ),
@@ -214,7 +225,9 @@ list(
         name = assessment$name,
         id = assessment$id,
         helpers = normalizePath(report_helpers),
-        docs = metric_docs_brief
+        docs = metric_docs_brief,
+        version = repo_version(version_file),
+        repository = site$repository
       ),
       title = paste("Zotero group", assessment$name)
     ),
@@ -234,7 +247,10 @@ list(
         ids = vapply(assessment, `[[`, 0, "id"),
         helpers = normalizePath(report_helpers),
         docs = normalizePath(metric_docs_file),
-        plugins = normalizePath(grep("plugins[.]json$", plugins, value = TRUE))
+        plugins = normalizePath(grep("plugins[.]json$", plugins, value = TRUE)),
+        version = repo_version(version_file),
+        repository = site$repository,
+        doi = site$doi %||% ""
       ),
       title = "IPBES Zotero group reports"
     ),
