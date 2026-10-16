@@ -131,6 +131,27 @@ list(
     format = "file"
   ),
 
+  # Proposed fixes, published next to the reports for the Zotero plugin --
+
+  tar_target(
+    proposals_schema,
+    file.path("input", "proposals.schema.json"),
+    format = "file"
+  ),
+
+  tar_target(
+    proposals,
+    export_proposals(metrics, zotero_works, assessment, proposals_schema),
+    pattern = map(metrics, zotero_works, assessment),
+    format = "file"
+  ),
+
+  tar_target(
+    proposals_index,
+    export_proposals_index(proposals, assessment, proposals_schema),
+    format = "file"
+  ),
+
   tar_target(
     metric_docs,
     get_metric_docs(metric_names, metric_code)
@@ -144,6 +165,24 @@ list(
       writeLines(c("# Metrics", "", metric_docs), file)
       file
     },
+    format = "file"
+  ),
+
+  # Zotero plugins (submodules in plugins/), built for the website --------
+
+  tar_target(
+    plugin_sources,
+    list.files(
+      file.path("plugins", c("zotero-safe-edit", "zotero-fix-proposals"), "addon"),
+      recursive = TRUE,
+      full.names = TRUE
+    ),
+    format = "file"
+  ),
+
+  tar_target(
+    plugins,
+    build_plugins(file.path("plugins", c("zotero-safe-edit", "zotero-fix-proposals")), plugin_sources),
     format = "file"
   ),
 
@@ -194,7 +233,8 @@ list(
         names = vapply(assessment, `[[`, "", "name"),
         ids = vapply(assessment, `[[`, 0, "id"),
         helpers = normalizePath(report_helpers),
-        docs = normalizePath(metric_docs_file)
+        docs = normalizePath(metric_docs_file),
+        plugins = normalizePath(grep("plugins[.]json$", plugins, value = TRUE))
       ),
       title = "IPBES Zotero group reports"
     ),

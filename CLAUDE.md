@@ -36,10 +36,16 @@ Edit `assessments` in [input/config.yaml](input/config.yaml) to change which Zot
 5. `doi_candidates` — [get_doi_candidates()](R/get_doi_candidates.R) searches OpenAlex by title for items without a DOI (one request per item) into `output/doi_candidates/<group>.rds`; results are cached per item (key + title), so re-runs only search new or changed items. Delete the file to search again.
 6. `extra_ids` — [get_extra_ids()](R/get_extra_ids.R) looks up the `OpenAlex: W…` lines in Extra in OpenAlex (one `pro_query()`/`pro_fetch()` for all IDs; IDs not returned are not in OpenAlex) into `output/extra_ids/<group>.rds`.
 7. `metrics` — [get_metrics()](R/get_metrics.R) runs the `met_*` measures listed in the config (one file each in `R/met_*.R`, shared helpers in [R/met_helpers.R](R/met_helpers.R)). `metric_code` tracks those files. Measures are called with `zotero` and `openalex`; those with a `candidates` or `extra_ids` argument also get the DOI candidates or the OpenAlex IDs in Extra.
-8. `metric_docs` / `metric_docs_file` — [get_metric_docs()](R/get_metric_docs.R) combines the roxygen docs of the measures into `output/report/metrics.md`.
-9. `group_report` / `index` — [render_report()](R/render_report.R) renders [input/group_report.qmd](input/group_report.qmd) per group and [input/index.qmd](input/index.qmd) into `output/report/`, using [R/report_helpers.R](R/report_helpers.R).
+8. `proposals` / `proposals_index` — [export_proposals()](R/export_proposals.R) runs all fixes ([fix_table()](R/fix_table.R)) per group and writes the proposed changes as JSON to `output/report/fixes/<group>.json` (plus `index.json` and `schema.json`), checked against [input/proposals.schema.json](input/proposals.schema.json). They are read by the Zotero plugin which shows the fixes.
+9. `metric_docs` / `metric_docs_file` — [get_metric_docs()](R/get_metric_docs.R) combines the roxygen docs of the measures into `output/report/metrics.md`.
+10. `plugin_sources` / `plugins` — [build_plugins()](R/build_plugins.R) builds the two Zotero plugins (git submodules `plugins/zotero-safe-edit`, `plugins/zotero-fix-proposals`, pinned to release tags) into `output/report/plugins/<plugin>/` with `updates.json` (installed copies update from there) and `plugins.json` for the index page.
+11. `group_report` / `index` — [render_report()](R/render_report.R) renders [input/group_report.qmd](input/group_report.qmd) per group and [input/index.qmd](input/index.qmd) into `output/report/`, using [R/report_helpers.R](R/report_helpers.R).
 
 Outputs land under [output/](output/) in fixed subdirs (`zotero_groups/`, `zotero_works/`, `metrics/`, `report/`, ...). `get_zotero_group()` and `get_works()` `unlink()` their target directory before writing — re-runs are destructive by design.
+
+## Checks
+
+`Rscript tests/check_fixes.R` (or `… all`): fixes return the agreed columns, exported proposals validate against the schema, the fix app loads. Needs the pipeline output in `output/`. The two Zotero plugins have their own tests (`node --test …`, `tests/zotero/run.sh`, which runs inside a separate Zotero instance).
 
 ## External credentials
 
@@ -50,10 +56,14 @@ Outputs land under [output/](output/) in fixed subdirs (`zotero_groups/`, `zoter
 
 Non-CRAN / IPBES-internal packages used by the pipeline (declared in `tar_option_set(packages = ...)`): `openalexPro`, `zotFunc`. These must be installed from their respective sources before `tar_make()` will run.
 
+## Zotero plugins
+
+Developed in their own repos (private, `dev` → `main`, tags `v<version>`); here only as submodules at the released tag. To publish: move the submodule to the new tag, run the pipeline, commit and push. Clone this repo with `--recurse-submodules` (or `git submodule update --init`) — the pipeline needs the plugin sources.
+
 ## Fix app (not part of the pipeline)
 
 `run_fix_app()` ([R/run_fix_app.R](R/run_fix_app.R)) starts a local Shiny app ([fix_app/](fix_app/)) which proposes fixes for problems found by the metrics and sends them to Zotero through the **Zotero Safe Edit** plugin (separate repo `IPBES-Data/zotero-safe-edit`, Zotero 10). The plugin does all checks (token, auto-sync off, fresh backup, allowed fields, expected old value, batch limit), shows the approval dialog, writes, and keeps the log; the app stores nothing.
 
 - Client functions `se_*()`: [fix_app/R/safe_edit_client.R](fix_app/R/safe_edit_client.R); token in the keyring as `zotero_safe_edit_token` (`se_register()` stores it).
-- Fixes are `fix_*(m, group_id)` functions in `fix_app/R/`, returning `group_id, item_key, title, field, old, new, reason, proposed, note` (optionally `doi`, for the DOI/OpenAlex links when the field is not `DOI`; `choice`, alternatives of which only one can be selected; `preselect`; `append`, a line to add, based on the current value in Zotero); register new ones in the `fixes` list in [fix_app/app.R](fix_app/app.R). Field names are Zotero field names (`DOI`, `extra`, …), and the field must be allowed in the plugin settings.
+- Fixes are `fix_*(m, group_id)` functions in `R/` (shared with the pipeline, which publishes their proposals), listed in [fix_table()](R/fix_table.R); returning `group_id, item_key, title, field, old, new, reason, proposed, note` (optionally `doi`, for the DOI/OpenAlex links when the field is not `DOI`; `choice`, alternatives of which only one can be selected; `preselect`; `append`, a line to add, based on the current value in Zotero); register new ones there. Field names are Zotero field names (`DOI`, `extra`, …), and the field must be allowed in the plugin settings.
 - The app must run on the same computer as Zotero.
