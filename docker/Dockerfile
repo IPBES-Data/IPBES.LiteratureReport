@@ -1,20 +1,12 @@
 # The IPBES Literature Report pipeline in a container: runs the pipeline
 # regularly (and when triggered), and publishes changed reports, fixes and
 # plugins by pushing them to GitHub. See docker/README.md.
-# Versions (set in docker-compose.yml; rebuild with `docker compose build`):
-# R, the date of the CRAN snapshot (Posit Package Manager), Quarto, the minimum
-# versions of openalexPro and zotFunc (both from r-universe)
+# Versions: R and Quarto here (R must match renv.lock); the R packages are
+# those in renv.lock. Rebuild after changing them.
 ARG R_VERSION=4.6.1
 FROM rocker/r-ver:${R_VERSION}
 
-ARG CRAN_DATE=2026-10-16
 ARG QUARTO_VERSION=1.10.18
-ARG OPENALEXPRO_MIN=0.13.0
-ARG ZOTFUNC_MIN=0.1.0
-
-# CRAN packages as of CRAN_DATE, so that rebuilds give the same versions
-RUN echo "options(repos = c(CRAN = 'https://p3m.dev/cran/__linux__/noble/${CRAN_DATE}'))" \
-  >> "$(R RHOME)/etc/Rprofile.site"
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -28,17 +20,16 @@ RUN curl -fsSL -o /tmp/quarto.deb \
   && apt-get update && apt-get install -y --no-install-recommends /tmp/quarto.deb \
   && rm -rf /tmp/quarto.deb /var/lib/apt/lists/*
 
-# R packages of the pipeline and the reports (binaries from Posit Package Manager)
-RUN install2.r --error --skipinstalled --ncpus -1 \
-    targets tarchetypes dplyr tibble ggplot2 quarto knitr rmarkdown \
-    arrow jsonlite jsonvalidate yaml keyring ISOcodes countrycode \
-    httr2 openssl digest withr htmltools reactable roxygen2 remotes \
-  && Rscript -e 'for (p in c("targets", "tarchetypes", "dplyr", "ggplot2", "quarto", "knitr", "arrow", "jsonlite", "jsonvalidate", "yaml", "keyring", "ISOcodes", "countrycode", "httr2", "openssl", "withr", "htmltools", "reactable", "roxygen2")) library(p, character.only = TRUE)' \
-  && rm -rf /tmp/downloaded_packages
-
-# the IPBES packages from r-universe (the newest versions, at least the
-# minimum versions); the build fails if one does not load or is too old
-RUN Rscript -e 'install.packages(c("openalexPro", "zotFunc"), repos = c("https://openalexpro.r-universe.dev", "https://rkrug.r-universe.dev", getOption("repos"))); library(openalexPro); library(zotFunc); stopifnot(packageVersion("openalexPro") >= Sys.getenv("OPENALEXPRO_MIN"), packageVersion("zotFunc") >= Sys.getenv("ZOTFUNC_MIN"))'
+# R packages: exactly the versions in renv.lock (Linux binaries from Posit
+# Package Manager, openalexPro and zotFunc from r-universe), restored into a
+# fixed library; the project's renv uses the same library when the pipeline
+# runs (RENV_PATHS_LIBRARY)
+ENV RENV_PATHS_LIBRARY=/opt/renv/library RENV_CONFIG_CACHE_ENABLED=FALSE
+WORKDIR /opt/renv/project
+COPY renv.lock .Rprofile ./
+COPY renv/activate.R renv/settings.json renv/
+RUN Rscript -e 'renv::restore(prompt = FALSE)' \
+  && Rscript -e 'for (p in c("targets", "tarchetypes", "dplyr", "ggplot2", "quarto", "knitr", "arrow", "jsonlite", "jsonvalidate", "yaml", "keyring", "ISOcodes", "countrycode", "httr2", "openssl", "withr", "htmltools", "reactable", "roxygen2", "openalexPro", "zotFunc")) library(p, character.only = TRUE)'
 
 # the versions in this image (shown by GET /status)
 RUN mkdir -p /opt/literature-report \

@@ -1,0 +1,111 @@
+# Runs the pipeline every 12 hours (00:23 and 12:23 UTC), and by hand ("Run
+# workflow"), in the image built by image.yml. Only groups changed in Zotero
+# are recalculated; the downloads, OpenAlex works and the targets store are
+# kept between runs in the Actions cache. Changed reports in output/report
+# are committed to main and published to GitHub Pages.
+#
+# Repository secrets: OPENALEX_API_KEY; ZOTERO_API_KEY only for private groups.
+name: Update reports
+
+on:
+  schedule:
+    - cron: "23 */12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+env:
+  CACHE_PATHS: |
+    output
+    !output/report
+    _targets
+
+jobs:
+  update:
+    # commits to main, so only from main
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ipbes-data/ipbes-literature-report:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      deploy: ${{ steps.commit.outputs.changed == 'true' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      # the state of the previous run; replaces _targets/meta/meta from git
+      - name: Restore the pipeline's caches
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CACHE_PATHS }}
+          key: pipeline-${{ github.run_id }}
+          restore-keys: pipeline-
+
+      - name: Run the pipeline
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+          ZOTERO_API_KEY: ${{ secrets.ZOTERO_API_KEY }}
+        run: Rscript -e 'targets::tar_make(reporter = "timestamp")'
+
+      - name: Commit changed reports
+        id: commit
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add output/report
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "Update reports (automatic)"
+          git push origin HEAD:main || {
+            git -c rebase.autoStash=true pull --rebase origin main && git push origin HEAD:main
+          }
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # only when something changed: a run without changes leaves the state as
+      # it was (ponytail: one cache entry per changing run, GitHub evicts the
+      # oldest beyond 10 GB)
+      - name: Save the pipeline's caches
+        if: steps.commit.outputs.changed == 'true' || steps.cache.outputs.cache-matched-key == ''
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CACHE_PATHS }}
+          key: pipeline-${{ github.run_id }}
+
+      - name: Upload output/report
+        if: steps.commit.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output/report
+
+  # pushes with the workflow's token do not start pages.yml, so publish here
+  deploy:
+    needs: update
+    if: needs.update.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

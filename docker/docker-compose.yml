@@ -9,12 +9,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-      # versions: change and rebuild (docker compose build)
-      args:
-        R_VERSION: ${R_VERSION:-4.6.1}
-        CRAN_DATE: ${CRAN_DATE:-2026-10-16}       # CRAN packages as of this date
-        OPENALEXPRO_MIN: ${OPENALEXPRO_MIN:-0.13.0} # newest from r-universe, at least this
-        ZOTFUNC_MIN: ${ZOTFUNC_MIN:-0.1.0}         # newest from r-universe, at least this
+      # R packages: renv.lock; R and Quarto: docker/Dockerfile
     image: ipbes-literature-report
     env_file: .env
     environment:

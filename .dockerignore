@@ -1,4 +1,8 @@
-# the image only needs these two files (see docker/Dockerfile)
+# the image only needs these files (see docker/Dockerfile)
 *
 !docker/update.sh
 !docker/trigger.py
+!renv.lock
+!.Rprofile
+!renv/activate.R
+!renv/settings.json

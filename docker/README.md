@@ -45,19 +45,12 @@ behind HTTPS (a reverse proxy) and keep the trigger token secret.
 ## Versions
 
 The pipeline code is updated from GitHub before every run. R and the
-packages are fixed in the image; their versions are set in
-`docker-compose.yml`:
-
-| Setting | What |
-|---|---|
-| `R_VERSION` | R (image `rocker/r-ver`) |
-| `CRAN_DATE` | CRAN packages as of this date (Posit Package Manager snapshot), so rebuilds give the same versions |
-| `OPENALEXPRO_MIN` | openalexPro from r-universe (the newest), at least this version |
-| `ZOTFUNC_MIN` | zotFunc from r-universe (the newest), at least this version |
-
-To update: change the value, `docker compose build`, `docker compose up -d`.
-The versions in the image are listed in `/opt/literature-report/versions.txt`;
-`GET /status` shows R, openalexPro, zotFunc and targets.
+packages are fixed in the image: the R packages are those in `renv.lock` (the
+same as in a local working copy), R and Quarto are set in `Dockerfile` (R must
+match the R version in `renv.lock`). After changing them: `docker compose
+build`, `docker compose up -d`. The versions in the image are listed in
+`/opt/literature-report/versions.txt`; `GET /status` shows R, openalexPro,
+zotFunc and targets.
 
 ## Notes
 

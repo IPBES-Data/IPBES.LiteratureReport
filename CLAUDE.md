@@ -47,9 +47,11 @@ Outputs land under [output/](output/) in fixed subdirs (`zotero_groups/`, `zoter
 
 `Rscript tests/check_fixes.R` (or `… all`): fixes return the agreed columns, exported proposals validate against the schema, the fix app loads. Needs the pipeline output in `output/`. The two Zotero plugins have their own tests (`node --test …`, `tests/zotero/run.sh`, which runs inside a separate Zotero instance).
 
-## Docker service
+## Automatic updates
 
-[docker/](docker/): `Dockerfile` + `docker-compose.yml` run the pipeline as a service (clone/pull the repo into a volume, `tar_make()` every `INTERVAL_MINUTES` or on `POST /update`, commit and push changes in `output/report/` to `main`). Keys come from `docker/.env` (`ZOTERO_API_KEY`, `OPENALEX_API_KEY`, `GITHUB_TOKEN`, `TRIGGER_TOKEN`); `zotero_api_key()` falls back to `ZOTERO_API_KEY` when there is no keyring. `.dockerignore` keeps the build context to the two scripts.
+GitHub Actions: [image.yml](.github/workflows/image.yml) builds [docker/Dockerfile](docker/Dockerfile) into `ghcr.io/ipbes-data/ipbes-literature-report:latest` (on changes of the Dockerfile or `renv.lock` on `main`, or by hand); [update.yml](.github/workflows/update.yml) runs `tar_make()` in that image every 12 hours and by hand, keeps `output/` (except `output/report/`) and `_targets/` in the Actions cache (saved only when the reports changed), commits `output/report/` to `main` and deploys Pages itself (pushes with the workflow token do not start [pages.yml](.github/workflows/pages.yml)). Secrets: `OPENALEX_API_KEY`, optionally `ZOTERO_API_KEY`.
+
+Alternative, on a server: [docker/](docker/): `Dockerfile` + `docker-compose.yml` run the pipeline as a service (clone/pull the repo into a volume, `tar_make()` every `INTERVAL_MINUTES` or on `POST /update`, commit and push changes in `output/report/` to `main`). Keys come from `docker/.env` (`ZOTERO_API_KEY`, `OPENALEX_API_KEY`, `GITHUB_TOKEN`, `TRIGGER_TOKEN`); `zotero_api_key()` falls back to `ZOTERO_API_KEY` when there is no keyring. `.dockerignore` keeps the build context to the two scripts.
 
 ## External credentials
 
@@ -58,7 +60,7 @@ Outputs land under [output/](output/) in fixed subdirs (`zotero_groups/`, `zoter
 
 ## Dependencies worth knowing
 
-Non-CRAN / IPBES-internal packages used by the pipeline (declared in `tar_option_set(packages = ...)`): `openalexPro`, `zotFunc`. These must be installed from their respective sources before `tar_make()` will run.
+R packages are managed with renv (`renv.lock`, `.Rprofile` activates it; `renv::restore()` in a new working copy, `renv::snapshot()` after updating). The lockfile's repositories: Posit Package Manager for CRAN, `openalexpro.r-universe.dev` (`openalexPro`) and `rkrug.r-universe.dev` (`zotFunc`) — install those two from r-universe, not from source, or the lockfile cannot be restored elsewhere. The image ([docker/Dockerfile](docker/Dockerfile)) restores `renv.lock` into `RENV_PATHS_LIBRARY=/opt/renv/library`, which the cloned project's renv then uses; R in the Dockerfile must match the lockfile.
 
 ## Zotero plugins
 

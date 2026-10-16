@@ -30,9 +30,15 @@ For each group it
 Pushing `output/report/` to `main` publishes the reports (GitHub Action
 [pages.yml](.github/workflows/pages.yml)).
 
-To keep the website up to date automatically, run the pipeline as a Docker
-service, see [docker/README.md](docker/README.md): it runs regularly or when
-triggered, and pushes changed reports, fixes and plugins.
+The website is kept up to date by the GitHub Action
+[update.yml](.github/workflows/update.yml): it runs the pipeline every 12
+hours (and by hand, "Run workflow" on the Actions page), commits changed
+reports to `main` and publishes them. It runs in the container image built by
+[image.yml](.github/workflows/image.yml) from [docker/Dockerfile](docker/Dockerfile);
+run image.yml by hand to pick up new versions of openalexPro or zotFunc. Needs
+the repository secret `OPENALEX_API_KEY` (and `ZOTERO_API_KEY` for private
+groups). The same image can also run as a service on a server, see
+[docker/README.md](docker/README.md).
 
 ### Checks
 
@@ -56,10 +62,12 @@ needs the pipeline output.
 
 ### Requirements
 
-- R packages: arrow, dplyr, ggplot2, htmltools, httr2, ISOcodes, jsonlite,
-  keyring, quarto, reactable, roxygen2, shiny, targets, tibble, yaml, and the
-  IPBES packages [openalexPro](https://github.com/IPBES-Data/openalexPro) and
-  zotFunc.
+- R packages: fixed with [renv](https://rstudio.github.io/renv/) in
+  `renv.lock` (CRAN packages from Posit Package Manager, the IPBES packages
+  [openalexPro](https://github.com/IPBES-Data/openalexPro) and zotFunc from
+  r-universe). In a new working copy, `renv::restore()` installs them; the
+  container image uses the same versions. After updating packages,
+  `renv::snapshot()` and commit `renv.lock`.
 - [Quarto](https://quarto.org) for the reports.
 - A Zotero API key with read access to the groups, in the keyring:
   `keyring::key_set("API_zotero")`.
