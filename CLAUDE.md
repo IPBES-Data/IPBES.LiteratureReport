@@ -47,6 +47,10 @@ Outputs land under [output/](output/) in fixed subdirs (`zotero_groups/`, `zoter
 
 `Rscript tests/check_fixes.R` (or `… all`): fixes return the agreed columns, exported proposals validate against the schema, the fix app loads. Needs the pipeline output in `output/`. The two Zotero plugins have their own tests (`node --test …`, `tests/zotero/run.sh`, which runs inside a separate Zotero instance).
 
+## Docker service
+
+[docker/](docker/): `Dockerfile` + `docker-compose.yml` run the pipeline as a service (clone/pull the repo into a volume, `tar_make()` every `INTERVAL_MINUTES` or on `POST /update`, commit and push changes in `output/report/` to `main`). Keys come from `docker/.env` (`ZOTERO_API_KEY`, `OPENALEX_API_KEY`, `GITHUB_TOKEN`, `TRIGGER_TOKEN`); `zotero_api_key()` falls back to `ZOTERO_API_KEY` when there is no keyring. `.dockerignore` keeps the build context to the two scripts.
+
 ## External credentials
 
 - Zotero API key for private groups: stored via `keyring::key_get("API_zotero")` (see [R/get_zotero_group.R](R/get_zotero_group.R)). The fallback environment variable mentioned in some docstrings is `ZOTERO_API_KEY`.
@@ -58,7 +62,7 @@ Non-CRAN / IPBES-internal packages used by the pipeline (declared in `tar_option
 
 ## Zotero plugins
 
-Developed in their own repos (private, `dev` → `main`, tags `v<version>`); here only as submodules at the released tag. To publish: move the submodule to the new tag, run the pipeline, commit and push. Clone this repo with `--recurse-submodules` (or `git submodule update --init`) — the pipeline needs the plugin sources.
+Developed in their own repos (public, `dev` → `main`, tags `v<version>`); here only as submodules at the released tag. To publish: move the submodule to the new tag, run the pipeline, commit and push. Clone this repo with `--recurse-submodules` (or `git submodule update --init`) — the pipeline needs the plugin sources.
 
 ## Fix app (not part of the pipeline)
 

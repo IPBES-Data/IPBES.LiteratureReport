@@ -30,6 +30,10 @@ For each group it
 Pushing `output/report/` to `main` publishes the reports (GitHub Action
 [pages.yml](.github/workflows/pages.yml)).
 
+To keep the website up to date automatically, run the pipeline as a Docker
+service, see [docker/README.md](docker/README.md): it runs regularly or when
+triggered, and pushes changed reports, fixes and plugins.
+
 ### Checks
 
 ```sh

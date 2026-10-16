@@ -44,15 +44,15 @@ get_zotero_group <- function(
 
   message("Downloaded group ", group$name, "!\n<<<<<<<\n")
 
-  path <- normalizePath(path)
-  message(path)
-  message(file.exists(path))
+  # relative, so that the pipeline's cache works in any location (e.g. the
+  # Docker container)
   return(path)
 }
 
 #' Zotero API key
 #'
-#' Reads the Zotero API key with `keyring::key_get("API_zotero")`.
+#' Reads the Zotero API key with `keyring::key_get("API_zotero")`, or from
+#' the environment variable `ZOTERO_API_KEY` (e.g. in the Docker container).
 #'
 #' @return The API key, or `NULL` if none is stored (only public groups can
 #'   then be accessed).
@@ -62,5 +62,9 @@ zotero_api_key <- function() {
     api_key <- keyring::key_get("API_zotero"),
     silent = TRUE
   )
+  # without a keyring, e.g. in the Docker container
+  if (is.null(api_key) && nzchar(Sys.getenv("ZOTERO_API_KEY"))) {
+    api_key <- Sys.getenv("ZOTERO_API_KEY")
+  }
   return(api_key)
 }

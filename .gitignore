@@ -66,3 +66,7 @@ website/*
 
 # macOS
 .DS_Store
+
+# Docker: keys and data of the container
+docker/.env
+docker/data/
