@@ -5,7 +5,7 @@
         {
           "version": "0.2.1",
           "update_link": "https://ipbes-data.github.io/IPBES.LiteratureReport/plugins/zotero-safe-edit/zotero-safe-edit-0.2.1.xpi",
-          "update_hash": "sha256:e69ecf0e9dda09f628a8002ed7890412bfd74482a880ad53dd70eaeae1eda8a0",
+          "update_hash": "sha256:3eb88c807461fdac83b3d5faa935d85627a746e1c16e923e72cc2516adc145cc",
           "applications": {
             "zotero": {
               "strict_min_version": "10.0",

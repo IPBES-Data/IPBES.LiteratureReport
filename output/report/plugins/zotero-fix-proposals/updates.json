@@ -5,7 +5,7 @@
         {
           "version": "0.1.9",
           "update_link": "https://ipbes-data.github.io/IPBES.LiteratureReport/plugins/zotero-fix-proposals/zotero-fix-proposals-0.1.9.xpi",
-          "update_hash": "sha256:65f8fde5e121524c8e05c10c2cb79ad3c506da323186990812d2c6f1650a5fed",
+          "update_hash": "sha256:879f4437ca0ddfd4d9c38ae819ae07aed8af30c9f83b401b5bc79f401d82a5bd",
           "applications": {
             "zotero": {
               "strict_min_version": "10.0",
