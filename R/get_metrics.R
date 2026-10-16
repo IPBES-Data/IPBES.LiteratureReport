@@ -22,8 +22,8 @@
 #'
 #' @return Path to the RDS file. It contains a list with one element per
 #'   metric group, each a list with one element per measure, the group
-#'   `name`, and `items`, a tibble with `key`, `title` and `type` of all
-#'   Zotero items.
+#'   `name`, `downloaded` (when the Zotero data was downloaded) and `items`, a
+#'   tibble with `key`, `title` and `type` of all Zotero items.
 
 get_metrics <- function(
   zotero_group,
@@ -65,6 +65,8 @@ get_metrics <- function(
     simplify = FALSE
   )
   result$name <- basename(zotero_group)
+  # when the Zotero data was downloaded (time of the CSV files)
+  result$downloaded <- max(file.mtime(list.files(zotero_group, "[.]csv$", full.names = TRUE)))
   result$items <- tibble::tibble(
     key = zotero$Key,
     title = zotero$Title,
