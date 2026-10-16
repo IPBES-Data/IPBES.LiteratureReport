@@ -31,8 +31,6 @@ get_works <- function(
     showWarnings = FALSE
   )
 
-  path <- normalizePath(path, mustWork = FALSE)
-
   ##
 
   zotBib <- read_zotero(zotero_group) |>
@@ -57,14 +55,14 @@ get_works <- function(
       chunk_limit = 200
     ) |>
     openalexPro::pro_fetch(
-      project_folder = file.path(path),
+      project_folder = normalizePath(path, mustWork = FALSE),
       delete_input = TRUE,
       overwrite = TRUE,
       compact_parquet = 250000,
       via = "oqo"
     )
 
-  # add in_oa to bibliography_bibliography
-
-  return(zotWorksDB)
+  # relative, so that the pipeline's cache works in any location (e.g. the
+  # Docker container)
+  return(file.path(path, basename(zotWorksDB)))
 }

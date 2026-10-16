@@ -1,0 +1,27 @@
+# The IPBES Literature Report pipeline as a service. From this directory:
+#
+#   cp .env.example .env     # and fill in the keys
+#   docker compose up -d --build
+#
+# See README.md in this directory.
+services:
+  literature-report:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      # R packages: renv.lock; R and Quarto: docker/Dockerfile
+    image: ipbes-literature-report
+    env_file: .env
+    environment:
+      # run the pipeline every 30 minutes (from the end of the previous run);
+      # only groups changed in Zotero are recalculated, so a run without
+      # changes takes seconds
+      INTERVAL_MINUTES: ${INTERVAL_MINUTES:-30}
+      # a trigger (POST /update) starts a run at most every 5 minutes
+      MIN_GAP_MINUTES: ${MIN_GAP_MINUTES:-5}
+    volumes:
+      # the repository, the downloaded data and the pipeline's cache
+      - ${DATA_DIR:-./data}:/work
+    ports:
+      - "${TRIGGER_PORT:-8080}:8080"
+    restart: unless-stopped
