@@ -6,7 +6,10 @@
 library(shiny)
 
 project <- getOption("fix_app.project", normalizePath(".."))
-source(file.path(project, "R", "report_helpers.R"))
+# shared with the pipeline: report helpers, the fixes and their table
+for (f in list.files(file.path(project, "R"), pattern = "^(report_helpers|fix_.*)\\.R$", full.names = TRUE)) {
+  source(f)
+}
 for (f in list.files("R", pattern = "\\.R$", full.names = TRUE)) {
   source(f)
 }
@@ -17,32 +20,8 @@ groups <- stats::setNames(
   vapply(cfg$assessments, function(a) a$name, "")
 )
 
-# fixes: problem → value in field, the fix function(m, group_id), the check
-# in the report (rep_checks()) for its status, and whether it is sent with one
-# button, without a table (nothing to check)
-fix_info <- tibble::tribble(
-  ~problem, ~value, ~field, ~fun, ~check, ~bulk,
-  "DOI in wrong field", "DOI from other field (URL, Extra)", "DOI", fix_doi_misplaced, "misplaced-doi", FALSE,
-  "DOI as link or with prefix", "DOI without link or prefix", "DOI", fix_doi_form, "doi-form", FALSE,
-  "Language not as ISO code", "ISO language code", "Language", fix_language, "language", FALSE,
-  "No date", "Date from OpenAlex", "Date", fix_date, "year", FALSE,
-  "Empty fields", "Values from OpenAlex", "Journal, Volume, Issue, Pages", fix_fill, "fill", FALSE,
-  "No DOI", "DOI found in OpenAlex", "DOI", fix_doi_candidates, "doi-candidates", FALSE,
-  "No OpenAlex ID", "OpenAlex ID of the DOI", "Extra", fix_openalex_id, "openalex-id", TRUE,
-  "ISSN not in standard form", "ISSN in standard form", "ISSN", fix_issn_form, "issn-form", FALSE,
-  "OpenAlex ID not valid", "OpenAlex ID of the DOI", "Extra", fix_extra_id, "extra-id", FALSE
-)
-fix_info$label <- paste0(
-  fix_info$problem, " → ", fix_info$value, " in ",
-  fix_info$field, ifelse(grepl(",", fix_info$field), " fields", " field")
-)
-# sorted by field: DOI first, as the fixes with values from OpenAlex rely on
-# it, Extra (identifiers for other tools) last (order within a field as above)
-fix_info <- fix_info[order(
-  fix_info$field != "DOI",
-  fix_info$field == "Extra",
-  tolower(fix_info$field)
-), ]
+# the fixes (R/fix_table.R)
+fix_info <- fix_table()
 fixes <- stats::setNames(fix_info$fun, fix_info$label)
 fix_checks <- stats::setNames(fix_info$check, fix_info$label)
 bulk_fixes <- fix_info$label[fix_info$bulk]

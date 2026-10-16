@@ -121,7 +121,7 @@ met_id_candidates <- function(
   # the only likely match of an item (not a duplicate)
   ok <- x$match == "likely" & is.na(x$note)
   n_likely <- tapply(ok, x$key, sum)
-  x$single <- ok & unname(n_likely[x$key]) == 1
+  x$single <- ok & as.vector(n_likely[x$key]) == 1
 
   metrics$items <- dplyr::bind_rows(metrics$items, x)
   metrics$count_items <- length(unique(x$key))

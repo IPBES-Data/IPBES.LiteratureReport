@@ -34,6 +34,7 @@ fix_doi_candidates <- function(
     proposed = is.na(x$note),
     note = ifelse(is.na(x$note), NA_character_, paste0(x$note, ": ", x$doi)),
     doi = x$doi,
+    openalex = x$id,
     choice = x$key,
     preselect = x$single
   )

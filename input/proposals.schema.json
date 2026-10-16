@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ipbes-data.github.io/IPBES.LiteratureReport/fixes/schema.json",
+  "title": "Proposed fixes for a Zotero group",
+  "description": "Written by the IPBES Literature Report pipeline, read by the Zotero plugin which shows the fixes. Each change is applied only through Zotero Safe Edit, after approval in Zotero.",
+  "type": "object",
+  "required": ["format", "version", "created", "group_id", "name", "checks", "fixes"],
+  "additionalProperties": false,
+  "properties": {
+    "format": { "const": "zotero-fix-proposals" },
+    "version": { "const": 1 },
+    "created": { "type": "string", "description": "When the report data was made (ISO 8601)" },
+    "group_id": { "type": "integer" },
+    "name": { "type": "string" },
+    "report": { "type": "string", "description": "URL of the report of this group" },
+    "checks": {
+      "description": "Checks of the report, for the status of each fix",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "check", "count", "severity", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "check": { "type": "string" },
+          "count": { "type": "integer", "minimum": 0 },
+          "severity": { "enum": ["fix", "check", "info"] },
+          "status": { "type": "string" }
+        }
+      }
+    },
+    "fixes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "problem", "value", "field", "check", "bulk", "changes"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "problem": { "type": "string" },
+          "value": { "type": "string" },
+          "field": { "type": "string", "description": "Readable name of the field(s) changed" },
+          "check": { "type": "string", "description": "id of the check in checks" },
+          "bulk": { "type": "boolean", "description": "Nothing to check: sent as a whole, without a table" },
+          "changes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["item_key", "title", "field", "old", "new", "reason", "proposed"],
+              "additionalProperties": false,
+              "properties": {
+                "item_key": { "type": "string", "pattern": "^[A-Z0-9]{8}$" },
+                "title": { "type": ["string", "null"] },
+                "field": { "type": "string", "description": "Zotero field name, e.g. DOI, extra" },
+                "old": { "type": "string", "description": "Value in the report data (expected old value)" },
+                "new": { "type": "string" },
+                "reason": { "type": "string" },
+                "proposed": { "type": "boolean", "description": "false: listed to be fixed by hand, see note" },
+                "note": { "type": ["string", "null"] },
+                "doi": { "type": ["string", "null"], "description": "DOI for the links" },
+                "openalex": { "type": ["string", "null"], "description": "OpenAlex work URL for the links" },
+                "choice": { "type": ["string", "null"], "description": "Changes with the same choice are alternatives: at most one can be selected" },
+                "preselect": { "type": ["boolean", "null"], "description": "false: not selected at the start" },
+                "append": { "type": ["string", "null"], "description": "A line to add: the change is based on the current value in Zotero" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

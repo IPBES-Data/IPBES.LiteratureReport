@@ -23,10 +23,23 @@ For each group it
 2. looks up the DOIs in OpenAlex, and searches OpenAlex by title for items
    without a DOI,
 3. calculates the measures (`R/met_*.R`),
-4. renders one report per group and an index into `output/report/`.
+4. renders one report per group and an index into `output/report/`,
+5. publishes the proposed fixes per group and builds the Zotero plugins for
+   the website.
 
 Pushing `output/report/` to `main` publishes the reports (GitHub Action
 [pages.yml](.github/workflows/pages.yml)).
+
+### Checks
+
+```sh
+Rscript tests/check_fixes.R        # one group (PAND); "all" for all groups
+```
+
+checks that every fix returns changes in the agreed form, that the published
+proposals match [input/proposals.schema.json](input/proposals.schema.json)
+(and that the schema refuses broken files), and that the fix app loads. It
+needs the pipeline output.
 
 ### Configuration
 
@@ -48,31 +61,33 @@ Pushing `output/report/` to `main` publishes the reports (GitHub Action
   `keyring::key_set("API_zotero")`.
 - An OpenAlex API key, as set up for openalexPro.
 
-## Fixing problems: the fix app
+## Fixing problems in Zotero
 
-```r
-source("R/run_fix_app.R")
-run_fix_app()
-```
+Two Zotero 10 plugins fix the problems found by the pipeline, directly in
+Zotero. They are in `plugins/` as git submodules, and the pipeline publishes
+them on the website (section *Zotero plugins* of the index), from where
+installed copies update themselves:
 
-The app runs on the computer on which Zotero runs. It proposes fixes for
-problems found by the pipeline (DOIs in the wrong field or form, ISO language
-codes, dates and journal details from OpenAlex, DOIs found in OpenAlex,
-OpenAlex IDs in Extra, ISSNs, …) and sends them to Zotero, where every change
-is shown and has to be approved. Changes are logged and can be undone.
+- [Zotero Fix Proposals](https://github.com/IPBES-Data/zotero-fix-proposals)
+  shows the fixes proposed for a group (Tools → Fix Proposals…), read from
+  `fixes/` on the website.
+- [Zotero Safe Edit](https://github.com/IPBES-Data/zotero-safe-edit) checks
+  every change (automatic sync off, fresh backup, allowed fields, unchanged
+  old value), asks for approval, writes, logs and undoes.
 
-Writing to Zotero is done only by the Zotero plugin
-[Zotero Safe Edit](https://github.com/IPBES-Data/zotero-safe-edit), which
-checks every change (registered app, automatic sync off, fresh backup,
-allowed fields, unchanged old value, batch limit). Set up:
+To publish a new plugin version: update its submodule to the release tag
+(`git -C plugins/<plugin> fetch --tags && git -C plugins/<plugin> checkout v<version>`),
+run the pipeline and push.
 
-1. Install the plugin in Zotero 10 and allow the fields to be fixed in
-   Settings → Safe Edit (e.g. `DOI, language, date, publicationTitle, volume,
-   issue, pages, extra, ISSN`).
-2. Switch off automatic sync in Zotero (Settings → Sync).
-3. Start the app, click *Register this app* and confirm in Zotero.
-4. Make a backup of the group (Status tab), then work through the fixes.
-   Sync by hand when done.
+The local Shiny app in `fix_app/` (`source("R/run_fix_app.R"); run_fix_app()`)
+does the same for R users and developers.
+
+### Proposed fixes on the website
+
+For each group, the pipeline writes the proposed fixes to
+`output/report/fixes/<group>.json` (with `index.json`, and `schema.json`
+describing the format), published at
+<https://ipbes-data.github.io/IPBES.LiteratureReport/fixes/>.
 
 Some fixes build on others: once an item has a DOI, the fixes with values
 from OpenAlex find it only after the next sync and pipeline run.

@@ -1,0 +1,6 @@
+[submodule "plugins/zotero-safe-edit"]
+	path = plugins/zotero-safe-edit
+	url = https://github.com/IPBES-Data/zotero-safe-edit.git
+[submodule "plugins/zotero-fix-proposals"]
+	path = plugins/zotero-fix-proposals
+	url = https://github.com/IPBES-Data/zotero-fix-proposals.git

@@ -17,6 +17,7 @@ params:
   ids: ""
   helpers: ""
   docs: ""
+  plugins: ""
 ---
 
 ```{r}
@@ -60,6 +61,36 @@ knitr::kable(
 
 **Please fix**: number of items with errors. **Please check**: number of
 items which may need a correction.
+
+## Zotero plugins
+
+The problems listed in the reports can be fixed directly in Zotero with two
+plugins for Zotero 10. **Zotero Fix Proposals** shows the fixes proposed for
+a group (Tools → Fix Proposals…), and **Zotero Safe Edit** checks every
+change, asks you to approve it, writes it, logs it and lets you undo it.
+
+```{r}
+plugins <- jsonlite::read_json(params$plugins)
+knitr::kable(
+  data.frame(
+    Plugin = vapply(plugins, function(p) paste0("**", p$name, "**"), ""),
+    Version = vapply(plugins, function(p) p$version, ""),
+    Download = vapply(plugins, function(p) paste0("[", basename(p$download), "](", p$download, ")"), ""),
+    `What it does` = vapply(plugins, function(p) p$description, ""),
+    check.names = FALSE
+  )
+)
+```
+
+To install: download both files, then in Zotero: Tools → Plugins → gear
+icon → *Install Plugin From File…*. Afterwards the plugins update
+themselves. Before fixing anything:
+
+1. In Settings → Safe Edit, allow the fields to be fixed (e.g. `DOI,
+   language, date, publicationTitle, volume, issue, pages, extra, ISSN`).
+2. Switch off automatic sync (Settings → Sync), and sync by hand when done.
+3. Open Tools → Fix Proposals…, allow it to propose edits, make a backup of
+   the group, and work through the fixes.
 
 ## Metrics documentation
 

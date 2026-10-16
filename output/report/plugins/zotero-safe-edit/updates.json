@@ -1,0 +1,19 @@
+{
+  "addons": {
+    "safe-edit@ipbes-data": {
+      "updates": [
+        {
+          "version": "0.2.1",
+          "update_link": "https://ipbes-data.github.io/IPBES.LiteratureReport/plugins/zotero-safe-edit/zotero-safe-edit-0.2.1.xpi",
+          "update_hash": "sha256:e69ecf0e9dda09f628a8002ed7890412bfd74482a880ad53dd70eaeae1eda8a0",
+          "applications": {
+            "zotero": {
+              "strict_min_version": "10.0",
+              "strict_max_version": "10.0.*"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
