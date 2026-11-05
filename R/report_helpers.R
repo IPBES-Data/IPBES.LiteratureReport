@@ -148,6 +148,8 @@ rep_checks <- function(
     if (is.null(dup)) NA_integer_ else n(dup$count - 1), "fix",
     "invalid-doi", "DOI field with an invalid DOI",
     n(m$identifiers$met_id_doi$zotero$count_invalid), "fix",
+    "doi-exists", "DOI which does not exist",
+    n(m$identifiers$met_id_doi_exists$count), "fix",
     "doi-form", "DOI field with a link or prefix instead of the DOI",
     n(m$identifiers$met_id_doi_form$count), "fix",
     "issn-form", "ISSN not in the standard form",
@@ -155,7 +157,9 @@ rep_checks <- function(
     "misplaced-doi", "DOI in the wrong field",
     n(m$identifiers$met_id_doi_misplaced$count), "check",
     "not-found", "DOI not found in OpenAlex",
-    n(m$openalex_check$met_check_found$count_not_in_oa), "check",
+    # DOIs which do not exist are listed under doi-exists
+    n(m$openalex_check$met_check_found$count_not_in_oa) -
+      dplyr::coalesce(n(m$identifiers$met_id_doi_exists$count), 0L), "check",
     "year", "Missing or unusual publication year",
     n(m$metadata$met_meta_year$count), "check",
     "fill", "Empty journal, volume, issue or pages, found in OpenAlex",

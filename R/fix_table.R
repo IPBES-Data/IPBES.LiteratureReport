@@ -18,6 +18,8 @@ fix_table <- function() {
     "date", "No date", "Date from OpenAlex", "Date", fix_date, "year", FALSE,
     "fill", "Empty fields", "Values from OpenAlex", "Journal, Volume, Issue, Pages", fix_fill, "fill", FALSE,
     "doi_candidates", "No DOI", "DOI found in OpenAlex", "DOI", fix_doi_candidates, "doi-candidates", FALSE,
+    "doi_exists", "DOI does not exist", "Corrected DOI, or no DOI", "DOI", fix_doi_exists, "doi-exists", FALSE,
+    "doi_mismatch", "DOI points to a different publication", "No DOI", "DOI", fix_doi_mismatch, "wrong-doi", FALSE,
     "openalex_id", "No OpenAlex ID", "OpenAlex ID of the DOI", "Extra", fix_openalex_id, "openalex-id", TRUE,
     "issn_form", "ISSN not in standard form", "ISSN in standard form", "ISSN", fix_issn_form, "issn-form", FALSE,
     "extra_id", "OpenAlex ID not valid", "OpenAlex ID of the DOI", "Extra", fix_extra_id, "extra-id", FALSE

@@ -48,6 +48,7 @@ metrics:
     - met_id_issn_form
     - met_id_doi_misplaced
     - met_id_doi_form
+    - met_id_doi_exists
     - met_id_none
     - met_id_candidates
   metadata:

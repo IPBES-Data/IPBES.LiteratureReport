@@ -3,6 +3,19 @@
 Versions of the pipeline, the fix app and the website (the Zotero plugins
 have their own versions, see `plugins/`).
 
+## Unreleased
+
+- DOIs which OpenAlex has under another DOI (e.g. old SICI DOIs like
+  `10.1890/1540-9295(2007)5[475:NCNCAE]2.0.CO;2`) count as found and are
+  matched with their work; works the lookup of all DOIs missed are found too
+  (#10)
+- New check "DOI which does not exist" (doi.org), with a fix: the DOI
+  without extra characters at the end where that exists, otherwise an empty
+  DOI field (#13)
+- New fix for "DOI points to a different publication": empty the DOI field
+  (not selected at the start) (#16)
+- "DOI not found in OpenAlex" lists only DOIs which exist
+
 ## 0.4.0
 
 - Automatic updates: GitHub Actions run the pipeline every 12 hours (and by

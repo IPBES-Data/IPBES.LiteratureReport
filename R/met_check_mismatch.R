@@ -9,8 +9,9 @@
 #' @param openalex OpenAlex works (arrow dataset).
 #'
 #' @return A list with
-#' - `items`: tibble with `key`, `doi`, `title_zotero`, `title_openalex`,
-#'   `title_similarity`, `year_zotero` and `year_openalex`
+#' - `items`: tibble with `key`, `doi`, `doi_raw` (content of the DOI
+#'   field), `openalex` (the work's OpenAlex ID), `title_zotero`,
+#'   `title_openalex`, `title_similarity`, `year_zotero` and `year_openalex`
 #' - `count`: number of flagged items
 #' - `pc`: percentage of the items found in OpenAlex which are flagged
 met_check_mismatch <- function(
@@ -44,6 +45,8 @@ met_check_mismatch <- function(
     dplyr::select(
       key = id_zotero,
       doi,
+      doi_raw = doi_raw_zotero,
+      openalex = id_openalex,
       title_zotero,
       title_openalex,
       title_similarity,

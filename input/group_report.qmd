@@ -161,6 +161,29 @@ fix(
 )
 ```
 
+### DOI which does not exist {#doi-exists}
+
+The DOI of these items does not exist at doi.org: usually a typo, a
+shortened DOI, or a DOI with extra characters at the end. Where the DOI
+without these characters exists, it is given as suggestion. Otherwise find
+the right DOI, or remove it (then the search by title in OpenAlex can offer
+one).
+
+```{r}
+x <- m$identifiers$met_id_doi_exists
+fix(
+  if (!is.null(x)) {
+    add_title(dplyr::transmute(
+      x$items,
+      key,
+      `Content of the DOI field` = doi_raw,
+      Suggestion = suggestion
+    ))
+  },
+  doi_cols = "Suggestion"
+)
+```
+
 ### DOI field with a link or prefix instead of the DOI {#doi-form}
 
 The DOI field of these items contains the DOI as a link
@@ -228,14 +251,19 @@ fix(
 
 ### DOI not found in OpenAlex {#not-found}
 
-These DOIs were not found in OpenAlex. The DOI may be wrong: open it to
-check. If it leads to the right publication, the publication is simply not
-(yet) in OpenAlex and nothing needs to be done.
+These DOIs exist, but were not found in OpenAlex (DOIs which do not exist
+are listed [above](#doi-exists)). If the DOI leads to the right publication,
+the publication is simply not (yet) in OpenAlex and nothing needs to be
+done.
 
 ```{r}
 x <- m$openalex_check$met_check_found$zotero_not_in_oa
+gone <- m$identifiers$met_id_doi_exists$items$key
 fix(
-  if (!is.null(x)) add_title(tibble::tibble(key = names(x), DOI = unname(x))),
+  if (!is.null(x)) {
+    x <- x[!names(x) %in% gone]
+    add_title(tibble::tibble(key = names(x), DOI = unname(x)))
+  },
   doi_cols = "DOI"
 )
 ```

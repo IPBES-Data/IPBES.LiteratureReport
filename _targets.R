@@ -83,7 +83,7 @@ list(
 
   tar_target(
     zotero_version,
-    zotFunc::get_group_version(assessment$id, api_key = zotero_api_key()),
+    zotFunc::get_group_version(assessment$id),
     pattern = map(assessment),
     cue = tar_cue(mode = "always")
   ),
@@ -104,6 +104,18 @@ list(
     zotero_works,
     get_works(zotero_group),
     pattern = map(zotero_group),
+    format = "file"
+  ),
+
+  # DOIs looked up one by one (written by get_works(), cached per DOI) -----
+
+  tar_target(
+    doi_check,
+    {
+      zotero_works # dependency only: written by get_works()
+      file.path("output", "doi_check", paste0(basename(zotero_group), ".rds"))
+    },
+    pattern = map(zotero_group, zotero_works),
     format = "file"
   ),
 
@@ -137,8 +149,16 @@ list(
 
   tar_target(
     metrics,
-    get_metrics(zotero_group, zotero_works, metric_names, doi_candidates, extra_ids, metric_code),
-    pattern = map(zotero_group, zotero_works, doi_candidates, extra_ids),
+    get_metrics(
+      zotero_group,
+      zotero_works,
+      metric_names,
+      doi_candidates,
+      extra_ids,
+      metric_code,
+      doi_check
+    ),
+    pattern = map(zotero_group, zotero_works, doi_candidates, extra_ids, doi_check),
     format = "file"
   ),
 
@@ -184,7 +204,11 @@ list(
   tar_target(
     plugin_sources,
     list.files(
-      file.path("plugins", c("zotero-safe-edit", "zotero-fix-proposals"), "addon"),
+      file.path(
+        "plugins",
+        c("zotero-safe-edit", "zotero-fix-proposals"),
+        "addon"
+      ),
       recursive = TRUE,
       full.names = TRUE
     ),
@@ -193,7 +217,10 @@ list(
 
   tar_target(
     plugins,
-    build_plugins(file.path("plugins", c("zotero-safe-edit", "zotero-fix-proposals")), plugin_sources),
+    build_plugins(
+      file.path("plugins", c("zotero-safe-edit", "zotero-fix-proposals")),
+      plugin_sources
+    ),
     format = "file"
   ),
 

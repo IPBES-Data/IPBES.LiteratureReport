@@ -32,7 +32,7 @@ Edit `assessments` in [input/config.yaml](input/config.yaml) to change which Zot
 1. `config_file` / `assessment` / `metric_names` — read [input/config.yaml](input/config.yaml); `assessment` (`iteration = "list"`) fans out one branch per group.
 2. `zotero_version` — always runs; checks each group's library version with `zotFunc::get_group_version()`.
 3. `zotero_group` — [get_zotero_group()](R/get_zotero_group.R) downloads each Zotero group as CSV into `output/zotero_groups/IPBES_<name>_<id>/`, only when `zotero_version` changed. Returns the directory path; target `format = "file"`.
-4. `zotero_works` — [get_works()](R/get_works.R) reads the Zotero CSV(s), extracts DOIs via `openalexPro::extract_doi()`, queries OpenAlex with `openalexPro::pro_query()` + `pro_fetch()`, writes to `output/zotero_works/<group>/`.
+4. `zotero_works` — [get_works()](R/get_works.R) reads the Zotero CSV(s), extracts DOIs via `openalexPro::extract_doi()`, queries OpenAlex with `openalexPro::pro_query()` + `pro_fetch()`, writes to `output/zotero_works/<group>/`. DOIs not returned are looked up one by one by [get_doi_check()](R/get_doi_check.R) (OpenAlex `/works/doi:…`, which finds works OpenAlex has under another DOI, then doi.org: does the DOI exist), cached per DOI in `output/doi_check/<group>.rds` (target `doi_check`); if that finds works, all works are fetched again by OpenAlex ID (two fetches can't be combined: column types differ). `get_metrics()` adds `DOI.OpenAlex` (OpenAlex's DOI where it differs) to the Zotero items, and `as_bib()` uses it as `doi`, so all DOI joins find these works.
 5. `doi_candidates` — [get_doi_candidates()](R/get_doi_candidates.R) searches OpenAlex by title for items without a DOI (one request per item) into `output/doi_candidates/<group>.rds`; results are cached per item (key + title), so re-runs only search new or changed items. Delete the file to search again.
 6. `extra_ids` — [get_extra_ids()](R/get_extra_ids.R) looks up the `OpenAlex: W…` lines in Extra in OpenAlex (one `pro_query()`/`pro_fetch()` for all IDs; IDs not returned are not in OpenAlex) into `output/extra_ids/<group>.rds`.
 7. `metrics` — [get_metrics()](R/get_metrics.R) runs the `met_*` measures listed in the config (one file each in `R/met_*.R`, shared helpers in [R/met_helpers.R](R/met_helpers.R)). `metric_code` tracks those files. Measures are called with `zotero` and `openalex`; those with a `candidates` or `extra_ids` argument also get the DOI candidates or the OpenAlex IDs in Extra.
@@ -43,9 +43,16 @@ Edit `assessments` in [input/config.yaml](input/config.yaml) to change which Zot
 
 Outputs land under [output/](output/) in fixed subdirs (`zotero_groups/`, `zotero_works/`, `metrics/`, `report/`, ...). `get_zotero_group()` and `get_works()` `unlink()` their target directory before writing — re-runs are destructive by design.
 
+## Writing a measure
+
+- One function per file, `R/met_<section>_<name>.R`, then list it under its section in `metrics` of [input/config.yaml](input/config.yaml).
+- Signature `met_x(...)`: with one data source compute on it (normalised by `as_bib()`); with two (Zotero data frame + OpenAlex arrow dataset) return `per_source(met_x, ...)`, a list per source. Helpers are in [R/met_helpers.R](R/met_helpers.R).
+- The roxygen block is published as user-facing documentation (`output/report/metrics.md`, index page) — write it for report readers.
+- Zotero CSVs are read by [read_zotero()](R/read_zotero.R) with every column as string; empty fields are `""`, not `NA`.
+
 ## Checks
 
-`Rscript tests/check_fixes.R` (or `… all`): fixes return the agreed columns, exported proposals validate against the schema, the fix app loads. Needs the pipeline output in `output/`. The two Zotero plugins have their own tests (`node --test …`, `tests/zotero/run.sh`, which runs inside a separate Zotero instance).
+`Rscript tests/check_fixes.R` (one group, PAND) or `Rscript tests/check_fixes.R all`: fixes return the agreed columns, exported proposals validate against the schema, the fix app loads. Needs the pipeline output in `output/`. The two Zotero plugins have their own tests (`node --test …`, `tests/zotero/run.sh`, which runs inside a separate Zotero instance).
 
 ## Automatic updates
 
@@ -55,7 +62,7 @@ Alternative, on a server: [docker/](docker/): `Dockerfile` + `docker-compose.yml
 
 ## External credentials
 
-- Zotero API key for private groups: stored via `keyring::key_get("API_zotero")` (see [R/get_zotero_group.R](R/get_zotero_group.R)). The fallback environment variable mentioned in some docstrings is `ZOTERO_API_KEY`.
+- Zotero API key, only needed for private groups: `keyring::key_set("API_zotero")`, falling back to the env var `ZOTERO_API_KEY` (see `zotero_api_key()` in [R/get_zotero_group.R](R/get_zotero_group.R)).
 - OpenAlex access uses `openalexPro` (the "pro" variant — not plain `openalexR`); follow its own auth conventions.
 
 ## Dependencies worth knowing
@@ -64,7 +71,15 @@ R packages are managed with renv (`renv.lock`, `.Rprofile` activates it; `renv::
 
 ## Zotero plugins
 
-Developed in their own repos (public, `dev` → `main`, tags `v<version>`); here only as submodules at the released tag. To publish: move the submodule to the new tag, run the pipeline, commit and push. Clone this repo with `--recurse-submodules` (or `git submodule update --init`) — the pipeline needs the plugin sources.
+Developed in their own repos (public, `dev` → `main`, tags `v<version>`); here only as submodules at the released tag. To publish: move the submodule to the new tag (`git -C plugins/<plugin> fetch --tags && git -C plugins/<plugin> checkout v<version>`), run the pipeline, commit and push. Clone this repo with `--recurse-submodules` (or `git submodule update --init`) — the pipeline needs the plugin sources.
+
+## Branches
+
+All development on `dev`; `main` changes only through pull requests from `dev` (`gh pr create --base main --head dev`). `main` is protected (PR required, also for admins; no force push or deletion). Only the GitHub Actions app may push to `main` directly, for the report commits of update.yml — so merge `main` into `dev` before opening a PR. The Docker service's push to `main` is blocked by this protection unless it gets a bypass.
+
+## Versions
+
+The pipeline, fix app and website share one version in [VERSION](VERSION) (read by `repo_version()`), with changes in [CHANGELOG.md](CHANGELOG.md). The plugins have their own versions.
 
 ## Fix app (not part of the pipeline)
 

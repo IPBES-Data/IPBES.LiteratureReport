@@ -130,6 +130,10 @@ oa_join <- function(
 #' Extracts the same columns from the Zotero items or the OpenAlex works, so
 #' that measures can treat both sources alike. Empty strings become `NA`.
 #'
+#' For Zotero items with the column `DOI.OpenAlex` (added by [get_metrics()]:
+#' OpenAlex has the work under another DOI), `doi` is that DOI, so that the
+#' item is matched with its OpenAlex work; `doi_raw` stays the DOI field.
+#'
 #' @param data Zotero items (data frame) or OpenAlex works (arrow dataset).
 #'
 #' @return A tibble with `id` (item key / OpenAlex id), `doi_raw`, `title`,
@@ -184,6 +188,9 @@ as_bib <- function(
     what = "doi"
   ) |>
     tolower()
+  if ("DOI.OpenAlex" %in% names(data)) {
+    bib$doi <- dplyr::coalesce(tolower(data$DOI.OpenAlex), bib$doi)
+  }
 
   return(bib)
 }
