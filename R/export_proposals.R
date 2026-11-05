@@ -49,7 +49,11 @@ export_proposals <- function(
     x <- fixes$fun[[i]](m, group_id)
     # the DOI of the item: in the DOI field the one it gets (or keeps)
     doi <- column(x, "doi", NA_character_)
-    doi <- ifelse(x$field == "DOI", ifelse(x$new != "", x$new, x$old), doi)
+    # (unless the fix gives it, e.g. when the DOI is removed)
+    doi <- dplyr::coalesce(
+      doi,
+      as.character(ifelse(x$field == "DOI", ifelse(x$new != "", x$new, x$old), NA))
+    )
     doi[!is.na(doi) & doi == ""] <- NA
     openalex <- dplyr::coalesce(column(x, "openalex", NA_character_), unname(oa[tolower(doi)]))
     list(

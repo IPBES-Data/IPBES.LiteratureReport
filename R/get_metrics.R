@@ -19,6 +19,11 @@
 #'   argument.
 #' @param metric_code Not used. Only passed so that targets reruns the metrics
 #'   when a `R/met_*.R` file changes.
+#' @param doi_check RDS file with the DOIs looked up one by one, as returned
+#'   by [get_doi_check()]. Passed as `doi_check` to the measures which have
+#'   that argument. The Zotero items also get the column `DOI.OpenAlex`, the
+#'   DOI under which OpenAlex has the work when it differs from the DOI in
+#'   Zotero; [as_bib()] uses it, so that the measures find these works.
 #'
 #' @return Path to the RDS file. It contains a list with one element per
 #'   metric group, each a list with one element per measure, the group
@@ -31,7 +36,8 @@ get_metrics <- function(
   metric_names,
   doi_candidates = NULL,
   extra_ids = NULL,
-  metric_code = NULL
+  metric_code = NULL,
+  doi_check = NULL
 ) {
   zotero <- read_zotero(zotero_group)
   # column names as used by the measures, e.g. "Item Type" -> "Item.Type"
@@ -41,8 +47,18 @@ get_metrics <- function(
   # further sources, passed to the measures which have an argument of that name
   sources <- list(
     candidates = if (!is.null(doi_candidates)) readRDS(doi_candidates),
-    extra_ids = if (!is.null(extra_ids)) readRDS(extra_ids)
+    extra_ids = if (!is.null(extra_ids)) readRDS(extra_ids),
+    doi_check = if (!is.null(doi_check)) readRDS(doi_check)
   )
+
+  # the DOI under which OpenAlex has the work, where it differs
+  if (!is.null(sources$doi_check)) {
+    alias <- sources$doi_check[
+      sources$doi_check$found %in% TRUE &
+        sources$doi_check$oa_doi != sources$doi_check$doi,
+    ]
+    zotero$DOI.OpenAlex <- alias$oa_doi[match(as_bib(zotero)$doi, alias$doi)]
+  }
 
   # Run metrics from config ------------------------------------------------
 
