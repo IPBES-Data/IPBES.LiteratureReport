@@ -3,7 +3,7 @@
 Versions of the pipeline, the fix app and the website (the Zotero plugins
 have their own versions, see `plugins/`).
 
-## Unreleased
+## 0.5.0
 
 - DOIs which OpenAlex has under another DOI (e.g. old SICI DOIs like
   `10.1890/1540-9295(2007)5[475:NCNCAE]2.0.CO;2`) count as found and are
@@ -15,6 +15,10 @@ have their own versions, see `plugins/`).
 - New fix for "DOI points to a different publication": empty the DOI field
   (not selected at the start) (#16)
 - "DOI not found in OpenAlex" lists only DOIs which exist
+- Zotero plugins: Safe Edit 0.2.2 and Fix Proposals 0.1.10, which work with
+  all Zotero 10 releases (before: only 10.0.x)
+- Branch `main` protected: changes through pull requests from `dev`; only the
+  automatic report updates push directly
 
 ## 0.4.0
 
