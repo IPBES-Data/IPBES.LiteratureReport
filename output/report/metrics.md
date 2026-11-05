@@ -78,6 +78,24 @@ a bibliography. The bare DOI is the one recognised by
 - `count`: number of items with a DOI in the wrong form
 - `pc`: percentage of all items with a DOI in the wrong form
 
+### DOIs which do not exist (`met_id_doi_exists`)
+
+Items whose DOI field contains a DOI in the right form which does not exist
+at doi.org: usually a typo, a shortened DOI, or a DOI with extra
+characters at the end (`.`, `;`, a link to supplementary material). Only
+DOIs which are not found in OpenAlex are checked at doi.org. Where the DOI
+without the extra characters at the end exists, it is given as
+suggestion.
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi_raw` (content of the DOI
+  field), `doi` and `suggestion` (existing DOI without the extra
+  characters, `NA` if none)
+- `count`: number of items with a DOI which does not exist
+- `count_unchecked`: number of DOIs which could not be checked (no answer
+  from OpenAlex or doi.org)
+- `pc`: percentage of the items with a valid DOI whose DOI does not exist
+
 ### Items without identifier (`met_id_none`)
 
 Items with none of DOI, ISBN, ISSN or Url. These items can neither be
@@ -176,11 +194,17 @@ itself, several languages or other text, are listed without a proposal.
 ### Zotero DOIs found in OpenAlex (`met_check_found`)
 
 Valid Zotero DOIs which were / were not found in OpenAlex. A DOI which is
-not found is either not indexed by OpenAlex or wrong.
+not found is either not indexed by OpenAlex or wrong (see
+`met_id_doi_exists` for DOIs which do not exist). DOIs of works which
+OpenAlex has under another DOI (e.g. the old and the new DOI of an
+article) count as found.
 
 **Result:** A list with
-- `zotero_in_oa`: DOIs found, named by item key
+- `zotero_in_oa`: DOIs found, named by item key (for works OpenAlex has
+  under another DOI: that DOI)
 - `zotero_not_in_oa`: DOIs not found, named by item key
+- `other_doi`: tibble with `key`, `doi` (in Zotero) and `oa_doi` of the
+  works OpenAlex has under another DOI
 - `count_not_in_oa`: number of DOIs not found
 - `pc_in_oa`: percentage of valid Zotero DOIs found
 
@@ -202,8 +226,9 @@ item is flagged when the title similarity (normalised Levenshtein
 distance) is below 0.8 or the years differ by more than one.
 
 **Result:** A list with
-- `items`: tibble with `key`, `doi`, `title_zotero`, `title_openalex`,
-  `title_similarity`, `year_zotero` and `year_openalex`
+- `items`: tibble with `key`, `doi`, `doi_raw` (content of the DOI
+  field), `openalex` (the work's OpenAlex ID), `title_zotero`,
+  `title_openalex`, `title_similarity`, `year_zotero` and `year_openalex`
 - `count`: number of flagged items
 - `pc`: percentage of the items found in OpenAlex which are flagged
 
