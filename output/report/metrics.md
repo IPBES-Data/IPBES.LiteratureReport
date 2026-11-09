@@ -228,7 +228,9 @@ distance) is below 0.8 or the years differ by more than one.
 **Result:** A list with
 - `items`: tibble with `key`, `doi`, `doi_raw` (content of the DOI
   field), `openalex` (the work's OpenAlex ID), `title_zotero`,
-  `title_openalex`, `title_similarity`, `year_zotero` and `year_openalex`
+  `title_openalex`, `title_similarity`, `year_zotero`, `year_openalex`,
+  `date_zotero` (content of the Date field) and `date_openalex`
+  (publication date in OpenAlex)
 - `count`: number of flagged items
 - `pc`: percentage of the items found in OpenAlex which are flagged
 
