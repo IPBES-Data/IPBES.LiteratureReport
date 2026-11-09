@@ -5,6 +5,8 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- Zotero Fix Proposals 0.1.14: "Details" (DOI found by title) as a button;
+  0.1.15: tinted item headings with a thicker line above
 - Zotero Fix Proposals 0.1.13: "Update the fixes" as a button next to
   "Fixes updated", explained on mouse-over
 - DOI found by title: the proposals contain the item and the work found
