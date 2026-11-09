@@ -62,7 +62,31 @@
                 "openalex": { "type": ["string", "null"], "description": "OpenAlex work URL for the links" },
                 "choice": { "type": ["string", "null"], "description": "Changes with the same choice are alternatives: at most one can be selected" },
                 "preselect": { "type": ["boolean", "null"], "description": "false: not selected at the start" },
-                "append": { "type": ["string", "null"], "description": "A line to add: the change is based on the current value in Zotero" }
+                "append": { "type": ["string", "null"], "description": "A line to add: the change is based on the current value in Zotero" },
+                "compare": {
+                  "type": ["object", "null"],
+                  "description": "The item and what was found side by side, e.g. for a DOI found by title",
+                  "required": ["fields"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "heading": { "type": "string", "description": "e.g. Likely match" },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["label"],
+                        "additionalProperties": false,
+                        "properties": {
+                          "label": { "type": "string" },
+                          "zotero": { "type": ["string", "null"], "description": "Value in Zotero" },
+                          "found": { "type": ["string", "null"], "description": "Value found" },
+                          "same": { "type": ["boolean", "null"], "description": "true: the same, false: different, null: not compared" },
+                          "more": { "type": ["boolean", "null"], "description": "true: shown only in the details" }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
