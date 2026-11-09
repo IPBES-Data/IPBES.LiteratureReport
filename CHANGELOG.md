@@ -10,7 +10,7 @@ have their own versions, see `plugins/`).
   removing the DOI
 - The proposals files contain the address of the GitHub Actions page from
   which the report can be run again (`update`, optional in the schema);
-  Zotero Fix Proposals 0.1.11 links it ("Update the fixes")
+  Zotero Fix Proposals 0.1.11 (included) links it ("Update the fixes")
 
 ## 0.5.0
 
