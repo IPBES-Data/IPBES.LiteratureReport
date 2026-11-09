@@ -79,7 +79,8 @@ export_proposals <- function(
         openalex = openalex,
         choice = column(x, "choice", NA_character_),
         preselect = column(x, "preselect", NA),
-        append = column(x, "append", NA_character_)
+        append = column(x, "append", NA_character_),
+        compare = column(x, "compare", NA)
       )
     )
   })

@@ -18,9 +18,12 @@
 #'   [get_doi_candidates()].
 #'
 #' @return A list with
-#' - `items`: tibble with `key`, `title`, `year`, `author` (first author) of
-#'   the item, and `doi`, `id`, `cand_title`, `cand_year`, `cand_author`,
-#'   `cand_journal` of the work found, `similarity` (titles), `match`
+#' - `items`: tibble with `key`, `title`, `year`, `author` (first author),
+#'   `journal`, `type` of the item, and `doi`, `id`, `cand_title`,
+#'   `cand_year`, `cand_author`, `cand_journal`, `cand_type` of the work
+#'   found, `same_title` (ignoring case and punctuation), `same_year`,
+#'   `same_author` (surname; `NA` if one of them has none), `similarity`
+#'   (titles), `match`
 #'   (`likely` or `possible`), `note` (DOI used by another item, else `NA`)
 #'   and `single` (`TRUE` for the only likely match of an item), one row per
 #'   item and work
@@ -39,12 +42,18 @@ met_id_candidates <- function(
     title = character(),
     year = integer(),
     author = character(),
+    journal = character(),
+    type = character(),
     doi = character(),
     id = character(),
     cand_title = character(),
     cand_year = integer(),
     cand_author = character(),
     cand_journal = character(),
+    cand_type = character(),
+    same_title = logical(),
+    same_year = logical(),
+    same_author = logical(),
     similarity = numeric(),
     match = character(),
     note = character(),
@@ -65,7 +74,9 @@ met_id_candidates <- function(
     key = zotero$Key,
     title = zotero$Title,
     year = suppressWarnings(as.integer(zotero$Publication.Year)),
-    author = sub(";.*", "", zotero$Author)
+    author = sub(";.*", "", zotero$Author),
+    journal = zotero$Publication.Title,
+    type = zotero$Item.Type
   )
 
   x <- dplyr::inner_join(
@@ -78,17 +89,25 @@ met_id_candidates <- function(
         cand_title = title,
         cand_year = year,
         cand_author = first_author,
-        cand_journal = journal
+        cand_journal = journal,
+        cand_type = type
       ),
     by = "key"
   )
   x$similarity <- title_similarity(x$title, x$cand_title)
   # last word of the OpenAlex name, e.g. "Berg" of "Anna van den Berg"
-  author_ok <- x$author == "" | is.na(x$cand_author) |
+  x$same_author <- ifelse(
+    x$author == "" | is.na(x$cand_author),
+    NA,
     endsWith(
       surname(sub(",.*", "", x$author)),
       surname(sub(".* ", "", x$cand_author))
     )
+  )
+  x$same_year <- x$year == x$cand_year
+  x$same_title <- gsub("[^[:alnum:]]", "", tolower(x$title)) ==
+    gsub("[^[:alnum:]]", "", tolower(x$cand_title))
+  author_ok <- x$same_author %in% c(TRUE, NA)
   year_ok <- is.na(x$year) | is.na(x$cand_year) | abs(x$year - x$cand_year) <= 1
   long <- lengths(strsplit(trimws(x$title), "\\s+")) >= 4
   x$match <- dplyr::case_when(
