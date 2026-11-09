@@ -12,6 +12,8 @@
 #' @param group The group (`name`, `id`) from `input/config.yaml`.
 #' @param schema JSON schema of the file.
 #' @param site URL of the published reports.
+#' @param update URL of the page from which the report can be run again
+#'   (GitHub Actions workflow), linked in the Zotero plugin.
 #' @param dir Directory to write to.
 #'
 #' @return Path to the JSON file.
@@ -21,6 +23,7 @@ export_proposals <- function(
   group,
   schema = file.path("input", "proposals.schema.json"),
   site = "https://ipbes-data.github.io/IPBES.LiteratureReport/",
+  update = "https://github.com/IPBES-Data/IPBES.LiteratureReport/actions/workflows/update.yml",
   dir = file.path("output", "report", "fixes")
 ) {
   m <- readRDS(metrics)
@@ -90,6 +93,7 @@ export_proposals <- function(
       group_id = group_id,
       name = group$name,
       report = paste0(site, name, ".html"),
+      update = update,
       checks = dplyr::transmute(
         checks,
         id,
