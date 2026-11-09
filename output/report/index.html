@@ -2268,7 +2268,7 @@ vertical-align: -.125em;
 <td style="text-align: left;"><a href="IPBES_APA_2333075.html" target="_blank">APA</a></td>
 <td style="text-align: right;">3152</td>
 <td style="text-align: right;">53%</td>
-<td style="text-align: right;">168</td>
+<td style="text-align: right;">169</td>
 <td style="text-align: right;">2070</td>
 <td style="text-align: right;">09 Nov 2026</td>
 <td style="text-align: left;"><a href="https://www.zotero.org/groups/2333075" target="_blank">open</a></td>
@@ -2401,7 +2401,7 @@ vertical-align: -.125em;
 </tr>
 <tr class="even">
 <td style="text-align: left;"><strong>Zotero Fix Proposals</strong></td>
-<td style="text-align: left;">0.1.11</td>
+<td style="text-align: left;">0.1.12</td>
 <td style="text-align: left;"><a href="plugins/zotero-fix-proposals/zotero-fix-proposals.xpi">download</a></td>
 <td style="text-align: left;">Shows fixes proposed for Zotero groups (e.g. by the IPBES Literature Report) and applies the ones you choose through Zotero Safe Edit, after approval.</td>
 </tr>
@@ -2464,7 +2464,7 @@ vertical-align: -.125em;
 <section id="dois-found-in-openalex-for-items-without-a-doi-met_id_candidates" class="level4">
 <h4 class="anchored" data-anchor-id="dois-found-in-openalex-for-items-without-a-doi-met_id_candidates">DOIs found in OpenAlex for items without a DOI (<code>met_id_candidates</code>)</h4>
 <p>For items without a DOI, OpenAlex was searched by title (see [get_doi_candidates()]). The works found are compared with the item: title (ignoring case and punctuation), year and the surname of the first author. A work is a <em>likely</em> match if the titles are (nearly) the same (similarity at least 0.95), the years differ by at most 1 and the first authors have the same surname (year or author are not compared if the item has none), and the title has at least 4 words (short titles like “Zoonoses” are too general). It is a <em>possible</em> match if the titles are similar (at least 0.8). All likely and possible works with a DOI are kept, sorted per item, best first. DOIs used by another item in the group are noted (the item would be a duplicate).</p>
-<p><strong>Result:</strong> A list with - <code>items</code>: tibble with <code>key</code>, <code>title</code>, <code>year</code>, <code>author</code> (first author) of the item, and <code>doi</code>, <code>id</code>, <code>cand_title</code>, <code>cand_year</code>, <code>cand_author</code>, <code>cand_journal</code> of the work found, <code>similarity</code> (titles), <code>match</code> (<code>likely</code> or <code>possible</code>), <code>note</code> (DOI used by another item, else <code>NA</code>) and <code>single</code> (<code>TRUE</code> for the only likely match of an item), one row per item and work - <code>count_items</code>: number of items with at least one match - <code>count_searched</code>: number of items searched - <code>count_likely</code>: items with exactly one likely match - <code>count_choice</code>: items with several or only possible matches</p>
+<p><strong>Result:</strong> A list with - <code>items</code>: tibble with <code>key</code>, <code>title</code>, <code>year</code>, <code>author</code> (first author), <code>journal</code>, <code>type</code> of the item, and <code>doi</code>, <code>id</code>, <code>cand_title</code>, <code>cand_year</code>, <code>cand_author</code>, <code>cand_journal</code>, <code>cand_type</code> of the work found, <code>same_title</code> (ignoring case and punctuation), <code>same_year</code>, <code>same_author</code> (surname; <code>NA</code> if one of them has none), <code>similarity</code> (titles), <code>match</code> (<code>likely</code> or <code>possible</code>), <code>note</code> (DOI used by another item, else <code>NA</code>) and <code>single</code> (<code>TRUE</code> for the only likely match of an item), one row per item and work - <code>count_items</code>: number of items with at least one match - <code>count_searched</code>: number of items searched - <code>count_likely</code>: items with exactly one likely match - <code>count_choice</code>: items with several or only possible matches</p>
 </section>
 </section>
 <section id="metadata" class="level3">

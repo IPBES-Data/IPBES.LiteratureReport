@@ -3,9 +3,9 @@
     "fix-proposals@ipbes-data": {
       "updates": [
         {
-          "version": "0.1.11",
-          "update_link": "https://ipbes-data.github.io/IPBES.LiteratureReport/plugins/zotero-fix-proposals/zotero-fix-proposals-0.1.11.xpi",
-          "update_hash": "sha256:0f019de7a31db4fc871dbd6591a503c6f3cb61de27c0bc6cc22dc3bb5061f380",
+          "version": "0.1.12",
+          "update_link": "https://ipbes-data.github.io/IPBES.LiteratureReport/plugins/zotero-fix-proposals/zotero-fix-proposals-0.1.12.xpi",
+          "update_hash": "sha256:7f177c3182b921ee969c99bf128d600280d615f06832cee4c189c4042b02c167",
           "applications": {
             "zotero": {
               "strict_min_version": "10.0",

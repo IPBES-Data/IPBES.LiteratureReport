@@ -121,9 +121,12 @@ best first. DOIs used by another item in the group are noted (the item
 would be a duplicate).
 
 **Result:** A list with
-- `items`: tibble with `key`, `title`, `year`, `author` (first author) of
-  the item, and `doi`, `id`, `cand_title`, `cand_year`, `cand_author`,
-  `cand_journal` of the work found, `similarity` (titles), `match`
+- `items`: tibble with `key`, `title`, `year`, `author` (first author),
+  `journal`, `type` of the item, and `doi`, `id`, `cand_title`,
+  `cand_year`, `cand_author`, `cand_journal`, `cand_type` of the work
+  found, `same_title` (ignoring case and punctuation), `same_year`,
+  `same_author` (surname; `NA` if one of them has none), `similarity`
+  (titles), `match`
   (`likely` or `possible`), `note` (DOI used by another item, else `NA`)
   and `single` (`TRUE` for the only likely match of an item), one row per
   item and work
