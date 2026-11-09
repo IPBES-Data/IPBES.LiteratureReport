@@ -2268,7 +2268,7 @@ vertical-align: -.125em;
 <td style="text-align: left;"><a href="IPBES_APA_2333075.html" target="_blank">APA</a></td>
 <td style="text-align: right;">3152</td>
 <td style="text-align: right;">53%</td>
-<td style="text-align: right;">169</td>
+<td style="text-align: right;">168</td>
 <td style="text-align: right;">2070</td>
 <td style="text-align: right;">09 Nov 2026</td>
 <td style="text-align: left;"><a href="https://www.zotero.org/groups/2333075" target="_blank">open</a></td>
@@ -2302,11 +2302,11 @@ vertical-align: -.125em;
 </tr>
 <tr class="odd">
 <td style="text-align: left;"><a href="IPBES_ILK_2344322.html" target="_blank">ILK</a></td>
-<td style="text-align: right;">10714</td>
+<td style="text-align: right;">10713</td>
 <td style="text-align: right;">64%</td>
-<td style="text-align: right;">704</td>
+<td style="text-align: right;">703</td>
 <td style="text-align: right;">6132</td>
-<td style="text-align: right;">08 Nov 2026</td>
+<td style="text-align: right;">09 Nov 2026</td>
 <td style="text-align: left;"><a href="https://www.zotero.org/groups/2344322" target="_blank">open</a></td>
 </tr>
 <tr class="even">
@@ -2314,7 +2314,7 @@ vertical-align: -.125em;
 <td style="text-align: right;">4264</td>
 <td style="text-align: right;">69%</td>
 <td style="text-align: right;">287</td>
-<td style="text-align: right;">2999</td>
+<td style="text-align: right;">2998</td>
 <td style="text-align: right;">09 Nov 2026</td>
 <td style="text-align: left;"><a href="https://www.zotero.org/groups/2333076" target="_blank">open</a></td>
 </tr>
@@ -2401,7 +2401,7 @@ vertical-align: -.125em;
 </tr>
 <tr class="even">
 <td style="text-align: left;"><strong>Zotero Fix Proposals</strong></td>
-<td style="text-align: left;">0.1.10</td>
+<td style="text-align: left;">0.1.11</td>
 <td style="text-align: left;"><a href="plugins/zotero-fix-proposals/zotero-fix-proposals.xpi">download</a></td>
 <td style="text-align: left;">Shows fixes proposed for Zotero groups (e.g. by the IPBES Literature Report) and applies the ones you choose through Zotero Safe Edit, after approval.</td>
 </tr>
@@ -2505,7 +2505,7 @@ vertical-align: -.125em;
 <section id="wrong-dois-met_check_mismatch" class="level4">
 <h4 class="anchored" data-anchor-id="wrong-dois-met_check_mismatch">Wrong DOIs (<code>met_check_mismatch</code>)</h4>
 <p>Items whose DOI points in OpenAlex to a work with a different title or year, which usually means that the wrong DOI is attached to the item. An item is flagged when the title similarity (normalised Levenshtein distance) is below 0.8 or the years differ by more than one.</p>
-<p><strong>Result:</strong> A list with - <code>items</code>: tibble with <code>key</code>, <code>doi</code>, <code>doi_raw</code> (content of the DOI field), <code>openalex</code> (the work’s OpenAlex ID), <code>title_zotero</code>, <code>title_openalex</code>, <code>title_similarity</code>, <code>year_zotero</code> and <code>year_openalex</code> - <code>count</code>: number of flagged items - <code>pc</code>: percentage of the items found in OpenAlex which are flagged</p>
+<p><strong>Result:</strong> A list with - <code>items</code>: tibble with <code>key</code>, <code>doi</code>, <code>doi_raw</code> (content of the DOI field), <code>openalex</code> (the work’s OpenAlex ID), <code>title_zotero</code>, <code>title_openalex</code>, <code>title_similarity</code>, <code>year_zotero</code>, <code>year_openalex</code>, <code>date_zotero</code> (content of the Date field) and <code>date_openalex</code> (publication date in OpenAlex) - <code>count</code>: number of flagged items - <code>pc</code>: percentage of the items found in OpenAlex which are flagged</p>
 </section>
 <section id="item-type-agreement-met_check_type" class="level4">
 <h4 class="anchored" data-anchor-id="item-type-agreement-met_check_type">Item type agreement (<code>met_check_type</code>)</h4>
