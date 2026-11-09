@@ -7,7 +7,7 @@ have their own versions, see `plugins/`).
 
 - DOI found by title: the proposals contain the item and the work found
   side by side (`compare`: title, year, first author, journal, type, marked
-  as the same or different); Zotero Fix Proposals 0.1.12 shows them
+  as the same or different); Zotero Fix Proposals 0.1.12 (included) shows them
 - "DOI points to a different publication": if only the year differs (the
   titles match), the fix offers the date from OpenAlex as an alternative to
   removing the DOI
