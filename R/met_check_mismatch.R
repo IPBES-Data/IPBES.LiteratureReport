@@ -11,7 +11,9 @@
 #' @return A list with
 #' - `items`: tibble with `key`, `doi`, `doi_raw` (content of the DOI
 #'   field), `openalex` (the work's OpenAlex ID), `title_zotero`,
-#'   `title_openalex`, `title_similarity`, `year_zotero` and `year_openalex`
+#'   `title_openalex`, `title_similarity`, `year_zotero`, `year_openalex`,
+#'   `date_zotero` (content of the Date field) and `date_openalex`
+#'   (publication date in OpenAlex)
 #' - `count`: number of flagged items
 #' - `pc`: percentage of the items found in OpenAlex which are flagged
 met_check_mismatch <- function(
@@ -34,6 +36,17 @@ met_check_mismatch <- function(
   )
   pairs$year_diff <- abs(pairs$year_zotero - pairs$year_openalex)
 
+  pairs$date_zotero <- zotero$Date[match(pairs$id_zotero, zotero$Key)]
+  pairs$date_openalex <- NA_character_
+  if ("publication_date" %in% names(openalex)) {
+    dates <- openalex |>
+      dplyr::select(id, publication_date) |>
+      dplyr::collect()
+    pairs$date_openalex <- as.character(
+      dates$publication_date[match(pairs$id_openalex, dates$id)]
+    )
+  }
+
   metrics <- list()
 
   # ponytail: fixed thresholds (title similarity < 0.8, year off by more
@@ -51,7 +64,9 @@ met_check_mismatch <- function(
       title_openalex,
       title_similarity,
       year_zotero,
-      year_openalex
+      year_openalex,
+      date_zotero,
+      date_openalex
     )
 
   metrics$count <- nrow(metrics$items)

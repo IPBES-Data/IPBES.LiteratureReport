@@ -3,6 +3,12 @@
 Versions of the pipeline, the fix app and the website (the Zotero plugins
 have their own versions, see `plugins/`).
 
+## Unreleased
+
+- "DOI points to a different publication": if only the year differs (the
+  titles match), the fix offers the date from OpenAlex as an alternative to
+  removing the DOI
+
 ## 0.5.0
 
 - DOIs which OpenAlex has under another DOI (e.g. old SICI DOIs like

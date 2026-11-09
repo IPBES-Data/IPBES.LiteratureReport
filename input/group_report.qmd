@@ -108,8 +108,10 @@ fix(
 
 The DOI of these items leads to a publication with a different title or
 year. Usually the DOI is wrong: open the DOI to see where it leads, and
-correct it in Zotero. Differences of one year (e.g. published online before
-print) are not listed.
+correct it in Zotero. If the titles match and only the year differs, the
+DOI is probably right and the date in Zotero wrong (unless it is a reprint
+or another edition): correct the date instead. Differences of one year (e.g.
+published online before print) are not listed.
 
 ```{r}
 x <- m$openalex_check$met_check_mismatch
