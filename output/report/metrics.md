@@ -108,21 +108,15 @@ checked against OpenAlex nor easily be retrieved by readers.
 
 ### DOIs found in OpenAlex for items without a DOI (`met_id_candidates`)
 
-For items without a DOI, OpenAlex was searched by title (see
-[get_doi_candidates()]). The works found are compared with the item:
-title (ignoring case and punctuation), year and the surname of the first
-author. A work is a *likely* match if the titles are (nearly) the same
-(similarity at least 0.95), the years differ by at most 1 and the first
-authors have the same surname (year or author are not compared if the item
-has none), and the title has at least 4 words (short titles like
-"Zoonoses" are too general). It is a *possible* match if the titles are similar (at least
-0.8). All likely and possible works with a DOI are kept, sorted per item,
-best first. DOIs used by another item in the group are noted (the item
-would be a duplicate).
+For items without a DOI, OpenAlex was searched by title, and by the
+PubMed ID (line `PMID: …` in Extra), and Crossref by ISBN and title (see
+[get_doi_candidates()]).
 
 **Result:** A list with
 - `items`: tibble with `key`, `title`, `year`, `author` (first author),
-  `journal`, `type` of the item, and `doi`, `id`, `cand_title`,
+  `journal`, `type`, `extra` of the item, `by` (how the work was found:
+  `title`, `pmid` or `isbn`), and `doi` (`NA` for a work found by PubMed
+  ID without DOI), `id`, `cand_title`,
   `cand_year`, `cand_author`, `cand_journal`, `cand_type` of the work
   found, `same_title` (ignoring case and punctuation), `same_year`,
   `same_author` (surname; `NA` if one of them has none), `similarity`
