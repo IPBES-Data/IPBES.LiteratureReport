@@ -11,7 +11,7 @@ ARG QUARTO_VERSION=1.10.18
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     git zip python3 curl ca-certificates \
-    libcurl4-openssl-dev libssl-dev libxml2-dev libsodium-dev libjq1 libglpk40 libuv1 libsecret-1-0 \
+    libcurl4-openssl-dev libssl-dev libxml2-dev libsodium-dev libjq1 libglpk40 libuv1 libsecret-1-0 libnode109 \
   && rm -rf /var/lib/apt/lists/*
 
 # Quarto, for the reports
@@ -29,7 +29,7 @@ WORKDIR /opt/renv/project
 COPY renv.lock .Rprofile ./
 COPY renv/activate.R renv/settings.json renv/
 RUN Rscript -e 'renv::restore(prompt = FALSE)' \
-  && Rscript -e 'for (p in c("targets", "tarchetypes", "dplyr", "ggplot2", "quarto", "knitr", "arrow", "jsonlite", "jsonvalidate", "yaml", "keyring", "ISOcodes", "countrycode", "httr2", "openssl", "withr", "htmltools", "reactable", "roxygen2", "openalexPro", "zotFunc")) library(p, character.only = TRUE)'
+  && Rscript -e 'for (p in c("targets", "tarchetypes", "dplyr", "ggplot2", "quarto", "knitr", "arrow", "jsonlite", "jsonvalidate", "yaml", "keyring", "ISOcodes", "countrycode", "httr2", "openssl", "withr", "htmltools", "reactable", "roxygen2", "rcrossref", "V8", "openalexPro", "zotFunc")) library(p, character.only = TRUE)'
 
 # the versions in this image (shown by GET /status)
 RUN mkdir -p /opt/literature-report \

@@ -11,6 +11,8 @@ have their own versions, see `plugins/`).
   PubMed ID only get DOIs found by title if they are likely matches. Each item
   can be kept as it is (adds `No DOI: checked` to Extra, the item is then no
   longer listed); items with an OpenAlex ID in Extra are not listed (#24)
+- Docker image: `libnode109` for V8 (the V8 binary from Posit Package
+  Manager needs it now)
 - Zotero Fix Proposals 0.1.14: "Details" (DOI found by title) as a button;
   0.1.15: tinted item headings with a thicker line above
 - Zotero Fix Proposals 0.1.13: "Update the fixes" as a button next to
