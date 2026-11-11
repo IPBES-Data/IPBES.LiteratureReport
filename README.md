@@ -87,8 +87,13 @@ upload_snapshot_data("v<version>")  # replaces an asset of the same name
 ```
 
 The data must come from a `tar_make()` run at the release's commit.
-`upload_snapshot_data()` uses the token git has for github.com
-(`git credential fill`).
+`upload_snapshot_data()` uses `GITHUB_TOKEN` if set, otherwise the token git
+has for github.com (`git credential fill`).
+
+On GitHub this happens automatically: the workflow
+[snapshot-data.yml](.github/workflows/snapshot-data.yml) attaches the data
+of the last update run (from the Actions cache) to every published release;
+it can also be run by hand with the tag of a release.
 
 ## Fixing problems in Zotero
 

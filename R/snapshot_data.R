@@ -44,8 +44,10 @@ zip_snapshot_data <- function(
 #' Upload the snapshot data to a release
 #'
 #' Attaches `zipfile` as asset `snapshot_data.zip` to the GitHub release with
-#' tag `tag`, replacing an asset of that name. Authenticates with the token
-#' git uses for github.com (`git credential fill`).
+#' tag `tag`, replacing an asset of that name. Authenticates with
+#' `GITHUB_TOKEN` if set (GitHub Actions, see
+#' `.github/workflows/snapshot-data.yml`), otherwise with the token git uses
+#' for github.com (`git credential fill`).
 #'
 #' @param tag Tag of the release, e.g. `"v0.6.0"`.
 #' @param zipfile The zip file made by [zip_snapshot_data()].
@@ -58,14 +60,17 @@ upload_snapshot_data <- function(
   repo = "IPBES-Data/IPBES.LiteratureReport"
 ) {
   name <- "snapshot_data.zip"
-  cred <- system2(
-    "git",
-    c("credential", "fill"),
-    input = c("protocol=https", "host=github.com", ""),
-    stdout = TRUE
-  )
-  token <- sub("^password=", "", grep("^password=", cred, value = TRUE))
-  if (length(token) != 1) {
+  token <- Sys.getenv("GITHUB_TOKEN")
+  if (token == "") {
+    cred <- system2(
+      "git",
+      c("credential", "fill"),
+      input = c("protocol=https", "host=github.com", ""),
+      stdout = TRUE
+    )
+    token <- sub("^password=", "", grep("^password=", cred, value = TRUE))
+  }
+  if (length(token) != 1 || token == "") {
     stop("No token for github.com from git credential fill")
   }
   gh <- function(url) {

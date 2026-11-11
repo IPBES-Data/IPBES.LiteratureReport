@@ -7,7 +7,8 @@ have their own versions, see `plugins/`).
 
 - `zip_snapshot_data()` and `upload_snapshot_data()` (R/snapshot_data.R):
   the downloaded data as release asset `snapshot_data.zip`, for the snapshot
-  of the paper
+  of the paper; the workflow snapshot-data.yml attaches it to every
+  published release (and by hand), with the data of the last update run
 
 ## 0.6.0
 

@@ -83,7 +83,7 @@ The pipeline, fix app and website share one version in [VERSION](VERSION) (read 
 
 ## Paper snapshot (not part of the pipeline)
 
-The paper repo (`~/GitHub/Paper/Literature use in IPBES`, `update_snapshot(source = "github")`) downloads the release asset `snapshot_data.zip`. [R/snapshot_data.R](R/snapshot_data.R): `zip_snapshot_data()` zips `zotero_groups/`, `zotero_works/` and `doi_check/` from inside `output/` (no `output/` prefix; only the groups in the config), `upload_snapshot_data(tag)` attaches it to the release with that tag via the GitHub REST API (replaces an existing asset; token from `git credential fill`, never print it). The zip must come from a `tar_make()` run at the release's commit.
+The paper repo (`~/GitHub/Paper/Literature use in IPBES`, `update_snapshot(source = "github")`) downloads the release asset `snapshot_data.zip`. [R/snapshot_data.R](R/snapshot_data.R): `zip_snapshot_data()` zips `zotero_groups/`, `zotero_works/` and `doi_check/` from inside `output/` (no `output/` prefix; only the groups in the config), `upload_snapshot_data(tag)` attaches it to the release with that tag via the GitHub REST API (replaces an existing asset; token from `GITHUB_TOKEN`, else `git credential fill`, never print it). [snapshot-data.yml](.github/workflows/snapshot-data.yml) does both on every published release and by hand (input `tag`), with the data of the last update.yml run restored from the Actions cache (same cache paths as update.yml, or it won't match). Locally, the zip must come from a `tar_make()` run at the release's commit.
 
 ## Fix app (not part of the pipeline)
 
