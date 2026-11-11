@@ -5,6 +5,7 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- New groups BBA (5081872) and NXS (4596166); groups sorted by name
 - `zip_snapshot_data()` and `upload_snapshot_data()` (R/snapshot_data.R):
   the downloaded data as release asset `snapshot_data.zip`, for the snapshot
   of the paper; the workflow snapshot-data.yml attaches it to every
