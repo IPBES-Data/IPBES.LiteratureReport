@@ -1,18 +1,8 @@
 {
   "format": "zotero-fix-proposals-index",
   "version": 1,
-  "created": "2026-11-11T10:49:44Z",
+  "created": "2026-11-11T14:04:34Z",
   "groups": [
-    {
-      "group_id": 4937409,
-      "name": "NFF",
-      "file": "IPBES_NFF_4937409.json"
-    },
-    {
-      "group_id": 2499181,
-      "name": "PAND",
-      "file": "IPBES_PAND_2499181.json"
-    },
     {
       "group_id": 2333070,
       "name": "AFA",
@@ -27,6 +17,11 @@
       "group_id": 2333075,
       "name": "APA",
       "file": "IPBES_APA_2333075.json"
+    },
+    {
+      "group_id": 5081872,
+      "name": "BBA",
+      "file": "IPBES_BBA_5081872.json"
     },
     {
       "group_id": 2345951,
@@ -54,6 +49,16 @@
       "file": "IPBES_LDR_2333076.json"
     },
     {
+      "group_id": 4596166,
+      "name": "NXS",
+      "file": "IPBES_NXS_4596166.json"
+    },
+    {
+      "group_id": 2499181,
+      "name": "PAND",
+      "file": "IPBES_PAND_2499181.json"
+    },
+    {
       "group_id": 2333088,
       "name": "PPA",
       "file": "IPBES_PPA_2333088.json"
@@ -69,6 +74,11 @@
       "file": "IPBES_SUA_2344805.json"
     },
     {
+      "group_id": 4589462,
+      "name": "TCA",
+      "file": "IPBES_TCA_4589462.json"
+    },
+    {
       "group_id": 2345372,
       "name": "VA",
       "file": "IPBES_VA_2345372.json"
@@ -79,9 +89,9 @@
       "file": "IPBES_IPCC_2603670.json"
     },
     {
-      "group_id": 4589462,
-      "name": "TCA",
-      "file": "IPBES_TCA_4589462.json"
+      "group_id": 4937409,
+      "name": "NFF",
+      "file": "IPBES_NFF_4937409.json"
     }
   ]
 }
