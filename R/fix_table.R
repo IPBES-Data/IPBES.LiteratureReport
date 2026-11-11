@@ -17,7 +17,7 @@ fix_table <- function() {
     "language", "Language not as ISO code", "ISO language code", "Language", fix_language, "language", FALSE,
     "date", "No date", "Date from OpenAlex", "Date", fix_date, "year", FALSE,
     "fill", "Empty fields", "Values from OpenAlex", "Journal, Volume, Issue, Pages", fix_fill, "fill", FALSE,
-    "doi_candidates", "No DOI", "DOI found in OpenAlex", "DOI", fix_doi_candidates, "doi-candidates", FALSE,
+    "doi_candidates", "No DOI", "DOI found (OpenAlex, Crossref), or keep as it is", "DOI, Extra", fix_doi_candidates, "doi-candidates", FALSE,
     "doi_exists", "DOI does not exist", "Corrected DOI, or no DOI", "DOI", fix_doi_exists, "doi-exists", FALSE,
     "doi_mismatch", "DOI points to a different publication", "No DOI", "DOI", fix_doi_mismatch, "wrong-doi", FALSE,
     "openalex_id", "No OpenAlex ID", "OpenAlex ID of the DOI", "Extra", fix_openalex_id, "openalex-id", TRUE,

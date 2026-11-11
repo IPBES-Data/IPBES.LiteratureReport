@@ -363,14 +363,23 @@ fix(
 )
 ```
 
-### Items without DOI, for which OpenAlex has one {#doi-candidates}
+### Items without DOI, for which a DOI was found {#doi-candidates}
 
 OpenAlex was searched by title for items without a DOI (journal articles,
-books, book sections, reports, conference papers, theses, preprints). The
-publications found are compared by title, year and first author: a *likely*
-match agrees in all three, a *possible* match has a similar title, but e.g.
-a different year or author. Open the DOI to check that it is the same
-publication, and add the DOI in Zotero.
+books, book sections, reports, conference papers, theses, preprints), and by
+the PubMed ID (line `PMID: …` in Extra); Crossref was searched by ISBN and
+title. The publications found by title are compared by title, year and first
+author: a *likely* match agrees in all three, a *possible* match has a
+similar title, but e.g. a different year or author. A publication found by
+PubMed ID is a likely match; if it has no DOI, its OpenAlex ID can be added
+to Extra instead. A publication found by ISBN is a likely match if the title
+is the same. For items with an ISBN or PubMed ID, publications found by title
+are only listed if they are likely matches. Open the DOI to check that it is
+the same publication, and add the DOI in Zotero.
+
+If none of them is the item, add the line `No DOI: checked` to Extra: the
+item is then no longer listed (the Zotero plugin offers this as "Keep as it
+is").
 
 ```{r}
 x <- m$identifiers$met_id_candidates
@@ -385,6 +394,7 @@ fix(
       `Found in OpenAlex` = cand_title,
       `Year (OpenAlex)` = cand_year,
       `Author (OpenAlex)` = cand_author,
+      `Found by` = dplyr::recode(by, title = "title", pmid = "PubMed ID", isbn = "ISBN (Crossref)"),
       Match = ifelse(is.na(note), match, paste0(match, ": ", note)),
       DOI = doi
     )
