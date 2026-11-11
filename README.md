@@ -73,6 +73,23 @@ needs the pipeline output.
   `keyring::key_set("API_zotero")`.
 - An OpenAlex API key, as set up for openalexPro.
 
+### Data for the paper
+
+The paper ("Literature use in IPBES") takes a snapshot of the downloaded data
+(`output/zotero_groups`, `output/zotero_works`, `output/doi_check`, not in
+git) from the release asset `snapshot_data.zip`. To attach it to a release,
+check out the release's tag, run `targets::tar_make()`, then
+
+```r
+source("R/snapshot_data.R")
+zip_snapshot_data()                 # snapshot_data.zip, the groups in input/config.yaml
+upload_snapshot_data("v<version>")  # replaces an asset of the same name
+```
+
+The data must come from a `tar_make()` run at the release's commit.
+`upload_snapshot_data()` uses the token git has for github.com
+(`git credential fill`).
+
 ## Fixing problems in Zotero
 
 Two Zotero 10 plugins fix the problems found by the pipeline, directly in

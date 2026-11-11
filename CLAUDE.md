@@ -81,6 +81,10 @@ All development on `dev`; `main` changes only through pull requests from `dev` (
 
 The pipeline, fix app and website share one version in [VERSION](VERSION) (read by `repo_version()`), with changes in [CHANGELOG.md](CHANGELOG.md). The plugins have their own versions.
 
+## Paper snapshot (not part of the pipeline)
+
+The paper repo (`~/GitHub/Paper/Literature use in IPBES`, `update_snapshot(source = "github")`) downloads the release asset `snapshot_data.zip`. [R/snapshot_data.R](R/snapshot_data.R): `zip_snapshot_data()` zips `zotero_groups/`, `zotero_works/` and `doi_check/` from inside `output/` (no `output/` prefix; only the groups in the config), `upload_snapshot_data(tag)` attaches it to the release with that tag via the GitHub REST API (replaces an existing asset; token from `git credential fill`, never print it). The zip must come from a `tar_make()` run at the release's commit.
+
 ## Fix app (not part of the pipeline)
 
 `run_fix_app()` ([R/run_fix_app.R](R/run_fix_app.R)) starts a local Shiny app ([fix_app/](fix_app/)) which proposes fixes for problems found by the metrics and sends them to Zotero through the **Zotero Safe Edit** plugin (separate repo `IPBES-Data/zotero-safe-edit`, Zotero 10). The plugin does all checks (token, auto-sync off, fresh backup, allowed fields, expected old value, batch limit), shows the approval dialog, writes, and keeps the log; the app stores nothing.
