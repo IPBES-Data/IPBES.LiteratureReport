@@ -5,6 +5,12 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- No DOI: items are also looked up by PubMed ID (OpenAlex) and ISBN
+  (Crossref, with the rOpenSci package rcrossref); a work found by PubMed ID
+  without DOI is offered as `OpenAlex: W…` in Extra. Items with an ISBN or
+  PubMed ID only get DOIs found by title if they are likely matches. Each item
+  can be kept as it is (adds `No DOI: checked` to Extra, the item is then no
+  longer listed); items with an OpenAlex ID in Extra are not listed (#24)
 - Zotero Fix Proposals 0.1.14: "Details" (DOI found by title) as a button;
   0.1.15: tinted item headings with a thicker line above
 - Zotero Fix Proposals 0.1.13: "Update the fixes" as a button next to

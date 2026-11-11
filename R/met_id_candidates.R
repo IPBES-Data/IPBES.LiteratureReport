@@ -1,7 +1,17 @@
 #' DOIs found in OpenAlex for items without a DOI
 #'
-#' For items without a DOI, OpenAlex was searched by title (see
-#' [get_doi_candidates()]). The works found are compared with the item:
+#' For items without a DOI, OpenAlex was searched by title, and by the
+#' PubMed ID (line `PMID: …` in Extra), and Crossref by ISBN and title (see
+#' [get_doi_candidates()]).
+#'
+#' A work found by PubMed ID is a *likely* match. If it has no DOI in
+#' OpenAlex, its OpenAlex ID is offered instead (as the line `OpenAlex: W…`
+#' in Extra). A work found by ISBN is a *likely* match if the titles are
+#' (nearly) the same (similarity at least 0.95), the years differ by at most
+#' 1, and it is a book for a book, a chapter for a book section; *possible*
+#' if the titles are similar (at least 0.8).
+#'
+#' The works found by title are compared with the item:
 #' title (ignoring case and punctuation), year and the surname of the first
 #' author. A work is a *likely* match if the titles are (nearly) the same
 #' (similarity at least 0.95), the years differ by at most 1 and the first
@@ -10,7 +20,12 @@
 #' "Zoonoses" are too general). It is a *possible* match if the titles are similar (at least
 #' 0.8). All likely and possible works with a DOI are kept, sorted per item,
 #' best first. DOIs used by another item in the group are noted (the item
-#' would be a duplicate).
+#' would be a duplicate). For items with an ISBN or PubMed ID, works found
+#' by title are only kept if they are likely matches.
+#'
+#' Items with the line `No DOI: checked` in Extra (someone checked that there
+#' is no DOI to add), or with an OpenAlex ID in Extra (the work is known),
+#' are not listed.
 #'
 #' @param zotero Zotero items as read from the CSV export (data frame).
 #' @param openalex Not used.
@@ -19,7 +34,9 @@
 #'
 #' @return A list with
 #' - `items`: tibble with `key`, `title`, `year`, `author` (first author),
-#'   `journal`, `type` of the item, and `doi`, `id`, `cand_title`,
+#'   `journal`, `type`, `extra` of the item, `by` (how the work was found:
+#'   `title`, `pmid` or `isbn`), and `doi` (`NA` for a work found by PubMed
+#'   ID without DOI), `id`, `cand_title`,
 #'   `cand_year`, `cand_author`, `cand_journal`, `cand_type` of the work
 #'   found, `same_title` (ignoring case and punctuation), `same_year`,
 #'   `same_author` (surname; `NA` if one of them has none), `similarity`
@@ -44,6 +61,8 @@ met_id_candidates <- function(
     author = character(),
     journal = character(),
     type = character(),
+    extra = character(),
+    by = character(),
     doi = character(),
     id = character(),
     cand_title = character(),
@@ -76,14 +95,26 @@ met_id_candidates <- function(
     year = suppressWarnings(as.integer(zotero$Publication.Year)),
     author = sub(";.*", "", zotero$Author),
     journal = zotero$Publication.Title,
-    type = zotero$Item.Type
+    type = zotero$Item.Type,
+    extra = zotero$Extra
   )
+  # checked: no DOI to add, or the work is known
+  done <- grepl("(?mi)^(No DOI: checked|OpenAlex:)", zotero$Extra, perl = TRUE)
+  has_id <- zotero$ISBN != "" | grepl("(?mi)^PMID:\\s*\\d+", zotero$Extra, perl = TRUE)
+  items <- items[!done, ]
+
+  if (!"by" %in% names(candidates)) candidates$by <- "title" # made before the lookups
+  # with a DOI, or found by PubMed ID (then the OpenAlex ID is offered)
+  candidates <- candidates[
+    !is.na(candidates$doi) | (candidates$by %in% "pmid" & !is.na(candidates$id)),
+  ]
 
   x <- dplyr::inner_join(
     items,
-    candidates[!is.na(candidates$doi), ] |>
+    candidates |>
       dplyr::select(
         key,
+        by,
         doi,
         id,
         cand_title = title,
@@ -95,6 +126,12 @@ met_id_candidates <- function(
     by = "key"
   )
   x$similarity <- title_similarity(x$title, x$cand_title)
+  # Crossref keeps the subtitle apart: by ISBN, also the title without it
+  isbn <- x$by == "isbn" & grepl(":", x$title)
+  x$similarity[isbn] <- pmax(
+    x$similarity[isbn],
+    title_similarity(sub(":.*", "", x$title[isbn]), x$cand_title[isbn])
+  )
   # last word of the OpenAlex name, e.g. "Berg" of "Anna van den Berg"
   x$same_author <- ifelse(
     x$author == "" | is.na(x$cand_author),
@@ -110,12 +147,23 @@ met_id_candidates <- function(
   author_ok <- x$same_author %in% c(TRUE, NA)
   year_ok <- is.na(x$year) | is.na(x$cand_year) | abs(x$year - x$cand_year) <= 1
   long <- lengths(strsplit(trimws(x$title), "\\s+")) >= 4
+  # by ISBN: a book for a book, a chapter for a book section
+  chapter <- grepl("chapter|part|section", x$cand_type)
+  type_ok <- dplyr::case_when(
+    x$type == "book" ~ !chapter,
+    x$type == "bookSection" ~ chapter,
+    .default = TRUE
+  )
   x$match <- dplyr::case_when(
-    x$similarity >= 0.95 & year_ok & author_ok & long ~ "likely",
+    x$by == "pmid" ~ "likely",
+    x$by == "isbn" & x$similarity >= 0.95 & year_ok & type_ok ~ "likely",
+    x$by == "title" & x$similarity >= 0.95 & year_ok & author_ok & long ~ "likely",
     x$similarity >= 0.8 ~ "possible",
     .default = NA_character_
   )
-  x <- x[!is.na(x$match), ]
+  # items with an ISBN or PubMed ID: works found by title only if likely
+  weak <- x$by == "title" & x$match %in% "possible" & x$key %in% zotero$Key[has_id]
+  x <- x[!is.na(x$match) & !weak, ]
 
   # one row per item and DOI; DOIs already in the group are noted
   in_group <- openalexPro::extract_doi(
@@ -128,12 +176,13 @@ met_id_candidates <- function(
       tolower(title),
       key,
       match != "likely",
+      by == "title",
       -similarity
     ) |>
     dplyr::distinct(key, tolower(doi), .keep_all = TRUE) |>
     dplyr::select(-`tolower(doi)`)
   x$note <- ifelse(
-    tolower(x$doi) %in% in_group,
+    !is.na(x$doi) & tolower(x$doi) %in% in_group,
     "DOI used by another item in the group (duplicate?)",
     NA_character_
   )
