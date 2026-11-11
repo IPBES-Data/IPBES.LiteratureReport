@@ -3,7 +3,7 @@
 Versions of the pipeline, the fix app and the website (the Zotero plugins
 have their own versions, see `plugins/`).
 
-## Unreleased
+## 0.6.0
 
 - No DOI: items are also looked up by PubMed ID (OpenAlex) and ISBN
   (Crossref, with the rOpenSci package rcrossref); a work found by PubMed ID
