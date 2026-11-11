@@ -70,3 +70,6 @@ website/*
 # Docker: keys and data of the container
 docker/.env
 docker/data/
+
+# release asset for the paper (R/snapshot_data.R)
+/snapshot_data.zip

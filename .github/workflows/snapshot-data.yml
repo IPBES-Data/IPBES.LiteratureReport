@@ -1,0 +1,59 @@
+# Attaches the data of the last pipeline run as release asset
+# snapshot_data.zip, for the snapshot of the paper (update_snapshot(source =
+# "github") in "Literature use in IPBES"). Runs when a release is published,
+# and by hand ("Run workflow", with the tag of the release). Runs no pipeline:
+# it restores the Actions cache of update.yml (the data of its last run, behind
+# the published reports), zips zotero_groups/, zotero_works/ and doi_check/
+# (R/snapshot_data.R) and uploads the zip, replacing an asset of the same
+# name. Changes neither main nor the cache.
+#
+# The data is that of the last update run before the release. If a release
+# changes how the data is downloaded, run update.yml after the release, then
+# this workflow by hand.
+name: Snapshot data for the paper
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag of the release to attach snapshot_data.zip to (e.g. v0.6.0)
+        required: true
+
+# no concurrency with update.yml needed: cache entries are saved whole at the
+# end of a run, the restore gets the newest complete one
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ipbes-data/ipbes-literature-report:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      # same paths as update.yml: the cache only matches with the same paths
+      - name: Restore the pipeline's caches
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            output
+            !output/report
+            _targets
+          key: pipeline-${{ github.run_id }}
+          restore-keys: pipeline-
+          fail-on-cache-miss: true
+
+      - name: Zip and upload snapshot_data.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: |
+          Rscript -e 'source("R/snapshot_data.R"); z <- zip_snapshot_data(); cat(z, file.size(z), "bytes\n"); cat(upload_snapshot_data(Sys.getenv("TAG")), "\n")'
