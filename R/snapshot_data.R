@@ -33,11 +33,15 @@ zip_snapshot_data <- function(
     file.path(dirs[3], paste0(groups, ".rds"))
   )
   files <- files[file.exists(file.path(output, files))]
-  zipfile <- normalizePath(zipfile, mustWork = FALSE)
+  # absolute, as zip runs inside output/ (normalizePath() of a file which
+  # does not exist yet stays relative on Linux)
+  zipfile <- file.path(normalizePath(dirname(zipfile)), basename(zipfile))
   unlink(zipfile)
   old <- setwd(output)
   on.exit(setwd(old))
-  utils::zip(zipfile, files, flags = "-r9Xq")
+  if (utils::zip(zipfile, files, flags = "-r9Xq") != 0 || !file.exists(zipfile)) {
+    stop("zip failed: ", zipfile)
+  }
   zipfile
 }
 
