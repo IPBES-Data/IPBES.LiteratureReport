@@ -1,4 +1,4 @@
-#' Fix: DOI points to a different publication → no DOI, or the date
+#' Fix: DOI points to a different publication → no DOI, the date, or keep
 #'
 #' For items whose DOI leads to a work with a different title or year
 #' (`met_check_mismatch`), proposes to empty the DOI field, showing where the
@@ -10,6 +10,11 @@
 #' year of the printed issue and OpenAlex the online date). Not selected at
 #' the start: the check uses fixed thresholds, so some items are listed
 #' although their DOI is right (e.g. translated or short titles).
+#'
+#' The last alternative of each item is to keep it as it is: this adds the
+#' line `DOI checked: correct` to Extra, and the item is no longer listed
+#' (e.g. a book chapter with the DOI of the whole book, or a wrong year in
+#' OpenAlex).
 #'
 #' @param m Metrics of one group, as saved by [get_metrics()].
 #' @param group_id Zotero group id.
@@ -24,6 +29,10 @@ fix_doi_mismatch <- function(
   if (!"date_openalex" %in% names(x)) {
     x$date_zotero <- NA_character_
     x$date_openalex <- NA_character_
+  }
+  # NA for metrics made before the column: no "keep" alternative
+  if (!"extra" %in% names(x)) {
+    x$extra <- NA_character_
   }
 
   found <- paste0(
@@ -56,7 +65,7 @@ fix_doi_mismatch <- function(
     note = NA_character_,
     doi = x$doi,
     openalex = x$openalex,
-    choice = ifelse(date_option, x$key, NA_character_),
+    choice = ifelse(date_option | !is.na(x$extra), x$key, NA_character_),
     preselect = FALSE
   )
 
@@ -70,7 +79,7 @@ fix_doi_mismatch <- function(
     new = sub("-01-01$", "", d$date_openalex),
     reason = paste0(
       "The DOI leads to this publication with another year: date from ",
-      "OpenAlex. Or remove the DOI (another edition), or change nothing ",
+      "OpenAlex. Or remove the DOI (another edition), or keep as it is ",
       "(year of the printed issue, OpenAlex has the online date)"
     ),
     proposed = TRUE,
@@ -81,7 +90,34 @@ fix_doi_mismatch <- function(
     preselect = FALSE
   )
 
-  # alternatives next to each other, the date first
-  dplyr::bind_rows(date, no_doi) |>
-    dplyr::arrange(match(item_key, x$key), field != "date")
+  # last alternative: keep the item as it is
+  k <- x[!is.na(x$extra), ]
+  keep_line <- "DOI checked: correct"
+  keep <- tibble::tibble(
+    group_id = as.numeric(group_id),
+    item_key = k$key,
+    title = k$title_zotero,
+    field = "extra",
+    old = k$extra,
+    new = as.character(ifelse(k$extra == "", keep_line, paste0(k$extra, "\n", keep_line))),
+    reason = paste0(
+      "Keep as it is: the DOI is right (e.g. the DOI of the whole book for ",
+      "a chapter, or a wrong year in OpenAlex; adds \"", keep_line,
+      "\" to Extra, the item is then no longer listed)"
+    ),
+    proposed = TRUE,
+    note = NA_character_,
+    doi = k$doi,
+    openalex = k$openalex,
+    choice = k$key,
+    preselect = FALSE,
+    append = keep_line
+  )
+
+  # alternatives next to each other: the date, no DOI, keep
+  dplyr::bind_rows(date, no_doi, keep) |>
+    dplyr::arrange(
+      match(item_key, x$key),
+      match(field, c("date", "DOI", "extra"))
+    )
 }

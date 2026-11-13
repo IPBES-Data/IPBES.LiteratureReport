@@ -97,7 +97,9 @@ title_similarity <- function(
 #'
 #' Joins the Zotero items with OpenAlex works on the DOI. Items whose DOI
 #' points to a different publication (see [met_check_mismatch()]) are left
-#' out, so that nothing is taken from the wrong work.
+#' out, so that nothing is taken from the wrong work, also when someone
+#' checked that the DOI is right (see [doi_checked()]): its work still
+#' differs (e.g. the book of a chapter).
 #'
 #' @param zotero Zotero items as read from the CSV export (data frame).
 #' @param openalex OpenAlex works (arrow dataset).
@@ -120,9 +122,22 @@ oa_join <- function(
 
   zotero$doi <- as_bib(zotero)$doi
   wrong <- met_check_mismatch(zotero, openalex)$items$key
-  zotero <- zotero[!is.na(zotero$doi) & !zotero$Key %in% wrong, ]
+  zotero <- zotero[
+    !is.na(zotero$doi) & !zotero$Key %in% wrong & !doi_checked(zotero$Extra),
+  ]
 
   dplyr::inner_join(zotero, works, by = "doi")
+}
+
+#' DOI checked
+#'
+#' Whether Extra has the line `DOI checked: correct`, added by the fix "DOI
+#' points to a different publication" when the DOI is right although title or
+#' year differ from OpenAlex. Not `DOI: …`, which Zotero reads as the DOI.
+#'
+#' @param extra Content of the Extra field.
+doi_checked <- function(extra) {
+  grepl("(?mi)^DOI checked: correct\\s*$", extra, perl = TRUE)
 }
 
 #' Common bibliography columns

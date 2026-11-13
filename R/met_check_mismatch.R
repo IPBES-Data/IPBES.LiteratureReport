@@ -3,7 +3,10 @@
 #' Items whose DOI points in OpenAlex to a work with a different title or
 #' year, which usually means that the wrong DOI is attached to the item. An
 #' item is flagged when the title similarity (normalised Levenshtein
-#' distance) is below 0.8 or the years differ by more than one.
+#' distance) is below 0.8 or the years differ by more than one. Items with
+#' the line `DOI checked: correct` in Extra (someone checked that the DOI is
+#' right, e.g. a book chapter with the DOI of the book, or a wrong year in
+#' OpenAlex) are not listed.
 #'
 #' @param zotero Zotero items as read from the CSV export (data frame).
 #' @param openalex OpenAlex works (arrow dataset).
@@ -13,7 +16,7 @@
 #'   field), `openalex` (the work's OpenAlex ID), `title_zotero`,
 #'   `title_openalex`, `title_similarity`, `year_zotero`, `year_openalex`,
 #'   `date_zotero` (content of the Date field) and `date_openalex`
-#'   (publication date in OpenAlex)
+#'   (publication date in OpenAlex) and `extra` (content of the Extra field)
 #' - `count`: number of flagged items
 #' - `pc`: percentage of the items found in OpenAlex which are flagged
 met_check_mismatch <- function(
@@ -36,7 +39,9 @@ met_check_mismatch <- function(
   )
   pairs$year_diff <- abs(pairs$year_zotero - pairs$year_openalex)
 
-  pairs$date_zotero <- zotero$Date[match(pairs$id_zotero, zotero$Key)]
+  row <- match(pairs$id_zotero, zotero$Key)
+  pairs$date_zotero <- zotero$Date[row]
+  pairs$extra <- zotero$Extra[row]
   pairs$date_openalex <- NA_character_
   if ("publication_date" %in% names(openalex)) {
     dates <- openalex |>
@@ -53,7 +58,8 @@ met_check_mismatch <- function(
   # than 1, as online-first often shifts the year by 1); tune on real cases
   metrics$items <- pairs |>
     dplyr::filter(
-      title_similarity < 0.8 | year_diff > 1
+      title_similarity < 0.8 | year_diff > 1,
+      !doi_checked(extra)
     ) |>
     dplyr::select(
       key = id_zotero,
@@ -66,7 +72,8 @@ met_check_mismatch <- function(
       year_zotero,
       year_openalex,
       date_zotero,
-      date_openalex
+      date_openalex,
+      extra
     )
 
   metrics$count <- nrow(metrics$items)
