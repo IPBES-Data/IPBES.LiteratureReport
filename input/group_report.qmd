@@ -113,6 +113,11 @@ DOI is probably right and the date in Zotero wrong (unless it is a reprint
 or another edition): correct the date instead. Differences of one year (e.g.
 published online before print) are not listed.
 
+If the DOI is right although title or year differ (e.g. a book chapter with
+the DOI of the whole book, or a wrong year in OpenAlex), add the line
+`DOI checked: correct` to Extra: the item is then no longer listed (the
+Zotero plugin offers this as "Keep as it is").
+
 ```{r}
 x <- m$openalex_check$met_check_mismatch
 fix(

@@ -5,6 +5,11 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- "DOI points to a different publication": new alternative "Keep as it is"
+  adds the line `DOI checked: correct` to Extra; such items are no longer
+  listed (e.g. a book chapter with the DOI of the book, a wrong year in
+  OpenAlex), and nothing is taken from their OpenAlex work
+
 ## 0.7.0
 
 - New groups BBA (5081872) and NXS (4596166); groups sorted by name
