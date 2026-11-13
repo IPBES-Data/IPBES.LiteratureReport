@@ -3,9 +3,9 @@
     "safe-edit@ipbes-data": {
       "updates": [
         {
-          "version": "0.2.2",
-          "update_link": "https://ipbes-data.github.io/IPBES.LiteratureReport/plugins/zotero-safe-edit/zotero-safe-edit-0.2.2.xpi",
-          "update_hash": "sha256:21068681e4a2a91a11d1df874acd4f91a970fae1c437d4b989038a844761ea18",
+          "version": "0.3.0",
+          "update_link": "https://ipbes-data.github.io/IPBES.LiteratureReport/plugins/zotero-safe-edit/zotero-safe-edit-0.3.0.xpi",
+          "update_hash": "sha256:e08772275102f8816613754cbb70f6cb699e5865e00989c22db08a573b009409",
           "applications": {
             "zotero": {
               "strict_min_version": "10.0",
