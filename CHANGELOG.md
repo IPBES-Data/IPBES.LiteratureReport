@@ -9,6 +9,11 @@ have their own versions, see `plugins/`).
   adds the line `DOI checked: correct` to Extra; such items are no longer
   listed (e.g. a book chapter with the DOI of the book, a wrong year in
   OpenAlex), and nothing is taken from their OpenAlex work
+- Zotero plugins: Safe Edit 0.3.0 and Fix Proposals 0.2.0, edit sessions:
+  the backup is checked when a fix is chosen, not with every batch, and stays
+  valid until all its changes are sent or the fix is left (or the group
+  synced); ticked changes are kept while working on a fix; "Make a backup"
+  on the Fixes tab
 
 ## 0.7.0
 
