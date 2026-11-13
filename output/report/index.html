@@ -2232,9 +2232,9 @@ vertical-align: -.125em;
 <td style="text-align: left;"><a href="IPBES_AFA_2333070.html" target="_blank">AFA</a></td>
 <td style="text-align: right;">1822</td>
 <td style="text-align: right;">54%</td>
-<td style="text-align: right;">85</td>
-<td style="text-align: right;">676</td>
-<td style="text-align: right;">16 Oct 2026</td>
+<td style="text-align: right;">69</td>
+<td style="text-align: right;">674</td>
+<td style="text-align: right;">13 Nov 2026</td>
 <td style="text-align: left;"><a href="https://www.zotero.org/groups/2333070" target="_blank">open</a></td>
 </tr>
 <tr class="even">
@@ -2293,10 +2293,10 @@ vertical-align: -.125em;
 </tr>
 <tr class="even">
 <td style="text-align: left;"><a href="IPBES_ILK_2344322.html" target="_blank">ILK</a></td>
-<td style="text-align: right;">11257</td>
-<td style="text-align: right;">63%</td>
-<td style="text-align: right;">587</td>
-<td style="text-align: right;">6251</td>
+<td style="text-align: right;">11355</td>
+<td style="text-align: right;">64%</td>
+<td style="text-align: right;">589</td>
+<td style="text-align: right;">6283</td>
 <td style="text-align: right;">13 Nov 2026</td>
 <td style="text-align: left;"><a href="https://www.zotero.org/groups/2344322" target="_blank">open</a></td>
 </tr>
@@ -2304,9 +2304,9 @@ vertical-align: -.125em;
 <td style="text-align: left;"><a href="IPBES_LDR_2333076.html" target="_blank">LDR</a></td>
 <td style="text-align: right;">4263</td>
 <td style="text-align: right;">75%</td>
-<td style="text-align: right;">305</td>
-<td style="text-align: right;">2552</td>
-<td style="text-align: right;">12 Nov 2026</td>
+<td style="text-align: right;">291</td>
+<td style="text-align: right;">2554</td>
+<td style="text-align: right;">13 Nov 2026</td>
 <td style="text-align: left;"><a href="https://www.zotero.org/groups/2333076" target="_blank">open</a></td>
 </tr>
 <tr class="even">
@@ -2522,8 +2522,8 @@ vertical-align: -.125em;
 </section>
 <section id="wrong-dois-met_check_mismatch" class="level4">
 <h4 class="anchored" data-anchor-id="wrong-dois-met_check_mismatch">Wrong DOIs (<code>met_check_mismatch</code>)</h4>
-<p>Items whose DOI points in OpenAlex to a work with a different title or year, which usually means that the wrong DOI is attached to the item. An item is flagged when the title similarity (normalised Levenshtein distance) is below 0.8 or the years differ by more than one.</p>
-<p><strong>Result:</strong> A list with - <code>items</code>: tibble with <code>key</code>, <code>doi</code>, <code>doi_raw</code> (content of the DOI field), <code>openalex</code> (the work’s OpenAlex ID), <code>title_zotero</code>, <code>title_openalex</code>, <code>title_similarity</code>, <code>year_zotero</code>, <code>year_openalex</code>, <code>date_zotero</code> (content of the Date field) and <code>date_openalex</code> (publication date in OpenAlex) - <code>count</code>: number of flagged items - <code>pc</code>: percentage of the items found in OpenAlex which are flagged</p>
+<p>Items whose DOI points in OpenAlex to a work with a different title or year, which usually means that the wrong DOI is attached to the item. An item is flagged when the title similarity (normalised Levenshtein distance) is below 0.8 or the years differ by more than one. Items with the line <code>DOI checked: correct</code> in Extra (someone checked that the DOI is right, e.g. a book chapter with the DOI of the book, or a wrong year in OpenAlex) are not listed.</p>
+<p><strong>Result:</strong> A list with - <code>items</code>: tibble with <code>key</code>, <code>doi</code>, <code>doi_raw</code> (content of the DOI field), <code>openalex</code> (the work’s OpenAlex ID), <code>title_zotero</code>, <code>title_openalex</code>, <code>title_similarity</code>, <code>year_zotero</code>, <code>year_openalex</code>, <code>date_zotero</code> (content of the Date field) and <code>date_openalex</code> (publication date in OpenAlex) and <code>extra</code> (content of the Extra field) - <code>count</code>: number of flagged items - <code>pc</code>: percentage of the items found in OpenAlex which are flagged</p>
 </section>
 <section id="item-type-agreement-met_check_type" class="level4">
 <h4 class="anchored" data-anchor-id="item-type-agreement-met_check_type">Item type agreement (<code>met_check_type</code>)</h4>

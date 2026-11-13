@@ -220,14 +220,17 @@ with the same DOI.
 Items whose DOI points in OpenAlex to a work with a different title or
 year, which usually means that the wrong DOI is attached to the item. An
 item is flagged when the title similarity (normalised Levenshtein
-distance) is below 0.8 or the years differ by more than one.
+distance) is below 0.8 or the years differ by more than one. Items with
+the line `DOI checked: correct` in Extra (someone checked that the DOI is
+right, e.g. a book chapter with the DOI of the book, or a wrong year in
+OpenAlex) are not listed.
 
 **Result:** A list with
 - `items`: tibble with `key`, `doi`, `doi_raw` (content of the DOI
   field), `openalex` (the work's OpenAlex ID), `title_zotero`,
   `title_openalex`, `title_similarity`, `year_zotero`, `year_openalex`,
   `date_zotero` (content of the Date field) and `date_openalex`
-  (publication date in OpenAlex)
+  (publication date in OpenAlex) and `extra` (content of the Extra field)
 - `count`: number of flagged items
 - `pc`: percentage of the items found in OpenAlex which are flagged
 
