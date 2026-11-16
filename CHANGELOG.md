@@ -5,6 +5,10 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- No DOI: book reviews (OpenAlex type `book-review`, found by title for
+  books) are no longer offered with the other works found; items for which
+  only book reviews were found are a fix of their own, "No DOI, only book
+  reviews found", with "Keep as it is" selected
 - "DOI points to a different publication": new alternative "Keep as it is"
   adds the line `DOI checked: correct` to Extra; such items are no longer
   listed (e.g. a book chapter with the DOI of the book, a wrong year in
