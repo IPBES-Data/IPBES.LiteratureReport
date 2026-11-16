@@ -5,6 +5,7 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- Update runs at 00:00 and 12:00 UTC (were 00:23 and 12:23)
 - No DOI: book reviews (OpenAlex type `book-review`, found by title for
   books) are no longer offered with the other works found; items for which
   only book reviews were found are a fix of their own, "No DOI, only book

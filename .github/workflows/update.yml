@@ -1,4 +1,4 @@
-# Runs the pipeline every 12 hours (00:23 and 12:23 UTC), and by hand ("Run
+# Runs the pipeline every 12 hours (00:00 and 12:00 UTC), and by hand ("Run
 # workflow"), in the image built by image.yml. Only groups changed in Zotero
 # are recalculated; the downloads, OpenAlex works and the targets store are
 # kept between runs in the Actions cache. Changed reports in output/report
@@ -9,7 +9,7 @@ name: Update reports
 
 on:
   schedule:
-    - cron: "23 */12 * * *"
+    - cron: "0 0,12 * * *"
   workflow_dispatch:
 
 permissions:

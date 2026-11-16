@@ -32,7 +32,9 @@ Pushing `output/report/` to `main` publishes the reports (GitHub Action
 
 The website is kept up to date by the GitHub Action
 [update.yml](.github/workflows/update.yml): it runs the pipeline every 12
-hours (and by hand, "Run workflow" on the Actions page), commits changed
+hours, at 00:00 and 12:00 UTC (01:00 and 13:00 Swiss time in winter, 02:00
+and 14:00 in summer; GitHub often starts scheduled runs some minutes late),
+and by hand ("Run workflow" on the Actions page), commits changed
 reports to `main` and publishes them. It runs in the container image built by
 [image.yml](.github/workflows/image.yml) from [docker/Dockerfile](docker/Dockerfile);
 run image.yml by hand to pick up new versions of openalexPro or zotFunc. Needs
