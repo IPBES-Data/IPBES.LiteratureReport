@@ -16,6 +16,9 @@
 #' (e.g. a book chapter with the DOI of the whole book, or a wrong year in
 #' OpenAlex).
 #'
+#' Items whose titles differ only by a subtitle missing on one side are
+#' offered by [fix_doi_subtitle()].
+#'
 #' @param m Metrics of one group, as saved by [get_metrics()].
 #' @param group_id Zotero group id.
 fix_doi_mismatch <- function(
@@ -23,8 +26,42 @@ fix_doi_mismatch <- function(
   group_id
 ) {
   x <- m$openalex_check$met_check_mismatch$items
+  if ("subtitle_only" %in% names(x)) x <- x[!x$subtitle_only, ]
+  mismatch_changes(x, group_id)
+}
+
+#' Fix: DOI points to a publication whose title lacks the subtitle → keep
+#'
+#' Items flagged by `met_check_mismatch` only because one of the titles has
+#' no subtitle (OpenAlex often has the title without it): most likely the
+#' same publication. Offers to keep the item as it is (selected at the
+#' start), or the same alternatives as [fix_doi_mismatch()].
+#'
+#' @param m Metrics of one group, as saved by [get_metrics()].
+#' @param group_id Zotero group id.
+fix_doi_subtitle <- function(
+  m,
+  group_id
+) {
+  x <- m$openalex_check$met_check_mismatch$items
+  if (!"subtitle_only" %in% names(x)) {
+    return(no_changes())
+  }
+  mismatch_changes(x[x$subtitle_only, ], group_id, keep_selected = TRUE)
+}
+
+# changes for the flagged items `x` (rows of met_check_mismatch);
+# `keep_selected`: "Keep as it is" is preselected
+mismatch_changes <- function(
+  x,
+  group_id,
+  keep_selected = FALSE
+) {
   if (is.null(x) || nrow(x) == 0 || !"doi_raw" %in% names(x)) {
     return(no_changes())
+  }
+  if (!"subtitle_only" %in% names(x)) {
+    x$subtitle_only <- FALSE
   }
   if (!"date_openalex" %in% names(x)) {
     x$date_zotero <- NA_character_
@@ -54,6 +91,7 @@ fix_doi_mismatch <- function(
     reason = paste0(
       "The DOI leads to a publication with a different ",
       dplyr::case_when(
+        x$subtitle_only ~ "title, only a subtitle missing on one side",
         title_differs & year_differs ~
           paste0("title and year (in Zotero: ", x$year_zotero, ")"),
         title_differs ~ "title",
@@ -101,16 +139,16 @@ fix_doi_mismatch <- function(
     old = k$extra,
     new = as.character(ifelse(k$extra == "", keep_line, paste0(k$extra, "\n", keep_line))),
     reason = paste0(
-      "Keep as it is: the DOI is right (e.g. the DOI of the whole book for ",
-      "a chapter, or a wrong year in OpenAlex; adds \"", keep_line,
-      "\" to Extra, the item is then no longer listed)"
+      if (keep_selected) "Keep as it is: the same publication, the title only lacks the subtitle (" else
+        "Keep as it is: the DOI is right (e.g. the DOI of the whole book for a chapter, or a wrong year in OpenAlex; ",
+      "adds \"", keep_line, "\" to Extra, the item is then no longer listed)"
     ),
     proposed = TRUE,
     note = NA_character_,
     doi = k$doi,
     openalex = k$openalex,
     choice = k$key,
-    preselect = FALSE,
+    preselect = keep_selected,
     append = keep_line
   )
 

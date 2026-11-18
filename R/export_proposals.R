@@ -128,6 +128,9 @@ export_proposals <- function(
 #' @param groups The groups (`name`, `id`) from `input/config.yaml`.
 #' @param schema JSON schema of the proposals files.
 #'
+#' For each group, `created` is the time of its proposals file, so that the
+#' Zotero plugin can tell from the small index that newer fixes are published.
+#'
 #' @return Paths of the index and the schema.
 export_proposals_index <- function(
   proposals,
@@ -145,7 +148,8 @@ export_proposals_index <- function(
         list(
           group_id = as.numeric(groups[[i]]$id),
           name = groups[[i]]$name,
-          file = basename(proposals[[i]])
+          file = basename(proposals[[i]]),
+          created = proposals_created(proposals[[i]])
         )
       })
     ),
@@ -155,4 +159,10 @@ export_proposals_index <- function(
   )
   file.copy(schema, file.path(dir, "schema.json"), overwrite = TRUE)
   return(c(index, file.path(dir, "schema.json")))
+}
+
+# `created` of a proposals file, read from its start (the files are large)
+proposals_created <- function(file) {
+  head <- readChar(file, 300, useBytes = TRUE)
+  sub('.*"created":"([^"]+)".*', "\\1", regmatches(head, regexpr('"created":"[^"]+"', head)))
 }

@@ -72,8 +72,9 @@ language_code <- function(
 
 #' Similarity of titles
 #'
-#' Compares titles without case, spaces and punctuation: 1 minus the edit
-#' distance divided by the length of the longer title.
+#' Compares titles without HTML tags (e.g. `<i>…</i>` in Zotero titles), case,
+#' spaces and punctuation: 1 minus the edit distance divided by the length of
+#' the longer title.
 #'
 #' @param a,b Titles, compared pairwise.
 #'
@@ -82,7 +83,7 @@ title_similarity <- function(
   a,
   b
 ) {
-  norm <- function(x) tolower(gsub("[^[:alnum:]]", "", x))
+  norm <- function(x) tolower(gsub("[^[:alnum:]]", "", gsub("<[^>]*>", "", x)))
   a <- norm(a)
   b <- norm(b)
   distance <- vapply(
@@ -99,7 +100,8 @@ title_similarity <- function(
 #' points to a different publication (see [met_check_mismatch()]) are left
 #' out, so that nothing is taken from the wrong work, also when someone
 #' checked that the DOI is right (see [doi_checked()]): its work still
-#' differs (e.g. the book of a chapter).
+#' differs (e.g. the book of a chapter). Items whose titles differ only by
+#' a subtitle missing on one side are the same work and are kept.
 #'
 #' @param zotero Zotero items as read from the CSV export (data frame).
 #' @param openalex OpenAlex works (arrow dataset).
@@ -121,10 +123,9 @@ oa_join <- function(
     dplyr::distinct(doi, .keep_all = TRUE)
 
   zotero$doi <- as_bib(zotero)$doi
-  wrong <- met_check_mismatch(zotero, openalex)$items$key
-  zotero <- zotero[
-    !is.na(zotero$doi) & !zotero$Key %in% wrong & !doi_checked(zotero$Extra),
-  ]
+  wrong <- met_check_mismatch(zotero, openalex, checked = TRUE)$items
+  wrong <- wrong$key[!wrong$subtitle_only]
+  zotero <- zotero[!is.na(zotero$doi) & !zotero$Key %in% wrong, ]
 
   dplyr::inner_join(zotero, works, by = "doi")
 }
@@ -138,6 +139,51 @@ oa_join <- function(
 #' @param extra Content of the Extra field.
 doi_checked <- function(extra) {
   grepl("(?mi)^DOI checked: correct\\s*$", extra, perl = TRUE)
+}
+
+#' Language checked
+#'
+#' Whether Extra has the line `Language checked: correct`, added by the fix
+#' "Language differs from OpenAlex" when the language in Zotero is right.
+#'
+#' @param extra Content of the Extra field.
+language_checked <- function(extra) {
+  grepl("(?mi)^Language checked: correct\\s*$", extra, perl = TRUE)
+}
+
+#' Language of a text
+#'
+#' Detects the language of texts (e.g. abstracts) with the Compact Language
+#' Detector 2 (R package cld2), a statistical method based on letter
+#' sequences, not AI. HTML and JATS tags are removed first. Only results
+#' cld2 reports as reliable, with at least 80% of the text in one language,
+#' are returned; texts shorter than 100 characters are not detected.
+#'
+#' @param x Texts.
+#'
+#' @return Two-letter language codes, `NA` where not detected.
+text_language <- function(
+  x
+) {
+  x <- trimws(gsub("\\s+", " ", gsub("<[^>]*>", " ", x)))
+  # ponytail: fixed thresholds (100 characters, 80% in one language)
+  vapply(
+    x,
+    function(t) {
+      if (is.na(t) || nchar(t) < 100) {
+        return(NA_character_)
+      }
+      r <- cld2::detect_language_mixed(t)
+      top <- r$classification[1, ]
+      # "reliabale": spelled so by cld2
+      if (!isTRUE(r$reliabale) || top$proportion < 0.8 || top$code == "un") {
+        return(NA_character_)
+      }
+      language_code(sub("-.*", "", top$code))
+    },
+    "",
+    USE.NAMES = FALSE
+  )
 }
 
 #' Common bibliography columns

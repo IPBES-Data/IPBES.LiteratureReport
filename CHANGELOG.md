@@ -5,6 +5,28 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- New check and fix "No language": empty language field, proposes the
+  language of the DOI in OpenAlex or else detected from the abstract with
+  the Compact Language Detector 2 (R package `cld2`, new dependency in
+  `renv.lock`, statistical, not AI); selected at the start
+- New check and fix "Language differs from OpenAlex": the language in Zotero
+  differs from the language of the DOI in OpenAlex; offers the language from
+  OpenAlex, or "Keep as it is" (adds `Language checked: correct` to Extra),
+  neither selected (OpenAlex detects the language from title and abstract,
+  often English for publications in other languages)
+- `fixes/index.json`: each group has `created`, the time of its fixes, so
+  that the Zotero plugin can show that newer fixes are available
+- DOI points to a different publication: titles are compared without HTML
+  tags; items whose titles differ only by a subtitle missing on one side
+  (OpenAlex often has the title without the part after the colon) are no
+  longer counted as wrong DOIs, get values from OpenAlex again (date, empty
+  fields), and are a fix of their own, "DOI points to a publication whose
+  title lacks the subtitle", with "Keep as it is" selected
+- Update runs at 00:00 and 12:00 UTC (were 00:23 and 12:23)
+- No DOI: book reviews (OpenAlex type `book-review`, found by title for
+  books) are no longer offered with the other works found; items for which
+  only book reviews were found are a fix of their own, "No DOI, only book
+  reviews found", with "Keep as it is" selected
 - "DOI points to a different publication": new alternative "Keep as it is"
   adds the line `DOI checked: correct` to Extra; such items are no longer
   listed (e.g. a book chapter with the DOI of the book, a wrong year in

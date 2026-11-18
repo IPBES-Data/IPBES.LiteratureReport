@@ -118,12 +118,16 @@ the DOI of the whole book, or a wrong year in OpenAlex), add the line
 `DOI checked: correct` to Extra: the item is then no longer listed (the
 Zotero plugin offers this as "Keep as it is").
 
+Not listed here: items whose titles differ only by a subtitle missing on
+one side (OpenAlex often has the title without the part after the colon).
+They are most likely right; the Zotero plugin lists them separately.
+
 ```{r}
 x <- m$openalex_check$met_check_mismatch
 fix(
   if (!is.null(x)) {
     dplyr::transmute(
-      x$items,
+      if ("subtitle_only" %in% names(x$items)) x$items[!x$items$subtitle_only, ] else x$items,
       key,
       `Title in Zotero` = title_zotero,
       `Year in Zotero` = year_zotero,
@@ -351,6 +355,57 @@ fix(
       `Language code` = code
     )
   }
+)
+```
+
+### Language differs from OpenAlex {#language-openalex}
+
+The language of these items differs from the language of their DOI in
+OpenAlex. OpenAlex detects the language from the title and abstract, and
+many publications in other languages have an English abstract: the language
+in Zotero is often right. Check the publication and correct the language if
+needed; if it is right, add the line `Language checked: correct` to Extra,
+and the item is no longer listed.
+
+```{r}
+x <- m$openalex_check$met_check_language
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Language = language,
+      `Language in OpenAlex` = language_openalex,
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
+### No language {#language-missing}
+
+These items have no language. Where possible, a language is proposed: from
+OpenAlex for items with a DOI, or else detected from the abstract (with the
+Compact Language Detector 2, a statistical method, not AI). Both are the
+language of the title or abstract, which may differ from the language of the
+publication.
+
+```{r}
+x <- m$metadata$met_meta_language_missing
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `Proposed language` = language,
+      From = unname(c(openalex = "OpenAlex", abstract = "Abstract")[source]),
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
 )
 ```
 

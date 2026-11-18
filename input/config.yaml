@@ -60,6 +60,7 @@ metrics:
     - met_meta_year
     - met_meta_duplicates
     - met_meta_language
+    - met_meta_language_missing
   openalex_check:
     - met_check_found
     - met_check_retracted
@@ -67,6 +68,7 @@ metrics:
     - met_check_type
     - met_check_date
     - met_check_fill
+    - met_check_language
     - met_check_openalex_id
     - met_check_extra_id
   profile:

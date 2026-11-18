@@ -23,6 +23,10 @@
 #' would be a duplicate). For items with an ISBN or PubMed ID, works found
 #' by title are only kept if they are likely matches.
 #'
+#' Works OpenAlex types as book review (`book-review`) are marked: a book
+#' review has the title of the book, but is rarely the item meant. They are
+#' offered separately, and do not count as the only likely match of an item.
+#'
 #' Items with the line `No DOI: checked` in Extra (someone checked that there
 #' is no DOI to add), or with an OpenAlex ID in Extra (the work is known),
 #' are not listed.
@@ -41,7 +45,8 @@
 #'   found, `same_title` (ignoring case and punctuation), `same_year`,
 #'   `same_author` (surname; `NA` if one of them has none), `similarity`
 #'   (titles), `match`
-#'   (`likely` or `possible`), `note` (DOI used by another item, else `NA`)
+#'   (`likely` or `possible`), `note` (DOI used by another item, else `NA`),
+#'   `book_review` (the work is a book review)
 #'   and `single` (`TRUE` for the only likely match of an item), one row per
 #'   item and work
 #' - `count_items`: number of items with at least one match
@@ -76,6 +81,7 @@ met_id_candidates <- function(
     similarity = numeric(),
     match = character(),
     note = character(),
+    book_review = logical(),
     single = logical()
   )
   if (is.null(candidates) || nrow(candidates) == 0) {
@@ -186,8 +192,9 @@ met_id_candidates <- function(
     "DOI used by another item in the group (duplicate?)",
     NA_character_
   )
-  # the only likely match of an item (not a duplicate)
-  ok <- x$match == "likely" & is.na(x$note)
+  x$book_review <- x$cand_type %in% "book-review"
+  # the only likely match of an item (not a duplicate, not a book review)
+  ok <- x$match == "likely" & is.na(x$note) & !x$book_review
   n_likely <- tapply(ok, x$key, sum)
   x$single <- ok & as.vector(n_likely[x$key]) == 1
 

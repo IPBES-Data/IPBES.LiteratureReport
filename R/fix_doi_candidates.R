@@ -16,6 +16,9 @@
 #' first author; journal and type in the details), each marked as the same
 #' or different.
 #'
+#' Book reviews (OpenAlex type `book-review`) are left out; items for which
+#' only book reviews were found are offered by [fix_doi_book_reviews()].
+#'
 #' @param m Metrics of one group, as saved by [get_metrics()].
 #' @param group_id Zotero group id.
 fix_doi_candidates <- function(
@@ -23,6 +26,38 @@ fix_doi_candidates <- function(
   group_id
 ) {
   x <- m$identifiers$met_id_candidates$items
+  if ("book_review" %in% names(x)) x <- x[!x$book_review, ]
+  candidate_changes(x, group_id)
+}
+
+#' Fix: no DOI, only book reviews found → keep as it is
+#'
+#' Items without a DOI for which only book reviews were found (a review has
+#' the title of the book). Offers to keep the item as it is (selected at the
+#' start), or the DOI of one of the reviews, as [fix_doi_candidates()].
+#'
+#' @param m Metrics of one group, as saved by [get_metrics()].
+#' @param group_id Zotero group id.
+fix_doi_book_reviews <- function(
+  m,
+  group_id
+) {
+  x <- m$identifiers$met_id_candidates$items
+  if (!"book_review" %in% names(x)) {
+    return(no_changes())
+  }
+  only <- tapply(x$book_review, x$key, all)
+  candidate_changes(x[as.vector(only[x$key]), ], group_id, keep_selected = TRUE)
+}
+
+# changes for the works found (`x`, rows of met_id_candidates), each item's
+# last alternative keeping it as it is; `keep_selected`: that one is
+# preselected
+candidate_changes <- function(
+  x,
+  group_id,
+  keep_selected = FALSE
+) {
   if (is.null(x) || nrow(x) == 0) {
     return(no_changes())
   }
@@ -42,6 +77,7 @@ fix_doi_candidates <- function(
     ),
     reason = paste0(
       ifelse(x$match == "likely", "Likely match", "Possible match"),
+      ifelse(x[["book_review"]] %in% TRUE, " (book review)", ""),
       dplyr::case_when(
         x$by %in% "pmid" ~ " (PubMed ID)",
         x$by %in% "isbn" ~ " (ISBN)",
@@ -57,7 +93,7 @@ fix_doi_candidates <- function(
     doi = x$doi,
     openalex = x$id,
     choice = x$key,
-    preselect = x$single,
+    preselect = x$single & !keep_selected,
     append = ifelse(is.na(x$doi), oa_line, NA_character_),
     # NULL (no column) for metrics made before the comparison
     compare = if ("same_title" %in% names(x)) compare_candidates(x)
@@ -77,7 +113,7 @@ fix_doi_candidates <- function(
     proposed = TRUE,
     note = NA_character_,
     choice = x$key[first],
-    preselect = FALSE,
+    preselect = keep_selected,
     append = keep_line
   )
   found <- dplyr::bind_rows(found, keep)
