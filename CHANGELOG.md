@@ -5,6 +5,8 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- `fixes/index.json`: each group has `created`, the time of its fixes, so
+  that the Zotero plugin can show that newer fixes are available
 - DOI points to a different publication: titles are compared without HTML
   tags; items whose titles differ only by a subtitle missing on one side
   (OpenAlex often has the title without the part after the colon) are no
