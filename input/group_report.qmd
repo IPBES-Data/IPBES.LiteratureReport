@@ -358,6 +358,57 @@ fix(
 )
 ```
 
+### Language differs from OpenAlex {#language-openalex}
+
+The language of these items differs from the language of their DOI in
+OpenAlex. OpenAlex detects the language from the title and abstract, and
+many publications in other languages have an English abstract: the language
+in Zotero is often right. Check the publication and correct the language if
+needed; if it is right, add the line `Language checked: correct` to Extra,
+and the item is no longer listed.
+
+```{r}
+x <- m$openalex_check$met_check_language
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      Language = language,
+      `Language in OpenAlex` = language_openalex,
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
+### No language {#language-missing}
+
+These items have no language. Where possible, a language is proposed: from
+OpenAlex for items with a DOI, or else detected from the abstract (with the
+Compact Language Detector 2, a statistical method, not AI). Both are the
+language of the title or abstract, which may differ from the language of the
+publication.
+
+```{r}
+x <- m$metadata$met_meta_language_missing
+fix(
+  if (!is.null(x)) {
+    dplyr::transmute(
+      x$items,
+      key,
+      Title = title,
+      `Proposed language` = language,
+      From = unname(c(openalex = "OpenAlex", abstract = "Abstract")[source]),
+      DOI = doi
+    )
+  },
+  doi_cols = "DOI"
+)
+```
+
 ### Items without DOI, ISBN, ISSN or URL {#no-identifier}
 
 Readers cannot easily find these items. Add a DOI, ISBN, ISSN or URL if one

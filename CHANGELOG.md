@@ -5,6 +5,15 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- New check and fix "No language": empty language field, proposes the
+  language of the DOI in OpenAlex or else detected from the abstract with
+  the Compact Language Detector 2 (R package `cld2`, new dependency in
+  `renv.lock`, statistical, not AI); selected at the start
+- New check and fix "Language differs from OpenAlex": the language in Zotero
+  differs from the language of the DOI in OpenAlex; offers the language from
+  OpenAlex, or "Keep as it is" (adds `Language checked: correct` to Extra),
+  neither selected (OpenAlex detects the language from title and abstract,
+  often English for publications in other languages)
 - `fixes/index.json`: each group has `created`, the time of its fixes, so
   that the Zotero plugin can show that newer fixes are available
 - DOI points to a different publication: titles are compared without HTML
