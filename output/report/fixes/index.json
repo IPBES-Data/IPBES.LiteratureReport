@@ -1,97 +1,115 @@
 {
   "format": "zotero-fix-proposals-index",
   "version": 1,
-  "created": "2026-11-18T00:54:05Z",
+  "created": "2026-11-18T12:26:41Z",
   "groups": [
     {
       "group_id": 2333070,
       "name": "AFA",
-      "file": "IPBES_AFA_2333070.json"
+      "file": "IPBES_AFA_2333070.json",
+      "created": "2026-11-18T12:19:23Z"
     },
     {
       "group_id": 2333011,
       "name": "AMA",
-      "file": "IPBES_AMA_2333011.json"
+      "file": "IPBES_AMA_2333011.json",
+      "created": "2026-11-18T12:19:34Z"
     },
     {
       "group_id": 2333075,
       "name": "APA",
-      "file": "IPBES_APA_2333075.json"
+      "file": "IPBES_APA_2333075.json",
+      "created": "2026-11-18T12:19:42Z"
     },
     {
       "group_id": 5081872,
       "name": "BBA",
-      "file": "IPBES_BBA_5081872.json"
+      "file": "IPBES_BBA_5081872.json",
+      "created": "2026-11-18T12:19:48Z"
     },
     {
       "group_id": 2345951,
       "name": "ECA",
-      "file": "IPBES_ECA_2345951.json"
+      "file": "IPBES_ECA_2345951.json",
+      "created": "2026-11-18T12:20:02Z"
     },
     {
       "group_id": 2333077,
       "name": "GA1",
-      "file": "IPBES_GA1_2333077.json"
+      "file": "IPBES_GA1_2333077.json",
+      "created": "2026-11-18T12:20:27Z"
     },
     {
       "group_id": 2352922,
       "name": "IAS",
-      "file": "IPBES_IAS_2352922.json"
+      "file": "IPBES_IAS_2352922.json",
+      "created": "2026-11-18T12:20:46Z"
     },
     {
       "group_id": 2344322,
       "name": "ILK",
-      "file": "IPBES_ILK_2344322.json"
+      "file": "IPBES_ILK_2344322.json",
+      "created": "2026-11-18T12:21:20Z"
     },
     {
       "group_id": 2333076,
       "name": "LDR",
-      "file": "IPBES_LDR_2333076.json"
+      "file": "IPBES_LDR_2333076.json",
+      "created": "2026-11-18T12:21:34Z"
     },
     {
       "group_id": 4596166,
       "name": "NXS",
-      "file": "IPBES_NXS_4596166.json"
+      "file": "IPBES_NXS_4596166.json",
+      "created": "2026-11-18T12:22:01Z"
     },
     {
       "group_id": 2499181,
       "name": "PAND",
-      "file": "IPBES_PAND_2499181.json"
+      "file": "IPBES_PAND_2499181.json",
+      "created": "2026-11-18T12:22:05Z"
     },
     {
       "group_id": 2333088,
       "name": "PPA",
-      "file": "IPBES_PPA_2333088.json"
+      "file": "IPBES_PPA_2333088.json",
+      "created": "2026-11-18T12:22:16Z"
     },
     {
       "group_id": 2333079,
       "name": "SCM",
-      "file": "IPBES_SCM_2333079.json"
+      "file": "IPBES_SCM_2333079.json",
+      "created": "2026-11-18T12:22:21Z"
     },
     {
       "group_id": 2344805,
       "name": "SUA",
-      "file": "IPBES_SUA_2344805.json"
+      "file": "IPBES_SUA_2344805.json",
+      "created": "2026-11-18T12:22:39Z"
     },
     {
       "group_id": 4589462,
       "name": "TCA",
-      "file": "IPBES_TCA_4589462.json"
+      "file": "IPBES_TCA_4589462.json",
+      "created": "2026-11-18T12:22:48Z"
     },
     {
       "group_id": 2345372,
       "name": "VA",
-      "file": "IPBES_VA_2345372.json"
+      "file": "IPBES_VA_2345372.json",
+      "created": "2026-11-18T12:22:58Z"
     },
     {
       "group_id": 2603670,
       "name": "IPCC",
-      "file": "IPBES_IPCC_2603670.json"
+      "file": "IPBES_IPCC_2603670.json",
+      "created": "2026-11-18T12:23:04Z"
     },
     {
       "group_id": 4937409,
       "name": "NFF",
-      "file": "IPBES_NFF_4937409.json"
+      "file": "IPBES_NFF_4937409.json",
+      "created": "2026-11-18T12:23:07Z"
     }
   ]
 }

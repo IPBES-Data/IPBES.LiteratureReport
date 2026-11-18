@@ -121,7 +121,8 @@ PubMed ID (line `PMID: …` in Extra), and Crossref by ISBN and title (see
   found, `same_title` (ignoring case and punctuation), `same_year`,
   `same_author` (surname; `NA` if one of them has none), `similarity`
   (titles), `match`
-  (`likely` or `possible`), `note` (DOI used by another item, else `NA`)
+  (`likely` or `possible`), `note` (DOI used by another item, else `NA`),
+  `book_review` (the work is a book review)
   and `single` (`TRUE` for the only likely match of an item), one row per
   item and work
 - `count_items`: number of items with at least one match
@@ -186,6 +187,19 @@ itself, several languages or other text, are listed without a proposal.
 - `count_recognised`: of these, items for which a code is proposed
 - `pc`: percentage of all items whose language is not a standard code
 
+### No language (`met_meta_language_missing`)
+
+Items with an empty language field, with a proposed language where one is
+found:
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi`, `language` (proposed code,
+  `NA` if none found) and `source` (`openalex`, `abstract` or `NA`)
+- `count`: number of items without language
+- `count_openalex`: of these, items with the language from OpenAlex
+- `count_abstract`: of these, items with the language from the abstract
+- `pc`: percentage of all items without language
+
 ## openalex_check
 
 ### Zotero DOIs found in OpenAlex (`met_check_found`)
@@ -230,9 +244,11 @@ OpenAlex) are not listed.
   field), `openalex` (the work's OpenAlex ID), `title_zotero`,
   `title_openalex`, `title_similarity`, `year_zotero`, `year_openalex`,
   `date_zotero` (content of the Date field) and `date_openalex`
-  (publication date in OpenAlex) and `extra` (content of the Extra field)
-- `count`: number of flagged items
-- `pc`: percentage of the items found in OpenAlex which are flagged
+  (publication date in OpenAlex), `extra` (content of the Extra field)
+  and `subtitle_only` (only a subtitle missing on one side)
+- `count`: number of flagged items, without those with `subtitle_only`
+- `count_subtitle`: number of items with `subtitle_only`
+- `pc`: percentage of the items found in OpenAlex which are counted
 
 ### Item type agreement (`met_check_type`)
 
@@ -269,6 +285,22 @@ points to a different publication are left out.
   OpenAlex), one row per empty field, sorted by publication
 - `count`: number of items with at least one field to fill
 - `count_fields`: number of fields to fill
+
+### Language differs from OpenAlex (`met_check_language`)
+
+Items whose language in Zotero differs from the language of their DOI in
+OpenAlex. Only the language is compared, not the region (`en-US` and `en`
+are the same), and only for items whose language is given as a language
+code (see "Language not given as a language code"). Items without a
+language are listed under "No language".
+
+**Result:** A list with
+- `items`: tibble with `key`, `title`, `doi`, `openalex` (the work's
+  OpenAlex ID), `language` (as entered in Zotero), `language_openalex` and
+  `extra` (content of the Extra field)
+- `count`: number of items whose language differs
+- `pc`: percentage of the items with a language in Zotero and in OpenAlex
+  whose language differs
 
 ### OpenAlex ID in the Extra field (`met_check_openalex_id`)
 
