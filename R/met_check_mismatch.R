@@ -8,20 +8,31 @@
 #' right, e.g. a book chapter with the DOI of the book, or a wrong year in
 #' OpenAlex) are not listed.
 #'
+#' OpenAlex often has the title without the subtitle (the part after the
+#' colon), e.g. "Urban Ecology" for "Urban Ecology: Patterns, Processes, and
+#' Applications". Items whose titles differ only by this (the title without
+#' the subtitle is similar, at least 0.8, and the years differ by at most one)
+#' are marked as `subtitle_only`: they are listed, but not counted as wrong
+#' DOIs.
+#'
 #' @param zotero Zotero items as read from the CSV export (data frame).
 #' @param openalex OpenAlex works (arrow dataset).
+#' @param checked Also list the items with `DOI checked: correct` in Extra.
 #'
 #' @return A list with
 #' - `items`: tibble with `key`, `doi`, `doi_raw` (content of the DOI
 #'   field), `openalex` (the work's OpenAlex ID), `title_zotero`,
 #'   `title_openalex`, `title_similarity`, `year_zotero`, `year_openalex`,
 #'   `date_zotero` (content of the Date field) and `date_openalex`
-#'   (publication date in OpenAlex) and `extra` (content of the Extra field)
-#' - `count`: number of flagged items
-#' - `pc`: percentage of the items found in OpenAlex which are flagged
+#'   (publication date in OpenAlex), `extra` (content of the Extra field)
+#'   and `subtitle_only` (only a subtitle missing on one side)
+#' - `count`: number of flagged items, without those with `subtitle_only`
+#' - `count_subtitle`: number of items with `subtitle_only`
+#' - `pc`: percentage of the items found in OpenAlex which are counted
 met_check_mismatch <- function(
   zotero,
-  openalex
+  openalex,
+  checked = FALSE
 ) {
   pairs <- dplyr::inner_join(
     as_bib(zotero) |>
@@ -38,6 +49,17 @@ met_check_mismatch <- function(
     pairs$title_openalex
   )
   pairs$year_diff <- abs(pairs$year_zotero - pairs$year_openalex)
+
+  # only a subtitle (after the colon) missing on one side, year as well
+  main <- function(t) sub("\\s*:.*", "", t)
+  has_sub <- function(t) grepl(":\\s*\\S", t)
+  tz <- pairs$title_zotero
+  to <- pairs$title_openalex
+  short <- (has_sub(tz) & !has_sub(to) & title_similarity(main(tz), to) >= 0.8) |
+    (has_sub(to) & !has_sub(tz) & title_similarity(tz, main(to)) >= 0.8)
+  pairs$subtitle_only <- pairs$title_similarity < 0.8 &
+    short %in% TRUE &
+    !(pairs$year_diff > 1) %in% TRUE
 
   row <- match(pairs$id_zotero, zotero$Key)
   pairs$date_zotero <- zotero$Date[row]
@@ -59,7 +81,7 @@ met_check_mismatch <- function(
   metrics$items <- pairs |>
     dplyr::filter(
       title_similarity < 0.8 | year_diff > 1,
-      !doi_checked(extra)
+      checked | !doi_checked(extra)
     ) |>
     dplyr::select(
       key = id_zotero,
@@ -73,10 +95,12 @@ met_check_mismatch <- function(
       year_openalex,
       date_zotero,
       date_openalex,
-      extra
+      extra,
+      subtitle_only
     )
 
-  metrics$count <- nrow(metrics$items)
+  metrics$count <- sum(!metrics$items$subtitle_only)
+  metrics$count_subtitle <- sum(metrics$items$subtitle_only)
   metrics$pc <- 100 * metrics$count / nrow(pairs)
 
   return(metrics)

@@ -21,6 +21,7 @@ fix_table <- function() {
     "doi_book_reviews", "No DOI, only book reviews found", "Keep as it is, or the DOI of a book review", "DOI, Extra", fix_doi_book_reviews, "doi-candidates", FALSE,
     "doi_exists", "DOI does not exist", "Corrected DOI, or no DOI", "DOI", fix_doi_exists, "doi-exists", FALSE,
     "doi_mismatch", "DOI points to a different publication", "No DOI", "DOI", fix_doi_mismatch, "wrong-doi", FALSE,
+    "doi_subtitle", "DOI points to a publication whose title lacks the subtitle", "Keep as it is, or no DOI", "DOI", fix_doi_subtitle, "wrong-doi", FALSE,
     "openalex_id", "No OpenAlex ID", "OpenAlex ID of the DOI", "Extra", fix_openalex_id, "openalex-id", TRUE,
     "issn_form", "ISSN not in standard form", "ISSN in standard form", "ISSN", fix_issn_form, "issn-form", FALSE,
     "extra_id", "OpenAlex ID not valid", "OpenAlex ID of the DOI", "Extra", fix_extra_id, "extra-id", FALSE

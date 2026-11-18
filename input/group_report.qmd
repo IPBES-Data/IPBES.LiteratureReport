@@ -118,12 +118,16 @@ the DOI of the whole book, or a wrong year in OpenAlex), add the line
 `DOI checked: correct` to Extra: the item is then no longer listed (the
 Zotero plugin offers this as "Keep as it is").
 
+Not listed here: items whose titles differ only by a subtitle missing on
+one side (OpenAlex often has the title without the part after the colon).
+They are most likely right; the Zotero plugin lists them separately.
+
 ```{r}
 x <- m$openalex_check$met_check_mismatch
 fix(
   if (!is.null(x)) {
     dplyr::transmute(
-      x$items,
+      if ("subtitle_only" %in% names(x$items)) x$items[!x$items$subtitle_only, ] else x$items,
       key,
       `Title in Zotero` = title_zotero,
       `Year in Zotero` = year_zotero,

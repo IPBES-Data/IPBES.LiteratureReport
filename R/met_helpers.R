@@ -72,8 +72,9 @@ language_code <- function(
 
 #' Similarity of titles
 #'
-#' Compares titles without case, spaces and punctuation: 1 minus the edit
-#' distance divided by the length of the longer title.
+#' Compares titles without HTML tags (e.g. `<i>…</i>` in Zotero titles), case,
+#' spaces and punctuation: 1 minus the edit distance divided by the length of
+#' the longer title.
 #'
 #' @param a,b Titles, compared pairwise.
 #'
@@ -82,7 +83,7 @@ title_similarity <- function(
   a,
   b
 ) {
-  norm <- function(x) tolower(gsub("[^[:alnum:]]", "", x))
+  norm <- function(x) tolower(gsub("[^[:alnum:]]", "", gsub("<[^>]*>", "", x)))
   a <- norm(a)
   b <- norm(b)
   distance <- vapply(
@@ -99,7 +100,8 @@ title_similarity <- function(
 #' points to a different publication (see [met_check_mismatch()]) are left
 #' out, so that nothing is taken from the wrong work, also when someone
 #' checked that the DOI is right (see [doi_checked()]): its work still
-#' differs (e.g. the book of a chapter).
+#' differs (e.g. the book of a chapter). Items whose titles differ only by
+#' a subtitle missing on one side are the same work and are kept.
 #'
 #' @param zotero Zotero items as read from the CSV export (data frame).
 #' @param openalex OpenAlex works (arrow dataset).
@@ -121,10 +123,9 @@ oa_join <- function(
     dplyr::distinct(doi, .keep_all = TRUE)
 
   zotero$doi <- as_bib(zotero)$doi
-  wrong <- met_check_mismatch(zotero, openalex)$items$key
-  zotero <- zotero[
-    !is.na(zotero$doi) & !zotero$Key %in% wrong & !doi_checked(zotero$Extra),
-  ]
+  wrong <- met_check_mismatch(zotero, openalex, checked = TRUE)$items
+  wrong <- wrong$key[!wrong$subtitle_only]
+  zotero <- zotero[!is.na(zotero$doi) & !zotero$Key %in% wrong, ]
 
   dplyr::inner_join(zotero, works, by = "doi")
 }

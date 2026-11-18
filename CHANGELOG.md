@@ -5,6 +5,12 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- DOI points to a different publication: titles are compared without HTML
+  tags; items whose titles differ only by a subtitle missing on one side
+  (OpenAlex often has the title without the part after the colon) are no
+  longer counted as wrong DOIs, get values from OpenAlex again (date, empty
+  fields), and are a fix of their own, "DOI points to a publication whose
+  title lacks the subtitle", with "Keep as it is" selected
 - Update runs at 00:00 and 12:00 UTC (were 00:23 and 12:23)
 - No DOI: book reviews (OpenAlex type `book-review`, found by title for
   books) are no longer offered with the other works found; items for which
