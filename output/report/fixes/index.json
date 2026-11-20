@@ -1,7 +1,7 @@
 {
   "format": "zotero-fix-proposals-index",
   "version": 1,
-  "created": "2026-11-20T00:29:01Z",
+  "created": "2026-11-20T12:26:31Z",
   "groups": [
     {
       "group_id": 2333070,
@@ -37,7 +37,7 @@
       "group_id": 2333077,
       "name": "GA1",
       "file": "IPBES_GA1_2333077.json",
-      "created": "2026-11-18T12:20:27Z"
+      "created": "2026-11-20T12:25:46Z"
     },
     {
       "group_id": 2352922,
@@ -97,7 +97,7 @@
       "group_id": 2345372,
       "name": "VA",
       "file": "IPBES_VA_2345372.json",
-      "created": "2026-11-20T00:28:25Z"
+      "created": "2026-11-20T12:25:57Z"
     },
     {
       "group_id": 2603670,
