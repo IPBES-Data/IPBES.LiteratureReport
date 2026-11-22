@@ -3,7 +3,7 @@
 Versions of the pipeline, the fix app and the website (the Zotero plugins
 have their own versions, see `plugins/`).
 
-## 0.8.0
+## Unreleased
 
 - Zotero plugin: Fix Proposals 0.2.1, "New fixes available — Refresh" when
   newer fixes are published (checked after loading and every 5 minutes)
