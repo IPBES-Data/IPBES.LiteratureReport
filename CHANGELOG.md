@@ -5,6 +5,8 @@ have their own versions, see `plugins/`).
 
 ## Unreleased
 
+- Zotero plugin: Fix Proposals 0.2.1, "New fixes available — Refresh" when
+  newer fixes are published (checked after loading and every 5 minutes)
 - New check and fix "No language": empty language field, proposes the
   language of the DOI in OpenAlex or else detected from the abstract with
   the Compact Language Detector 2 (R package `cld2`, new dependency in
