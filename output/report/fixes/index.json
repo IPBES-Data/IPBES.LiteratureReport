@@ -1,13 +1,13 @@
 {
   "format": "zotero-fix-proposals-index",
   "version": 1,
-  "created": "2026-11-22T13:56:14Z",
+  "created": "2026-11-23T00:35:15Z",
   "groups": [
     {
       "group_id": 2333070,
       "name": "AFA",
       "file": "IPBES_AFA_2333070.json",
-      "created": "2026-11-18T12:19:23Z"
+      "created": "2026-11-23T00:34:19Z"
     },
     {
       "group_id": 2333011,
@@ -37,7 +37,7 @@
       "group_id": 2333077,
       "name": "GA1",
       "file": "IPBES_GA1_2333077.json",
-      "created": "2026-11-22T13:55:48Z"
+      "created": "2026-11-23T00:34:41Z"
     },
     {
       "group_id": 2352922,
