@@ -1,7 +1,7 @@
 {
   "format": "zotero-fix-proposals-index",
   "version": 1,
-  "created": "2026-11-24T00:25:48Z",
+  "created": "2026-11-24T12:21:31Z",
   "groups": [
     {
       "group_id": 2333070,
@@ -19,7 +19,7 @@
       "group_id": 2333075,
       "name": "APA",
       "file": "IPBES_APA_2333075.json",
-      "created": "2026-11-24T00:25:20Z"
+      "created": "2026-11-24T12:20:50Z"
     },
     {
       "group_id": 5081872,
@@ -31,7 +31,7 @@
       "group_id": 2345951,
       "name": "ECA",
       "file": "IPBES_ECA_2345951.json",
-      "created": "2026-11-18T12:20:02Z"
+      "created": "2026-11-24T12:21:01Z"
     },
     {
       "group_id": 2333077,
